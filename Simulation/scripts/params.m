@@ -131,8 +131,7 @@ Kd =  diag(2 * zeta * m * omega_n_pos);
 
 
 %% ------------------------------------------------------------ Schaetzer
-% Mahony-Komplementaerfilter ohne Magnetometer (km = 0).
-% ka: Accel-Tilt-Korrektur (< 5 rad/s); kE: externe Mocap-Lage (Yaw + Tilt)
+% Mahony-Komplementaerfilter
 mahony.ka = 1.0;
 mahony.kE = 25.0;
 mahony.q_init = angle2quat(deg2rad(0), 0, deg2rad(0))';   % ZYX, scalar-first
@@ -177,13 +176,10 @@ fprintf('Discrete-time observer eigenvalues |z| (ZOH, dt=%.4g):\n', Ts_gcs);
 disp(sort(abs(eig(Ad))).');
 
 %% ------------------------------------------------------------ Trajektorie
-%  WICHTIG: traj.P(:,1) MUSS der Anfangsposition im 6-DOF-Block entsprechen,
-%  sonst entsteht eine Anfangstransiente (Regler zieht die Drohne erst auf WP1).
-
 % Wegpunkte (NED, z nach unten -> negativ = Hoehe). Beispiel: Quadrat in 1m Hoehe.
 traj.P = [  0   1   1   0   0 ;     % x [m]
             0   0   1   1   0 ;     % y [m]
-            0   1   1   1   1 ];    % z [m]  (NED)
+            0   1   1   1   1 ];    % z [m]  
 
 % Yaw konstant je Segment (N-1 Werte) [rad]
 traj.yaw    = deg2rad([ 0   0   0   0 ]);
