@@ -1,0 +1,70 @@
+%% setup_buses.m  --  erzeugt die drei Schnittstellen-Busse im Data Dictionary
+%  Einmalig ausfuehren bzw. als Projekt-Shortcut bei Aenderung der Busdefinition.
+%  Passe ddName an deinen Dateinamen an.
+
+ddName = 'project.sldd';
+
+% --- Busdefinitionen:  {Elementname, Dimension}
+busState = buildBus({ ...      % Strecken-Wahrheit (nur Simulation)
+    'x',          3; ...       % Position {A}
+    'v',          3; ...       % Geschwindigkeit {A}
+    'q',          4; ...       % Lage-Quaternion
+    'Omega',      3 });        % Koerperdrehrate {B}
+
+busCmd = buildBus({ ...        % Bodenstation -> Drohne (Funk, ein Paket)
+    'F_des',       1; ...      % Schub 
+    'q_des',      4; ...       % vom Positionsregler korrigiertes Lage-Quaternion 
+    'q_ref',      4; ...       % Solllage-Quaternion (Sollwert)
+    'Omega_ref',  3; ...       % Solldrehrate
+    'tau_ref',     3; ...       % Sollmomente (Vorsteuerung)
+    'q_ext',      4 });        % gemessene Mocap-Lage: externe Filterreferenz (kE-Term)
+
+busIMU = buildBus({ ...        % Onboard-Sensorik @ imu.Ts -> Mahony-Filter
+    'imu_gyro',   3; ...       % -> Onboard-Filter
+    'imu_acc',    3 });        % -> Onboard-Filter (Tilt)
+
+busMocap = buildBus({ ...      % Boden-/Mocap-Sensorik @ Ts_mocap
+    'mocap_pos',  3; ...       % -> Luenberger (Bodenstation)
+    'mocap_quat', 4 });        % -> Luenberger + wird als q_ext hochgesendet
+
+% --- ins Dictionary (Design Data) schreiben
+dd  = Simulink.data.dictionary.open(ddName);
+sec = getSection(dd,'Design Data');
+upsertEntry(sec,'Bus_State', busState);
+upsertEntry(sec,'Bus_Cmd',   busCmd);
+upsertEntry(sec,'Bus_IMU',   busIMU);
+upsertEntry(sec,'Bus_Mocap', busMocap);
+removeEntry(sec,'Bus_Meas');           % obsoleten Sammelbus entfernen
+saveChanges(dd);
+fprintf('Busse Bus_State, Bus_Cmd, Bus_IMU, Bus_Mocap in %s angelegt.\n', ddName);
+
+
+%% ---------------------- lokale Funktionen ----------------------
+function bus = buildBus(specs)
+    elems = Simulink.BusElement.empty;
+    for k = 1:size(specs,1)
+        e            = Simulink.BusElement;
+        e.Name       = specs{k,1};
+        e.Dimensions = specs{k,2};
+        e.DataType   = 'double';
+        e.Complexity = 'real';
+        elems(k)     = e; %#ok<AGROW>
+    end
+    bus          = Simulink.Bus;
+    bus.Elements = elems;
+end
+
+function upsertEntry(sec, name, value)
+    existing = find(sec, 'Name', name); %#ok<GTARG>
+    if ~isempty(existing)
+        deleteEntry(existing);
+    end
+    addEntry(sec, name, value);
+end
+
+function removeEntry(sec, name)
+    existing = find(sec, 'Name', name); %#ok<GTARG>
+    if ~isempty(existing)
+        deleteEntry(existing);
+    end
+end
