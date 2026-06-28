@@ -29,9 +29,9 @@ c_tau  = 7.398e-6;               % Nm/(rad/s)^2
 
 
 % Motordrehzaheln -> Schubkraft und Drehmomente:  [F; tau_x; tau_y; tau_z] = Gamma * [w1^2; w2^2; w3^2; w4^2] 
-% TODO: (Reihenfolge/Vorzeichen an reale Rotoranordnung anpassen, vgl. Gl.8) - momentan fliegt Quadrkopter in Plus-Konfiguration
+% momentan fliegt Quadrkopter in X-Konfiguration
 % konfiguriere Gamma:
-alpha = 38.4; % degrees
+alpha = 38.4; % degrees (Winkel aus Lunze/Schwung Paper)
 beta = 90 - alpha;
 % Quadrcopterkonfiguration ist ein Mix aus H- und X-Konfiguration 
 a = l * sin(alpha / 180 * pi);
@@ -58,7 +58,7 @@ tau = [skew(r1)*f_i-tau_i  skew(r2)*f_i+tau_i  skew(r3)*f_i-tau_i  skew(r4)*f_i+
 Gamma = [F; tau];
 
 Gamma_inv = inv(Gamma);
-Gamma = 1.1*Gamma;
+Gamma = 1.2*Gamma;
 
 
 % Motor (PT1) + Saettigung
@@ -110,20 +110,24 @@ mocap.t_delay   = 0.008;     % s, optional Transportverzoegerung (latency model)
 mocap.dropout_p = 0.01;      % Wahrscheinlichkeit Markerausfall pro Sample
 
 %% --------------------------------------------------------- Funkstrecke
-link.latency   = 0.005;      % s   TODO: am Modul messen
+link.latency   = 0.005;      % s   
 link.dropout_p = 0.02;       % Paketverlust-Wahrscheinlichkeit
 link.qbits     = 16;         % int16-Quantisierung der Kommandos
 
 %% ------------------------------------------------------------- Regler
 % omega_n and zeta are the natural frequency and the damping ratio of the
 % damped oscillator the closed loop-system is trying to achieve
-omega_n_pos = 0.20*[10; 10; 50];
+omega_n_pos = 0.42*[10; 10; 10];
 omega_n_Lage = 1.4*[10; 10; 10];
 zeta = 0.707;
 kR = diag(J * omega_n_Lage.^2);
 kOmega =  diag(2 * zeta * J * omega_n_Lage);
 Kp = diag(m * omega_n_pos.^2);
+% kp_diag = 6*[1; 1; 1.9];
+% Kp = diag(kp_diag);
 Kd =  diag(2 * zeta * m * omega_n_pos);
+% kd_diag = 2.75*[1; 1; 1.1];
+% Kd = diag(kd_diag);
 
 
 %% ------------------------------------------------------------ Schaetzer
@@ -142,7 +146,7 @@ mahony.q_init = angle2quat(deg2rad(0), 0, deg2rad(0))';   % ZYX, scalar-first
 %
 % Observer:
 %   d/dt xi = A*xi + B*a_cmd + L*(y - C*xi)
-luen.poles = 3.5*[-10 -10 -10 -10 -10 -10];
+luen.poles = 4.5*[-10 -10 -10 -10 -10 -10];
 luen.A = [zeros(3) eye(3); zeros(3) zeros(3)];
 luen.B = [zeros(3); eye(3)];
 luen.C = [eye(3) zeros(3)];
@@ -179,7 +183,7 @@ disp(sort(abs(eig(Ad))).');
 % Wegpunkte (NED, z nach unten -> negativ = Hoehe). Beispiel: Quadrat in 1m Hoehe.
 traj.P = [  0   1   1   0   0 ;     % x [m]
             0   0   1   1   0 ;     % y [m]
-            1   1   1   1   1 ];    % z [m]  (NED)
+            0   1   1   1   1 ];    % z [m]  (NED)
 
 % Yaw konstant je Segment (N-1 Werte) [rad]
 traj.yaw    = deg2rad([ 0   0   0   0 ]);
@@ -188,7 +192,7 @@ traj.yaw    = deg2rad([ 0   0   0   0 ]);
 traj.Tseg   = [ 7.0  7.0  7.0  7.0 ];
 
 % Rastdauer je Wegpunkt (N Werte) [s]  -- erster Wert = Anfangs-Hover
-traj.Tdwell = [ 2.0  2.0  2.0  2.0  2.0 ];
+traj.Tdwell = [ 10.0  2.0  2.0  2.0  2.0 ];
 
 % Sanity-Checks (offline)
 assert(size(traj.P,2) >= 2,                 'traj.P braucht >= 2 Wegpunkte');

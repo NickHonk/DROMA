@@ -29,9 +29,9 @@ c_tau  = 7.398e-6;               % Nm/(rad/s)^2
 
 
 % Motordrehzaheln -> Schubkraft und Drehmomente:  [F; tau_x; tau_y; tau_z] = Gamma * [w1^2; w2^2; w3^2; w4^2] 
-% TODO: (Reihenfolge/Vorzeichen an reale Rotoranordnung anpassen, vgl. Gl.8) - momentan fliegt Quadrkopter in Plus-Konfiguration
+% momentan fliegt Quadrkopter in X-Konfiguration
 % konfiguriere Gamma:
-alpha = 38.4; % degrees
+alpha = 38.4; % degrees (Winkel aus Lunze/Schwung Paper)
 beta = 90 - alpha;
 % Quadrcopterkonfiguration ist ein Mix aus H- und X-Konfiguration 
 a = l * sin(alpha / 180 * pi);
@@ -58,7 +58,7 @@ tau = [skew(r1)*f_i-tau_i  skew(r2)*f_i+tau_i  skew(r3)*f_i-tau_i  skew(r4)*f_i+
 Gamma = [F; tau];
 
 Gamma_inv = inv(Gamma);
-Gamma = 1.01*Gamma;
+Gamma = 1.1*Gamma;
 
 
 % Motor (PT1) + Saettigung
@@ -110,15 +110,15 @@ mocap.t_delay   = 0.008;     % s, optional Transportverzoegerung (latency model)
 mocap.dropout_p = 0.01;      % Wahrscheinlichkeit Markerausfall pro Sample
 
 %% --------------------------------------------------------- Funkstrecke
-link.latency   = 0.005;      % s   TODO: am Modul messen
+link.latency   = 0.005;      % s   
 link.dropout_p = 0.02;       % Paketverlust-Wahrscheinlichkeit
 link.qbits     = 16;         % int16-Quantisierung der Kommandos
 
 %% ------------------------------------------------------------- Regler
 % omega_n and zeta are the natural frequency and the damping ratio of the
 % damped oscillator the closed loop-system is trying to achieve
-omega_n_pos = 0.20*[10; 10; 10];
-omega_n_Lage = 1.4*[10; 10; 1];
+omega_n_pos = 0.24*[10; 10; 1];
+omega_n_Lage = 1.4*[10; 10; 10];
 zeta = 0.707;
 kR = diag(J * omega_n_Lage.^2);
 kOmega =  diag(2 * zeta * J * omega_n_Lage);
