@@ -20,7 +20,7 @@ Ts_link  = rate_outer2inner*Ts_inner;              % 1/f_base = 1/100 s (100 Hz)
 
 %% -------------------------------------------------------------- Modellparameter
 g   = 9.81;                  % m/s^2
-m   = 0.93;                  % kg            TODO: Waegung
+m   = 0.96;                  % kg            TODO: Waegung
 J   = diag([6.583 * 10^-3, 5.125 * 10^-3, 1.104 * 10^-2]);  % kg*m^2 
 J_inv = inv(J);
 l   = 0.124;                 % m, Armlaenge 
@@ -110,9 +110,42 @@ mocap.t_delay   = 0.008;     % s, optional Transportverzoegerung (latency model)
 mocap.dropout_p = 0.01;      % Wahrscheinlichkeit Markerausfall pro Sample
 
 %% --------------------------------------------------------- Funkstrecke
-link.latency   = 0.005;      % s   
-link.dropout_p = 0.02;       % Paketverlust-Wahrscheinlichkeit
-link.qbits     = 16;         % int16-Quantisierung der Kommandos
+% --- Transportlatenz (ganzzahliger Delay @ Ts_inner) ---
+link_params.latency = 5e-3;                              % s
+link_params.N_delay = round(link_params.latency / Ts_inner);    
+assert(abs(link_params.N_delay*Ts_inner - link_params.latency) < 1e-12, ...
+    'link.latency ist kein ganzzahliges Vielfaches von Ts_inner!');
+ 
+% --- Paketverlust ---
+link_params.pdrop = 0.02;                                % Verlustwahrscheinlichkeit
+link_params.seed  = uint32(12345);                       % xorshift32-Seed (!= 0)
+ 
+% --- int16-Quantisierung ---
+link_params.qmax = int16(32767);
+link_params.qmin = int16(-32768);
+% Full-Scale je Feld, Reihenfolge:
+%   [F_des(1) | q_des(4) | q_ref(4) | Omega_ref(3) | tau_ref(3) | q_ext(4)]
+link_params.fs =  [ 40 ; ...           % F_des      [N]      Hover ~10
+                    1;1;1;1 ; ...      % q_des      [-]      Einheitsquaternion
+                    1;1;1;1 ; ...      % q_ref      [-]      Einheitsquaternion
+                    20;20;20 ; ...     % Omega_ref  [rad/s]  
+                    2;2;2 ; ...        % tau_ref    [N*m]
+                    1;1;1;1 ];         % q_ext      [-]
+ 
+% --- Init-Paket = quantisiertes Hover-Kommando (Delay-IC + Latch-IC) ---
+cmd_hover = [ m*g ; ...        % F_des = m g
+              1;0;0;0 ; ...    % q_des = Identitaet
+              1;0;0;0 ; ...    % q_ref = Identitaet
+              0;0;0 ; ...      % Omega_ref = 0
+              0;0;0 ; ...      % tau_ref = 0
+              1;0;0;0 ];       % q_ext = Identitaet
+lsb_link      = link_params.fs / double(link_params.qmax);
+link_params.pkt_init = int16( min(max(round(cmd_hover ./ lsb_link), ...
+                       double(link_params.qmin)), double(link_params.qmax)) );
+% Delay-Buffer-IC fuer Delay-Block mit InputProcessing='Elements as channels (sample based)':
+% Eingang ist 19x1 -> IC muss [19, 1, N_delay] (3-D) sein. Letzte Dim = Delay-Laenge.
+link_params.pkt_init_delay = repmat(link_params.pkt_init, [1, 1, link_params.N_delay]);
+
 
 %% ------------------------------------------------------------- Regler
 % omega_n and zeta are the natural frequency and the damping ratio of the
