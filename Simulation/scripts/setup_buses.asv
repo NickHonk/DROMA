@@ -12,14 +12,14 @@ busState = buildBus({ ...      % Strecken-Wahrheit (nur Simulation)
     'Omega',3 });    % Koerperdrehrate {B}
 
 busCmd = buildBus({ ...        % Bodenstation -> Drohne (Funk, ein Paket)
-    'F_des',     1, 'double'; ...      % Schub 
-    'q_des',     4, 'double'; ...      % vom Positionsregler korrigiertes Lage-Quaternion 
-    'q_ref',     4, 'double'; ...      % Solllage-Quaternion (Sollwert)
-    'Omega_ref', 3, 'double'; ...      % Solldrehrate
-    'tau_ref',   3, 'double'; ...      % Sollmomente (Vorsteuerung)
-    'q_ext',     4, 'double'; ...      % gemessene Mocap-Lage: externe Filterreferenz (kE-Term)
-    'estop',     1, 'uint8';  ...      % emergency-stop flag für weiche Landung
-    'ack',       1, 'boolean'});       % Zum Freigeben nach Fehler (Wenn Drehratensensor ausschlug)
+    'F_des',1; ...      % Schub 
+    'q_des',4; ...      % vom Positionsregler korrigiertes Lage-Quaternion 
+    'q_ref', 4; ...     % Solllage-Quaternion (Sollwert)
+    'Omega_ref',3; ...  % Solldrehrate
+    'tau_ref',3; ...    % Sollmomente (Vorsteuerung)
+    'q_ext',4; ...      % gemessene Mocap-Lage: externe Filterreferenz (kE-Term)
+    'estop',1;...       % emergency-stop flag für wiche Landung
+    'ack', 1});         % Zum freigeben nach Fehler (W
 
 busIMU = buildBus({ ...        % Onboard-Sensorik @ imu.Ts -> Mahony-Filter
     'imu_gyro',   3; ...       % -> Onboard-Filter
@@ -42,33 +42,13 @@ fprintf('Busse Bus_State, Bus_Cmd, Bus_IMU, Bus_Mocap in %s angelegt.\n', ddName
 
 
 %% ---------------------- lokale Funktionen ----------------------
-% function bus = buildBus(specs)
-%     elems = Simulink.BusElement.empty;
-%     for k = 1:size(specs,1)
-%         e            = Simulink.BusElement;
-%         e.Name       = specs{k,1};
-%         e.Dimensions = specs{k,2};
-%         e.DataType   = 'double';
-%         e.Complexity = 'real';
-%         elems(k)     = e; %#ok<AGROW>
-%     end
-%     bus          = Simulink.Bus;
-%     bus.Elements = elems;
-% end
 function bus = buildBus(specs)
     elems = Simulink.BusElement.empty;
     for k = 1:size(specs,1)
         e            = Simulink.BusElement;
         e.Name       = specs{k,1};
         e.Dimensions = specs{k,2};
-        
-        % Check if a 3rd column exists and is not empty
-        if size(specs, 2) >= 3 && ~isempty(specs{k,3})
-            e.DataType = specs{k,3};
-        else
-            e.DataType = 'double'; % Default fallback
-        end
-        
+        e.DataType   = 'double';
         e.Complexity = 'real';
         elems(k)     = e; %#ok<AGROW>
     end
