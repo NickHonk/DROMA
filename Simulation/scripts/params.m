@@ -20,13 +20,13 @@ Ts_link  = rate_outer2inner*Ts_inner;              % 1/f_base = 1/100 s (100 Hz)
 % =================================================================================
 
 %% -------------------------------------------------------------- Modellparameter
-g   = 9.81;                  % m/s^2
-m   = 0.96;                  % kg            TODO: Waegung
-J   = diag([6.583 * 10^-3, 5.125 * 10^-3, 1.104 * 10^-2]);  % kg*m^2 
+g   = 9.81; % m/s^2
+m   = 0.965; % kg            
+J   = diag([6.583 * 10^-3, 5.125 * 10^-3, 1.104 * 10^-2]); % kg*m^2 
 J_inv = inv(J);
-l   = 0.124;                 % m, Armlaenge 
-c_T  = 1.134e-3;              % N/(rad/s)^2   
-c_tau  = 7.398e-6;               % Nm/(rad/s)^2 
+l   = 0.124;  % m, Armlaenge 
+c_T  = 1.134e-3; % N/(rad/s)^2   
+c_tau  = 7.398e-6; % Nm/(rad/s)^2 
 
 
 % Motordrehzaheln -> Schubkraft und Drehmomente:  [F; tau_x; tau_y; tau_z] = Gamma * [w1^2; w2^2; w3^2; w4^2] 
