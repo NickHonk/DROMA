@@ -8,15 +8,16 @@ close all;
 % integer multiple of Ts_inner so the ode4 fixed-step scheduler is valid.
 % Only the GCU block (Luenberger + Positionsregler) runs at Ts_gcs;
 % everything else (plant, sensors, MCU, attitude) runs at Ts_inner.
-f_base   = 100;                     % Hz, Mocap-Grundrate (Motive)
+f_base = 100;                     % Hz, Mocap-Grundrate (Motive)
 rate_outer2inner = 10;              % factor by how muc the controller on the drones is sampled faster compared to the ground station
 Ts_inner = 1/(rate_outer2inner*f_base);            % BASE: 1/800 s  (800 Hz) - Plant/IMU/MCU/Lageregler
-Ts_sim   = Ts_inner;                % Fixed-step Grundschrittweite (ode4)
+Ts_sim = Ts_inner;                % Fixed-step Grundschrittweite (ode4)
 
-% Multiples of Ts_inner (= 10*Ts_inner = 1/f_base each)
-Ts_mocap = rate_outer2inner*Ts_inner;              % 1/f_base = 1/100 s (100 Hz) - Optitrack
-Ts_gcs   = rate_outer2inner*Ts_inner;              % 1/f_base = 1/100 s (100 Hz) - Beobachter + Positionsregler
-Ts_link  = rate_outer2inner*Ts_inner;              % 1/f_base = 1/100 s (100 Hz) - Funkstrecke
+% Multiples of Ts_inner (= rate_outer2inner*Ts_inner = 1/f_base each)
+Ts_mocap = rate_outer2inner*Ts_inner; % Optitrack
+Ts_gcs = rate_outer2inner*Ts_inner; % Beobachter + Positionsregler
+Ts_link = rate_outer2inner*Ts_inner; % Funkstrecke
+Ts_batt = 100*Ts_gcs; % Rate der Batterieüberwachungsfunktion
 % =================================================================================
 
 %% -------------------------------------------------------------- Modellparameter
@@ -262,6 +263,39 @@ prm_traj.J = J;
 
 fprintf('Trajektorie: %d Wegpunkte, Gesamtdauer %.2f s\n', ...
         size(traj.P,2), sum(traj.Tseg)+sum(traj.Tdwell));
+% =================================================================================
+
+%% ------------------------------------------------------------ Batterie management
+ 
+% --- ADC / HW (PM06 V2, Teensy) ---
+safety.batt_pin = 40; % Pin 40 = A16 
+safety.adc_bits = 12; % analogReadResolution(12)
+
+% V_batt = k*count + b (Spannungsteiler 18.182 von PM06 V2, Vref 3.3, 12 bit):
+% k = 3.3*18.182/4095 ≈ 0.0146521 V/count,  b = 0.
+% k,b aus realer HW-Messung NOCH OFFEN -> hier Idealwerte als Platzhalter.
+safety.batt_k = 3.3*18.182/4095; % Steigung
+safety.batt_b = 0.0; % offset
+ 
+% --- Tiefpass ---
+safety.batt_tau   = 0.7; % [s] gegen Last-Einbruch + Rauschen (0.5..1)
+safety.batt_alpha = 1 - exp(-Ts_batt/safety.batt_tau);  % Hysterese-Koeffizient
+% Hinweis: alpha hier EINMAL berechnet (kein exp im Loop). Bei Aenderung von
+% Ts_batt/tau neu auswerten.
+ 
+% --- Schwellen (4S LiPo, unter Last). final auf HW bestaetigen ---
+safety.V_warn = 14.0; % 3.50 V/Zelle -> LED WARN, Bediener handeln
+safety.V_crit = 13.4; % 3.35 V/Zelle -> LED CRIT
+safety.V_floor = 12.0; % 3.00 V/Zelle -> onboard Hard-Floor-Descent
+safety.V_hyst = 0.2; % Hysterese/Recovery-Band gegen Chattering
+ 
+% --- Harter Sinklflug ---
+safety.hardfloor_thrust_frac = 0.98; % F_des = 0.98*m*g (ueberlebbare Sinkrate).
+safety.m = m;
+safety.g = g;
+ 
+% Quervalidierung Bereich: V_pin(4S) = 0.726..0.924 V -> count 901..1147
+% (~22..28 % des 12-bit-Bereichs). Keine Ueberspannung am Pin (<3.3 V).
 % =================================================================================
 
 function schiefsym = skew(r)

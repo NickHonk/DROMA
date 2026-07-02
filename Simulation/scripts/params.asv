@@ -8,24 +8,26 @@ close all;
 % integer multiple of Ts_inner so the ode4 fixed-step scheduler is valid.
 % Only the GCU block (Luenberger + Positionsregler) runs at Ts_gcs;
 % everything else (plant, sensors, MCU, attitude) runs at Ts_inner.
-f_base   = 100;                     % Hz, Mocap-Grundrate (Motive)
+f_base = 100;                     % Hz, Mocap-Grundrate (Motive)
 rate_outer2inner = 10;              % factor by how muc the controller on the drones is sampled faster compared to the ground station
 Ts_inner = 1/(rate_outer2inner*f_base);            % BASE: 1/800 s  (800 Hz) - Plant/IMU/MCU/Lageregler
-Ts_sim   = Ts_inner;                % Fixed-step Grundschrittweite (ode4)
+Ts_sim = Ts_inner;                % Fixed-step Grundschrittweite (ode4)
 
-% Multiples of Ts_inner (= 10*Ts_inner = 1/f_base each)
-Ts_mocap = rate_outer2inner*Ts_inner;              % 1/f_base = 1/100 s (100 Hz) - Optitrack
-Ts_gcs   = rate_outer2inner*Ts_inner;              % 1/f_base = 1/100 s (100 Hz) - Beobachter + Positionsregler
-Ts_link  = rate_outer2inner*Ts_inner;              % 1/f_base = 1/100 s (100 Hz) - Funkstrecke
+% Multiples of Ts_inner (= rate_outer2inner*Ts_inner = 1/f_base each)
+Ts_mocap = rate_outer2inner*Ts_inner; % Optitrack
+Ts_gcs = rate_outer2inner*Ts_inner; % Beobachter + Positionsregler
+Ts_link = rate_outer2inner*Ts_inner; % Funkstrecke
+Ts_batt = 100*Ts_gcs; % Rate der Batterieüberwachungsfunktion
+% =================================================================================
 
 %% -------------------------------------------------------------- Modellparameter
-g   = 9.81;                  % m/s^2
-m   = 0.96;                  % kg            TODO: Waegung
-J   = diag([6.583 * 10^-3, 5.125 * 10^-3, 1.104 * 10^-2]);  % kg*m^2 
+g   = 9.81; % m/s^2
+m   = 0.965; % kg            
+J   = diag([6.583 * 10^-3, 5.125 * 10^-3, 1.104 * 10^-2]); % kg*m^2 
 J_inv = inv(J);
-l   = 0.124;                 % m, Armlaenge 
-c_T  = 1.134e-3;              % N/(rad/s)^2   
-c_tau  = 7.398e-6;               % Nm/(rad/s)^2 
+l   = 0.124;  % m, Armlaenge 
+c_T  = 1.134e-3; % N/(rad/s)^2   
+c_tau  = 7.398e-6; % Nm/(rad/s)^2 
 
 
 % Motordrehzaheln -> Schubkraft und Drehmomente:  [F; tau_x; tau_y; tau_z] = Gamma * [w1^2; w2^2; w3^2; w4^2] 
@@ -65,6 +67,7 @@ Gamma = 1.2*Gamma;
 tau_m   = 0.030;             % Motorzeitkonstante  TODO: measure 
 rotors_min   = 0;            % rad/s
 rotors_max   = 30000;        % rad/s  
+% =================================================================================
 
 %% ------------------------------------------ IMU: MPU-6050 (Datenblatt)
 % Vollausschlag (FSR) -> externe Saettigung; Auswahl konfigurierbar
@@ -108,6 +111,7 @@ mocap.att_noise = 0.5*pi/180;% rad RMS
 mocap.Ts_mocap  = Ts_mocap;  % s, Sample-Periode (= 1/f_base) - used by sensors.slx
 mocap.t_delay   = 0.008;     % s, optional Transportverzoegerung (latency model)
 mocap.dropout_p = 0.01;      % Wahrscheinlichkeit Markerausfall pro Sample
+% =================================================================================
 
 %% --------------------------------------------------------- Funkstrecke
 % --- Transportlatenz (ganzzahliger Delay @ Ts_inner) ---
@@ -147,6 +151,7 @@ link_params.flags_init = [uint8(0); boolean(0)];
 % Eingang ist 19x1 -> IC muss [21, 1, N_delay] (3-D) sein. Letzte Dim = Delay-Laenge.
 link_params.pkt_init_delay = repmat(link_params.pkt_init, [1, 1, link_params.N_delay]);
 link_params.flags_init_delay = repmat(link_params.flags_init, [1, 1, link_params.N_delay]);
+% =================================================================================
 
 
 %% ------------------------------------------------------------- Regler
@@ -163,6 +168,7 @@ Kp = diag(m * omega_n_pos.^2);
 Kd =  diag(2 * zeta * m * omega_n_pos);
 % kd_diag = 2.75*[1; 1; 1.1];
 % Kd = diag(kd_diag);
+% =================================================================================
 
 %% ------------------------------------------------------------ Safety
 % Schwelle: ueber max(|Omega_ref|) + Marge,
@@ -174,15 +180,12 @@ safety.debounce_N = uint16(4);
  
 % Detektor-Modus: false = per-Achse |Omega_i| (empfohlen, achsselektiv),
 %                 true  = Euklidische Norm ||Omega||.
-safety.use_norm   = false;
+safety.use_norm   = true;
  
-% Quittungs-Quellen (onboard ge-OR-t, §9/§13.1):
+% Quittung:
 %   ack_combined = ack_button_edge | Bus_Cmd.ack
 % In reiner Sim ist ack_button=false -> ack kommt nur ueber den Uplink.
-% Teensy-Taster-Pin: OFFEN (§15).
- 
-% Optionaler Re-Arm-Idle-Interlock (NICHT aktiv, siehe safety_overspeed.m):
-% safety.F_rearm_idle = 0.2*m*g_const;   % Throttle-Proxy statt Boden-Schaetzung
+% Teensy-Taster-Pin: OFFEN.
 % =================================================================================
 
 
@@ -230,6 +233,7 @@ Bd_y    = Bd(:,4:6);    % column block for position measurement
 % Discrete-time eigenvalues — useful sanity check
 fprintf('Discrete-time observer eigenvalues |z| (ZOH, dt=%.4g):\n', Ts_gcs);
 disp(sort(abs(eig(Ad))).');
+% =================================================================================
 
 %% ------------------------------------------------------------ Trajektorie
 % Wegpunkte (NED, z nach unten -> negativ = Hoehe). Beispiel: Quadrat in 1m Hoehe.
@@ -259,6 +263,39 @@ prm_traj.J = J;
 
 fprintf('Trajektorie: %d Wegpunkte, Gesamtdauer %.2f s\n', ...
         size(traj.P,2), sum(traj.Tseg)+sum(traj.Tdwell));
+% =================================================================================
+
+%% ------------------------------------------------------------ Batterie management
+ 
+% --- ADC / HW (PM06 V2, Teensy) ---
+safety.batt_pin   = 40; % Pin 40 = A16 
+safety.adc_bits   = 12; % analogReadResolution(12)
+
+% V_batt = k*count + b (Spannungsteiler 18.182 von PM06 V2, Vref 3.3, 12 bit):
+% k = 3.3*18.182/4095 ≈ 0.0146521 V/count,  b = 0.
+% k,b aus realer HW-Messung NOCH OFFEN -> hier Idealwerte als Platzhalter.
+safety.batt_k     = 3.3*18.182/4095;  % Steigung
+safety.batt_b     = 0.0; % offset
+ 
+% --- EMA-Tiefpass ---
+safety.batt_tau   = 0.7; % [s] gegen Last-Einbruch + Rauschen (0.5..1)
+safety.batt_alpha = 1 - exp(-Ts_batt/safety.batt_tau);  % EMA-Koeffizient
+% Hinweis: alpha hier EINMAL berechnet (kein exp im Loop). Bei Aenderung von
+% Ts_batt/tau neu auswerten.
+ 
+% --- Schwellen (4S LiPo, unter Last). final auf HW bestaetigen ---
+safety.V_warn  = 14.0;                  % 3.50 V/Zelle -> LED WARN, Bediener handeln
+safety.V_crit  = 13.4;                  % 3.35 V/Zelle -> LED CRIT
+safety.V_floor = 12.0;                  % 3.00 V/Zelle -> onboard Hard-Floor-Descent
+safety.V_hyst  = 0.2;                   % Hysterese/Recovery-Band gegen Chattering
+ 
+% --- Hard-Floor-Descent (§13.3 Backstop) ---
+safety.hardfloor_thrust_frac = 0.92;    % F_des = 0.92*m*g (ueberlebbare Sinkrate).
+                                        % §15 offen: Faktor final.
+ 
+% Quervalidierung Bereich: V_pin(4S) = 0.726..0.924 V -> count 901..1147
+% (~22..28 % des 12-bit-Bereichs). Keine Ueberspannung am Pin (<3.3 V).
+% =================================================================================
 
 function schiefsym = skew(r)
 %VEE gibt die schiefsymmetrische Matrix schiefsym zu r zurück
