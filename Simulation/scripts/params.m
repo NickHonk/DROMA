@@ -290,12 +290,37 @@ safety.V_floor = 12.0; % 3.00 V/Zelle -> onboard Hard-Floor-Descent
 safety.V_hyst = 0.2; % Hysterese/Recovery-Band gegen Chattering
  
 % --- Harter Sinklflug ---
-safety.hardfloor_thrust_frac = 0.98; % F_des = 0.98*m*g (ueberlebbare Sinkrate).
+safety.hardfloor_thrust_frac = 0.99; % F_des = 0.98*m*g (ueberlebbare Sinkrate).
 safety.m = m;
 safety.g = g;
  
 % Quervalidierung Bereich: V_pin(4S) = 0.726..0.924 V -> count 901..1147
 % (~22..28 % des 12-bit-Bereichs). Keine Ueberspannung am Pin (<3.3 V).
+% =================================================================================
+
+
+%% ------------------------------------------------------------ Supervisor (Soft-Land)
+% geregeltes Soft-Land mit ~0.3..0.5 m/s 
+supervisor.v_sink = 0.35; % [m/s]  Soll-Sinkrate
+
+% Falls Mocap-z-Null nicht am Boden liegt, hier den realen Bodenwert setzen.
+supervisor.z_ground = 0.0; % [m]  z-Koordinate des Bodens 
+
+% Disarm-Marge ueber Grund: Cutoff (estop=2) bei z_est <= z_ground + margin.
+% Aufschlaggeschwindigkeit:  v_imp = sqrt(v_sink^2 + 2*g*margin)
+%   margin=0.08, v_sink=0.35 -> v_imp ~ 1.29 m/s
+% Kleiner margin => sanfter, aber mehr Bodeneffekte. 
+supervisor.disarm_margin = 0.2;       % [m]
+
+supervisor.Ts = Ts_gcs; % [s]
+
+% --- Info-Ausgabe ---
+v_imp = sqrt(supervisor.v_sink^2 + 2*g*supervisor.disarm_margin);
+fprintf(['Supervisor: v_sink=%.2f m/s, margin=%.3f m, z_ground=%.2f m ' ...
+         '-> v_impact~%.2f m/s\n'], supervisor.v_sink, supervisor.disarm_margin, ...
+         supervisor.z_ground, v_imp);
+assert(supervisor.v_sink > 0, 'v_sink muss > 0 sein.');
+assert(supervisor.disarm_margin > 0, 'disarm_margin muss > 0 sein.');
 % =================================================================================
 
 function schiefsym = skew(r)

@@ -268,33 +268,61 @@ fprintf('Trajektorie: %d Wegpunkte, Gesamtdauer %.2f s\n', ...
 %% ------------------------------------------------------------ Batterie management
  
 % --- ADC / HW (PM06 V2, Teensy) ---
-safety.batt_pin   = 40; % Pin 40 = A16 
-safety.adc_bits   = 12; % analogReadResolution(12)
+safety.batt_pin = 40; % Pin 40 = A16 
+safety.adc_bits = 12; % analogReadResolution(12)
 
 % V_batt = k*count + b (Spannungsteiler 18.182 von PM06 V2, Vref 3.3, 12 bit):
 % k = 3.3*18.182/4095 ≈ 0.0146521 V/count,  b = 0.
 % k,b aus realer HW-Messung NOCH OFFEN -> hier Idealwerte als Platzhalter.
-safety.batt_k     = 3.3*18.182/4095;  % Steigung
-safety.batt_b     = 0.0; % offset
+safety.batt_k = 3.3*18.182/4095; % Steigung
+safety.batt_b = 0.0; % offset
  
-% --- EMA-Tiefpass ---
+% --- Tiefpass ---
 safety.batt_tau   = 0.7; % [s] gegen Last-Einbruch + Rauschen (0.5..1)
-safety.batt_alpha = 1 - exp(-Ts_batt/safety.batt_tau);  % EMA-Koeffizient
+safety.batt_alpha = 1 - exp(-Ts_batt/safety.batt_tau);  % Hysterese-Koeffizient
 % Hinweis: alpha hier EINMAL berechnet (kein exp im Loop). Bei Aenderung von
 % Ts_batt/tau neu auswerten.
  
 % --- Schwellen (4S LiPo, unter Last). final auf HW bestaetigen ---
-safety.V_warn  = 14.0;                  % 3.50 V/Zelle -> LED WARN, Bediener handeln
-safety.V_crit  = 13.4;                  % 3.35 V/Zelle -> LED CRIT
-safety.V_floor = 12.0;                  % 3.00 V/Zelle -> onboard Hard-Floor-Descent
-safety.V_hyst  = 0.2;                   % Hysterese/Recovery-Band gegen Chattering
+safety.V_warn = 14.0; % 3.50 V/Zelle -> LED WARN, Bediener handeln
+safety.V_crit = 13.4; % 3.35 V/Zelle -> LED CRIT
+safety.V_floor = 12.0; % 3.00 V/Zelle -> onboard Hard-Floor-Descent
+safety.V_hyst = 0.2; % Hysterese/Recovery-Band gegen Chattering
  
-% --- Hard-Floor-Descent (§13.3 Backstop) ---
-safety.hardfloor_thrust_frac = 0.92;    % F_des = 0.92*m*g (ueberlebbare Sinkrate).
-                                        % §15 offen: Faktor final.
+% --- Harter Sinklflug ---
+safety.hardfloor_thrust_frac = 0.99; % F_des = 0.98*m*g (ueberlebbare Sinkrate).
+safety.m = m;
+safety.g = g;
  
 % Quervalidierung Bereich: V_pin(4S) = 0.726..0.924 V -> count 901..1147
 % (~22..28 % des 12-bit-Bereichs). Keine Ueberspannung am Pin (<3.3 V).
+% =================================================================================
+
+
+%% ------------------------------------------------------------ Supervisor (Soft-Land)
+% geregeltes Soft-Land mit ~0.3..0.5 m/s 
+supervisor.v_sink = 0.35; % [m/s]  Soll-Sinkrate
+
+% Falls Mocap-z-Null nicht am Boden liegt, hier den realen Bodenwert setzen.
+supervisor.z_ground = 0.0; % [m]  z-Koordinate des Bodens 
+
+% Disarm-Marge ueber Grund: Cutoff (estop=2) bei z_est >= z_ground + margin.
+% Aufschlaggeschwindigkeit nach Cut:  v_imp = sqrt(v_sink^2 + 2*g*margin)
+%   margin=0.08, v_sink=0.35 -> v_imp ~ 1.29 m/s
+%   margin=0.05, v_sink=0.30 -> v_imp ~ 1.05 m/s
+% Kleiner margin => sanfter, aber naeher an Bodeneffekt/Propstrike. HW-final.
+supervisor.disarm_margin = 0.08;       % [m]
+
+% Takt (fuer die z-Rampe zref += v_sink*Ts). MUSS = GCS-Takt sein.
+supervisor.Ts = Ts_gcs;                % [s]
+
+% --- Info-Ausgabe / Sanity ---
+v_imp = sqrt(supervisor.v_sink^2 + 2*g*supervisor.disarm_margin);
+fprintf(['Supervisor: v_sink=%.2f m/s, margin=%.3f m, z_ground=%.2f m ' ...
+         '-> v_impact~%.2f m/s\n'], supervisor.v_sink, supervisor.disarm_margin, ...
+         supervisor.z_ground, v_imp);
+assert(supervisor.v_sink > 0, 'v_sink muss > 0 sein (NED: Sinken = +z).');
+assert(supervisor.disarm_margin > 0, 'disarm_margin muss > 0 sein.');
 % =================================================================================
 
 function schiefsym = skew(r)
