@@ -29,10 +29,12 @@ l   = 0.124;  % m, Armlaenge
 c_T  = 1.134e-3; % N/(rad/s)^2   
 c_tau  = 7.398e-6; % Nm/(rad/s)^2 
 
+T = [1 0 0; 0 -1 0; 0 0 -1];
+
 quadcop.m = m;
 quadcop.g = g;
 quadcop.J = J;
-quadcop.D = D;
+quadcop.J_inv = J_inv;
 
 quadcop.x0 = [0;0;0];
 quadcop.v0 = [0;0;0];
