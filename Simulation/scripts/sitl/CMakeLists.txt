@@ -5,15 +5,19 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # --- Optionen -------------------------------------------------------------
-# QUAT_IMPL / SAFETY_IMPL:  ref     -> mitgelieferte Referenz-Ports 
+# QUAT_IMPL / SAFETY_IMPL:  ref     -> mitgelieferte Referenz-Ports (kein MATLAB)
 #                           codegen -> von MATLAB Coder generierte Quellen
 set(QUAT_IMPL   "ref" CACHE STRING "ref | codegen")
 set(SAFETY_IMPL "ref" CACHE STRING "ref | codegen")
 # Wurzel der Codegen-Ausgabe (siehe matlab/gen_lib_codegen.m). Nur bei *_IMPL=codegen.
 set(CODEGEN_ROOT "${CMAKE_SOURCE_DIR}/codegen" CACHE PATH "MATLAB Coder output root")
-set(GOLDEN_TOL "1e-9" CACHE STRING "abs tolerance test_data vs impl")
+# Golden-vs-Impl Toleranz. Default 1e-9 (= MATLAB-vs-Golden). Fuer den Codegen-
+# Diff eng lassen; ULP-Divergenz soll auffallen, nicht kaschiert werden.
+set(GOLDEN_TOL "1e-9" CACHE STRING "abs tolerance golden vs impl")
 
-set(GOLDEN_DIR "${CMAKE_SOURCE_DIR}/data")
+# Wo die Golden-CSVs liegen. Default: mitgelieferter data/-Ordner (kein Flag noetig).
+# Auf deinen eigenen Ordner zeigen mit  -DGOLDEN_DIR=../test
+set(GOLDEN_DIR "${CMAKE_SOURCE_DIR}/data" CACHE PATH "Ordner mit test_data_quat*.csv")
 
 # --- GoogleTest via FetchContent -----------------------------------------
 include(FetchContent)

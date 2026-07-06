@@ -1,0 +1,57 @@
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/CMakeFiles/CMakeScratch/TryCompile-czp5c1
+
+Run Build Command(s):C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_2bcdf.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:m && MSBuild version 17.4.0+18d5aef85 for .NET Framework
+  Microsoft (R) C/C++-Optimierungscompiler Version 19.34.31933 für x64
+  src.c
+  Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
+  cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\"Debug\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_2bcdf.dir\Debug\\" /Fd"cmTC_2bcdf.dir\Debug\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\CMakeFiles\CMakeScratch\TryCompile-czp5c1\src.c"
+C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\CMakeFiles\CMakeScratch\TryCompile-czp5c1\src.c(1,10): fatal  error C1083: Datei (Include) kann nicht geöffnet werden: "pthread.h": No such file or directory [C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\CMakeFiles\CMakeScratch\TryCompile-czp5c1\cmTC_2bcdf.vcxproj]
+
+
+Source file was:
+#include <pthread.h>
+
+static void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/CMakeFiles/CMakeScratch/TryCompile-cf4n5s
+
+Run Build Command(s):C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_23c1c.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:m && MSBuild version 17.4.0+18d5aef85 for .NET Framework
+  Microsoft (R) C/C++-Optimierungscompiler Version 19.34.31933 für x64
+  CheckFunctionExists.c
+  Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
+  cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\"Debug\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_23c1c.dir\Debug\\" /Fd"cmTC_23c1c.dir\Debug\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\CMakeFiles\CMakeScratch\TryCompile-cf4n5s\CheckFunctionExists.c"
+LINK : fatal error LNK1104: Datei "pthreads.lib" kann nicht geöffnet werden. [C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\CMakeFiles\CMakeScratch\TryCompile-cf4n5s\cmTC_23c1c.vcxproj]
+
+
+
+Determining if the function pthread_create exists in the pthread failed with the following output:
+Change Dir: C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/CMakeFiles/CMakeScratch/TryCompile-gtostr
+
+Run Build Command(s):C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe cmTC_a2dad.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:m && MSBuild version 17.4.0+18d5aef85 for .NET Framework
+  Microsoft (R) C/C++-Optimierungscompiler Version 19.34.31933 für x64
+  CheckFunctionExists.c
+  Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
+  cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\"Debug\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a2dad.dir\Debug\\" /Fd"cmTC_a2dad.dir\Debug\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\CMakeFiles\CMakeScratch\TryCompile-gtostr\CheckFunctionExists.c"
+LINK : fatal error LNK1104: Datei "pthread.lib" kann nicht geöffnet werden. [C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\CMakeFiles\CMakeScratch\TryCompile-gtostr\cmTC_a2dad.vcxproj]
+
+
+

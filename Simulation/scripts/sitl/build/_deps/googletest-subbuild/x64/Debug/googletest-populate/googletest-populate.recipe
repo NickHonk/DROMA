@@ -2,10 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\x64\Debug\ZERO_CHECK</FullPath>
+      <FullPath>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\x64\Debug\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\x64\Debug\googletest-populate</FullPath>
+      <FullPath>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\x64\Debug\googletest-populate</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

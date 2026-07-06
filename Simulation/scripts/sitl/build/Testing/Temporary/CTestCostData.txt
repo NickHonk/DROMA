@@ -1,0 +1,22 @@
+QuatGolden.Dcm2Quat_MatchesGolden 1 0.0066423
+QuatGolden.Quat2Dcm_MatchesGolden 1 0.0068195
+QuatGolden.QuatMul_MatchesGolden 1 0.0061926
+QuatGolden.QuatConj_MatchesGolden 1 0.0062328
+QuatGolden.QuatRotate_MatchesGolden 1 0.0058376
+QuatProps.RoundTripsAndIdentities 1 0.018921
+Overspeed.S1_NoOverspeed 1 0.0061249
+Overspeed.S2_Nminus1_NoLatch 1 0.0055483
+Overspeed.S3_TripAtNth_Holds 1 0.0056154
+Overspeed.S4_AckDuringOverspeed_NoRearm 1 0.0056406
+Overspeed.S5_AckEdge_Rearms 1 0.0055312
+Overspeed.S6_HeldAck_NoAutoRearm 1 0.0055184
+Overspeed.S7_HardKill_Immediate 1 0.0057567
+Overspeed.S8_KillDominatesLand 1 0.0057459
+Overspeed.S9_NormVsPerAxis 1 0.0059587
+Battery.B1_ColdStart_NoFalseTrip 1 0.0059304
+Battery.B2_Ramp_Escalation 1 0.0057913
+Battery.B3_Hysteresis_NoChatter 1 0.0058184
+Battery.B4_FloorLatch_Sticky 1 0.0057483
+Battery.B5_EMA_FiltersShortSag 1 0.0059901
+Battery.B6_CountRange 1 0.0058028
+---
