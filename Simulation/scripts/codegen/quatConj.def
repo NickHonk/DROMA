@@ -1,0 +1,9 @@
+LIBRARY quatConj.mexw64
+EXPORTS
+mexFunction
+mexfilerequiredapiversion
+emlrtMexFcnProperties
+quatConj
+quatConj_initialize
+quatConj_terminate
+quatConj_atexit
