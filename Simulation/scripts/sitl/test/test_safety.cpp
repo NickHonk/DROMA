@@ -94,6 +94,10 @@ TEST(Overspeed, S8_KillDominatesLand) {
     auto o = drive(g, std::vector<uint8_t>(7,1), std::vector<uint8_t>(7,0), OSP);
     EXPECT_EQ(o.k[3],1); EXPECT_EQ(o.src[3],1);  // Overspeed dominiert soft-land
 }
+// S9 braucht laufzeit-schaltbares use_norm. Bei codegen mit coder.Constant ist der
+// Modus einkompiliert (per-Achse) -> S9 wird dort ausgeblendet. Fuer volle Abdeckung
+// die Safety-Leafs mit Laufzeit-Params generieren (siehe README/gen_lib_codegen.m).
+#ifndef SAFETY_CODEGEN_CONST_PARAMS
 TEST(Overspeed, S9_NormVsPerAxis) {
     OverspeedParams sN{10.0,4,true};
     overspeed_reset();
@@ -103,6 +107,7 @@ TEST(Overspeed, S9_NormVsPerAxis) {
     auto o2 = drive(rep({6.0,6.0,0},6), std::vector<uint8_t>(6,0), std::vector<uint8_t>(6,0), sN); // ||.||=8.49
     for (int k : o2.k) EXPECT_EQ(k,0);
 }
+#endif  // SAFETY_CODEGEN_CONST_PARAMS
 
 // ------------------------------------------------------------ Battery
 namespace {

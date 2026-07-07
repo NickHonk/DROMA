@@ -3,12 +3,12 @@
 %  direkt einbindet (CMake -DQUAT_IMPL=codegen -DSAFETY_IMPL=codegen).
 %
 %  WICHTIG — das ist NICHT dasselbe wie:
-%   (a) dein verify_quat_codegen.m: das baut MEX (in MATLAB laufender Binaer) fuer
-%       den MATLAB<->Coder-Check. Laeuft NUR in MATLAB.
-%   (b) mcu.slx-Modell-Codegen (configure_mcu_codegen.m): das absorbiert die Leafs
-%       in EINE C++-Klasse 'MCU' -> keine standalone-Entry-Points je Funktion.
-%  Diese Datei erzeugt jede Leaf-Funktion als EIGENE, standalone C-Quelle, damit
-%  der C++-Test ihre reine Numerik isoliert gegen die Golden-Vektoren diffen kann.
+%   (a) dein verify_quat_codegen.m: baut MEX (in MATLAB laufender Binaer) fuer den
+%       MATLAB<->Coder-Check. Laeuft NUR in MATLAB.
+%   (b) mcu.slx-Modell-Codegen (configure_mcu_codegen.m): absorbiert die Leafs in
+%       EINE C++-Klasse 'MCU' -> keine standalone-Entry-Points je Funktion.
+%  Diese Datei erzeugt jede Leaf-Funktion als EIGENE standalone C-Quelle, damit der
+%  C++-Test ihre reine Numerik isoliert gegen die Golden-Vektoren diffen kann.
 %
 %  SPEICHERORDNUNG: Coder legt Matrizen COLUMN-major ab. dcm2quat_local(R) erwartet
 %  daher R column-major, quat2dcm_local(q) liefert R column-major. Genau darauf ist
@@ -18,13 +18,15 @@
 %  Erwartet: dieses Skript liegt in  Simulation\scripts\sitl\matlab\
 %  Quellen in:                       Simulation\scripts\functions\
 %  Ausgabe nach:                     Simulation\scripts\sitl\codegen\lib\<fn>\
-%  (Pfade unten anpassen, falls du das sitl-Projekt woanders ablegst.)
+%
+%  HINWEIS: Alle codegen-Aufrufe in FUNKTIONS-Syntax (codegen('name',...)). Das
+%  vermeidet die Whitespace-Fallen der Command-Syntax (z.B. '}-d' -> Subtraktion).
 
 clear; clc;
-here        = fileparts(mfilename('fullpath'));                 % ...\sitl\matlab
-sitlRoot    = fileparts(here);                                  % ...\sitl
-functionsDir= fullfile(sitlRoot,'..','functions');             % ...\scripts\functions
-outRoot     = fullfile(sitlRoot,'codegen','lib');              % == CODEGEN_ROOT/lib
+here         = fileparts(mfilename('fullpath'));            % ...\sitl\matlab
+sitlRoot     = fileparts(here);                             % ...\sitl
+functionsDir = fullfile(sitlRoot,'..','functions');        % ...\scripts\functions
+outRoot      = fullfile(sitlRoot,'codegen','lib');         % == CODEGEN_ROOT/lib
 
 assert(isfolder(functionsDir), 'functions-Ordner nicht gefunden: %s', functionsDir);
 addpath(functionsDir);
@@ -38,11 +40,16 @@ cfg.SupportNonFinite = false;     % embedded-clean
 cfg.EnableOpenMP     = false;
 
 %% ---- Quaternion-Helfer (stateless) ----
-codegen dcm2quat_local -config cfg -args {zeros(3,3)}            -d fullfile(outRoot,'dcm2quat_local')
-codegen quat2dcm_local -config cfg -args {zeros(4,1)}            -d fullfile(outRoot,'quat2dcm_local')
-codegen quatMul        -config cfg -args {zeros(4,1),zeros(4,1)}-d fullfile(outRoot,'quatMul')
-codegen quatConj       -config cfg -args {zeros(4,1)}           -d fullfile(outRoot,'quatConj')
-codegen quatRotate     -config cfg -args {zeros(4,1),zeros(3,1)}-d fullfile(outRoot,'quatRotate')
+codegen('dcm2quat_local', '-config', cfg, '-args', {zeros(3,3)}, ...
+        '-d', fullfile(outRoot,'dcm2quat_local'));
+codegen('quat2dcm_local', '-config', cfg, '-args', {zeros(4,1)}, ...
+        '-d', fullfile(outRoot,'quat2dcm_local'));
+codegen('quatMul', '-config', cfg, '-args', {zeros(4,1), zeros(4,1)}, ...
+        '-d', fullfile(outRoot,'quatMul'));
+codegen('quatConj', '-config', cfg, '-args', {zeros(4,1)}, ...
+        '-d', fullfile(outRoot,'quatConj'));
+codegen('quatRotate', '-config', cfg, '-args', {zeros(4,1), zeros(3,1)}, ...
+        '-d', fullfile(outRoot,'quatRotate'));
 
 %% ---- Safety-Leafs (persistent state) ----
 % Coder emittiert je <fn>_initialize()/<fn>()/<fn>_terminate(). Der duenne Shim
@@ -50,16 +57,17 @@ codegen quatRotate     -config cfg -args {zeros(4,1),zeros(3,1)}-d fullfile(outR
 os_p = struct('omega_max',10.0,'debounce_N',4.0,'use_norm',false);
 bt_p = struct('batt_k',3.3*18.182/4095,'batt_b',0.0,'batt_alpha',0.014, ...
               'V_warn',14.0,'V_crit',13.4,'V_floor',12.0,'V_hyst',0.2);
-codegen safety_overspeed -config cfg -args {zeros(3,1),uint8(0),false,coder.Constant(os_p)} -d fullfile(outRoot,'safety_overspeed')
-codegen safety_battery   -config cfg -args {0.0,coder.Constant(bt_p)}                       -d fullfile(outRoot,'safety_battery')
+codegen('safety_overspeed', '-config', cfg, ...
+        '-args', {zeros(3,1), uint8(0), false, coder.Constant(os_p)}, ...
+        '-d', fullfile(outRoot,'safety_overspeed'));
+codegen('safety_battery', '-config', cfg, ...
+        '-args', {0.0, coder.Constant(bt_p)}, ...
+        '-d', fullfile(outRoot,'safety_battery'));
 
 %% ---- NOCH NICHT im Golden-Test abgedeckt (deine restlichen mcu-Funktionen) ----
-% geo_attitude_ctrl.m, mahony_filter.m, safety_landcmd.m sind ebenfalls in mcu.slx.
-% Sie sind hier bewusst NICHT dabei: mahony/geo tragen internen Zustand bzw. haben
-% keine eingefrorenen Golden-Vektoren. Zwei Wege sie zu zertifizieren:
-%   1) analoges Sequenz-Fixture wie test_safety (Golden aus einem Python/Referenz-Port),
-%   2) ODER erst auf Modell-Ebene ueber mcu.slx (configure_mcu_codegen.m) im Host-Loop.
-% Wenn du willst, baue ich (1) fuer mahony/geo als naechsten Schritt.
+% geo_attitude_ctrl.m, mahony_filter.m -> Modell-Ebene (mcu.slx); safety_landcmd.m
+% -> als Leaf-Fixture geplant (schick die .m, dann kommt der Test dazu).
 
 fprintf('\nGeneriert nach %s\n', outRoot);
-fprintf('Weiter:  cmake -S <sitl> -B build -DQUAT_IMPL=codegen -DSAFETY_IMPL=codegen -DCODEGEN_ROOT=%s\n', fullfile(sitlRoot,'codegen'));
+fprintf(['Weiter:  cmake -S . -B build -DQUAT_IMPL=codegen -DSAFETY_IMPL=codegen ' ...
+         '-DCODEGEN_ROOT=%s\n'], fullfile(sitlRoot,'codegen'));

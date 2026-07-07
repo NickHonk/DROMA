@@ -1,6 +1,6 @@
 %% verify_quat_codegen.m  -- SITL-Codegen der Quaternion-Helfer
 %  SITL-Vorstufe: sicherstellen, dass die aus mcu.slx generierten C++-Helfer 
-%  bit-nah zu MATLAB rechnen — bevor mcu.slx als Firmware geflasht wird.
+%  äquivalent zu MATLAB rechnen bevor mcu.slx als Firmware geflasht wird.
 %  Prueft die Helfer (und optional die codegen-erzeugte MEX/C++-Version)
 %  gegen die eingefrorenen Test-Vektoren aus verify_quat_codegen.py.
 %

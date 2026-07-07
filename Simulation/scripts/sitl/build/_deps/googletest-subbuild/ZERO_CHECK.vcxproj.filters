@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\CMakeFiles\b57a848f79695b3ec72bba10eec3e427\generate.stamp.rule">
+    <CustomBuild Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\CMakeFiles\6df9c5e34f3ba1f306f9b0694c0696fe\generate.stamp.rule">
       <Filter>CMake Rules</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CMake Rules">
-      <UniqueIdentifier>{780BE355-AA92-3B6E-B725-72C8EA5DE800}</UniqueIdentifier>
+      <UniqueIdentifier>{D812C392-96BD-3563-B436-3625E0EDA4F8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

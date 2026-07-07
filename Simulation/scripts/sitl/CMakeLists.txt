@@ -1,23 +1,41 @@
 cmake_minimum_required(VERSION 3.16)
-project(sitl_golden LANGUAGES CXX)
+# WICHTIG: C UND CXX aktivieren -> Coders .c-Dateien werden als C kompiliert
+# (unmangled), passend zu den extern-"C"-Deklarationen im Test.
+project(sitl_golden LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # --- Optionen -------------------------------------------------------------
-# QUAT_IMPL / SAFETY_IMPL:  ref     -> mitgelieferte Referenz-Ports (kein MATLAB)
-#                           codegen -> von MATLAB Coder generierte Quellen
 set(QUAT_IMPL   "ref" CACHE STRING "ref | codegen")
 set(SAFETY_IMPL "ref" CACHE STRING "ref | codegen")
-# Wurzel der Codegen-Ausgabe (siehe matlab/gen_lib_codegen.m). Nur bei *_IMPL=codegen.
 set(CODEGEN_ROOT "${CMAKE_SOURCE_DIR}/codegen" CACHE PATH "MATLAB Coder output root")
-# Golden-vs-Impl Toleranz. Default 1e-9 (= MATLAB-vs-Golden). Fuer den Codegen-
-# Diff eng lassen; ULP-Divergenz soll auffallen, nicht kaschiert werden.
+# MATLAB-Wurzel: Coders rtwtypes.h zieht tmwtypes.h aus <MATLAB_ROOT>/extern/include.
+# In MATLAB herausfinden mit:  matlabroot
+# Setzen z.B.:  -DMATLAB_ROOT="C:/Program Files/MATLAB/R2025b"
+set(MATLAB_ROOT "" CACHE PATH "MATLAB root (fuer tmwtypes.h in extern/include)")
 set(GOLDEN_TOL "1e-9" CACHE STRING "abs tolerance golden vs impl")
-
 # Wo die Golden-CSVs liegen. Default: mitgelieferter data/-Ordner (kein Flag noetig).
-# Auf deinen eigenen Ordner zeigen mit  -DGOLDEN_DIR=../test
 set(GOLDEN_DIR "${CMAKE_SOURCE_DIR}/data" CACHE PATH "Ordner mit test_data_quat*.csv")
+
+# CODEGEN_ROOT robust normalisieren (Backslash -> Slash, relativ -> absolut).
+file(TO_CMAKE_PATH "${CODEGEN_ROOT}" _CGR)
+get_filename_component(CGROOT "${_CGR}" ABSOLUTE BASE_DIR "${CMAKE_SOURCE_DIR}")
+
+# MATLAB extern/include aufloesen (nur noetig bei *_IMPL=codegen).
+function(matlab_include out_var)
+  if(MATLAB_ROOT STREQUAL "")
+    message(FATAL_ERROR
+      "codegen gewaehlt, aber MATLAB_ROOT ist leer. In MATLAB 'matlabroot' "
+      "eingeben und z.B. -DMATLAB_ROOT=\"C:/Program Files/MATLAB/R2025b\" setzen.")
+  endif()
+  file(TO_CMAKE_PATH "${MATLAB_ROOT}" _mr)
+  set(_inc "${_mr}/extern/include")
+  if(NOT EXISTS "${_inc}/tmwtypes.h")
+    message(FATAL_ERROR "tmwtypes.h nicht unter ${_inc} gefunden — MATLAB_ROOT falsch?")
+  endif()
+  set(${out_var} "${_inc}" PARENT_SCOPE)
+endfunction()
 
 # --- GoogleTest via FetchContent -----------------------------------------
 include(FetchContent)
@@ -29,37 +47,68 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 include(GoogleTest)
 
-# --- Implementierungs-Quellen waehlen ------------------------------------
+# --- Helfer: generierte C-Quellen + Include-Dirs je Funktion einsammeln ----
+# Sammelt DIR/lib/<fn>/*.c (nicht rekursiv -> examples/main.c bleibt aussen vor)
+# und alle Ordner mit Headern (fuer rtwtypes.h etc.).
+function(collect_codegen fns out_src out_inc)
+  set(_src "")
+  set(_inc "")
+  foreach(fn ${fns})
+    set(_dir "${CGROOT}/lib/${fn}")
+    file(GLOB _c "${_dir}/*.c")
+    if(_c STREQUAL "")
+      message(WARNING "collect_codegen: keine .c unter ${_dir} - schon generiert?")
+    else()
+      message(STATUS "  ${fn}: ${_c}")
+    endif()
+    list(APPEND _src ${_c})
+    file(GLOB _h "${_dir}/*.h")
+    if(NOT _h STREQUAL "")
+      list(APPEND _inc "${_dir}")
+    endif()
+  endforeach()
+  if(NOT _inc STREQUAL "")
+    list(REMOVE_DUPLICATES _inc)
+  endif()
+  set(${out_src} "${_src}" PARENT_SCOPE)
+  set(${out_inc} "${_inc}" PARENT_SCOPE)
+endfunction()
+
+# --- Quaternion-Impl waehlen ---------------------------------------------
+set(QUAT_INC "")
 if(QUAT_IMPL STREQUAL "ref")
   set(QUAT_SRC src/quat_helpers_ref.cpp)
 else()
-  # Beispiel-Pfade; an gen_lib_codegen.m anpassen. Header muessen die
-  # extern-"C"-Signaturen aus include/quat_helpers.h erfuellen (Shim ggf. noetig).
-  file(GLOB QUAT_SRC
-    "${CODEGEN_ROOT}/lib/dcm2quat_local/*.c*"
-    "${CODEGEN_ROOT}/lib/quat2dcm_local/*.c*"
-    "${CODEGEN_ROOT}/lib/quatMul/*.c*"
-    "${CODEGEN_ROOT}/lib/quatConj/*.c*"
-    "${CODEGEN_ROOT}/lib/quatRotate/*.c*")
+  collect_codegen("dcm2quat_local;quat2dcm_local;quatMul;quatConj;quatRotate" QUAT_SRC QUAT_INC)
+  matlab_include(_MINC)
+  list(APPEND QUAT_INC "${_MINC}")
 endif()
 
+# --- Safety-Impl waehlen --------------------------------------------------
+set(SAFETY_INC "")
+set(SAFETY_DEF "")
 if(SAFETY_IMPL STREQUAL "ref")
   set(SAFETY_SRC src/safety_helpers_ref.cpp)
 else()
-  file(GLOB SAFETY_SRC
-    "${CODEGEN_ROOT}/lib/safety_overspeed/*.c*"
-    "${CODEGEN_ROOT}/lib/safety_battery/*.c*")
+  collect_codegen("safety_overspeed;safety_battery" _SAF_GEN SAFETY_INC)
+  matlab_include(_MINC2)
+  list(APPEND SAFETY_INC "${_MINC2}")
+  set(SAFETY_SRC src/codegen_shim_overspeed.cpp src/codegen_shim_battery.cpp ${_SAF_GEN})
+  # Deine Header haben Params via coder.Constant einkompiliert -> S9 (use_norm=true)
+  # ist im generierten Code nicht schaltbar. Test blendet S9 dann aus.
+  set(SAFETY_DEF SAFETY_CODEGEN_CONST_PARAMS)
 endif()
 
 # --- Test-Targets ---------------------------------------------------------
 add_executable(test_quat_golden test/test_quat_golden.cpp ${QUAT_SRC})
-target_include_directories(test_quat_golden PRIVATE include test)
+target_include_directories(test_quat_golden PRIVATE include test ${QUAT_INC})
 target_compile_definitions(test_quat_golden PRIVATE
   GOLDEN_DIR="${GOLDEN_DIR}" GOLDEN_TOL=${GOLDEN_TOL})
 target_link_libraries(test_quat_golden PRIVATE GTest::gtest_main)
 gtest_discover_tests(test_quat_golden)
 
 add_executable(test_safety test/test_safety.cpp ${SAFETY_SRC})
-target_include_directories(test_safety PRIVATE include test)
+target_include_directories(test_safety PRIVATE include test ${SAFETY_INC})
+target_compile_definitions(test_safety PRIVATE ${SAFETY_DEF})
 target_link_libraries(test_safety PRIVATE GTest::gtest_main)
 gtest_discover_tests(test_safety)

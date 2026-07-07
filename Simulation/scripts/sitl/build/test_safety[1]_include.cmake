@@ -1,5 +1,5 @@
-if(EXISTS "C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/test_safety[1]_tests.cmake")
-  include("C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/test_safety[1]_tests.cmake")
+if(EXISTS "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/test_safety[1]_tests.cmake")
+  include("C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/test_safety[1]_tests.cmake")
 else()
   add_test(test_safety_NOT_BUILT test_safety_NOT_BUILT)
 endif()

@@ -13,9 +13,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{39C117DC-B379-3C34-A841-15FFA0BE79B2}</ProjectGuid>
+    <ProjectGuid>{44D60AFB-093D-3E54-B565-EE2BFE6C302F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
     <ProjectName>ZERO_CHECK</ProjectName>
     <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
@@ -25,6 +25,7 @@
     <ConfigurationType>Utility</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -48,11 +49,12 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\CMakeFiles\b57a848f79695b3ec72bba10eec3e427\generate.stamp.rule">
+    <CustomBuild Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\CMakeFiles\6df9c5e34f3ba1f306f9b0694c0696fe\generate.stamp.rule">
       <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildInParallel>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking Build System</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-subbuild" "-BC:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-subbuild" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-subbuild/googletest-populate.sln"
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-subbuild" "-BC:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-subbuild" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-subbuild/googletest-populate.sln"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -60,13 +62,14 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\ExternalProject.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\ExternalProject\RepositoryInfo.txt.in;C:\Program Files\CMake\share\cmake-3.25\Modules\ExternalProject\cfgcmd.txt.in;C:\Program Files\CMake\share\cmake-3.25\Modules\ExternalProject\gitclone.cmake.in;C:\Program Files\CMake\share\cmake-3.25\Modules\ExternalProject\gitupdate.cmake.in;C:\Program Files\CMake\share\cmake-3.25\Modules\ExternalProject\mkdirs.cmake.in;C:\Program Files\CMake\share\cmake-3.25\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\Platform\WindowsPaths.cmake;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\CMakeFiles\3.25.0-rc4\CMakeSystem.cmake;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\CMakeLists.txt;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\googletest-populate-prefix\tmp\googletest-populate-mkdirs.cmake;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CMakeGenericSystem.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\ExternalProject.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\ExternalProject\PatchInfo.txt.in;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\ExternalProject\RepositoryInfo.txt.in;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\ExternalProject\UpdateInfo.txt.in;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\ExternalProject\cfgcmd.txt.in;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\ExternalProject\gitclone.cmake.in;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\ExternalProject\gitupdate.cmake.in;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\ExternalProject\mkdirs.cmake.in;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\Platform\Windows.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\Platform\WindowsPaths.cmake;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\CMakeFiles\3.31.6-msvc6\CMakeSystem.cmake;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\CMakeLists.txt;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\googletest-populate-prefix\tmp\googletest-populate-mkdirs.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-subbuild\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

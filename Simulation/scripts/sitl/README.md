@@ -53,35 +53,38 @@ Frame **z-up** und `params.m`-IST sind durchgängig respektiert; keine NED-Vorze
 
 ## Auf Codegen umstellen
 
-1. In MATLAB (Helfer + Safety-Leafs auf dem Pfad):
+1. In MATLAB (`functions`-Ordner auf dem Pfad):
    ```matlab
    run matlab/gen_lib_codegen.m        % -> codegen/lib/<fn>/*.c(+.h)
    ```
-2. Neu konfigurieren + testen:
+2. Neu konfigurieren + bauen + testen (kein CODEGEN_ROOT-Flag noetig — Default
+   zeigt auf `sitl/codegen`, wohin gen_lib_codegen.m schreibt):
    ```
-   cmake -S . -B build -DQUAT_IMPL=codegen -DSAFETY_IMPL=codegen \
-         -DCODEGEN_ROOT=/pfad/zu/codegen
-   cmake --build build -j && ctest --test-dir build --output-on-failure
+   cmake -S . -B build -DQUAT_IMPL=codegen -DSAFETY_IMPL=codegen -DMATLAB_ROOT="C:/Program Files/MATLAB/R2025b"
+   cmake --build build --config Release
+   ctest --test-dir build -C Release --output-on-failure
    ```
+   Erwartung: **20/20** (S9 bei einkompilierten Params ausgeblendet, s.u.).
+   Nur die Helfer ohne Safety: zusaetzlich `-R QuatGolden` an ctest.
 
-### Codegen-Shim (nur Safety, wegen `*_initialize`+Struct)
-Coder erzeugt `safety_overspeed(...)` mit von ihm benannter Param-Struct
-(`struct0_T`). Der Testkörper ruft aber die stabile `overspeed_reset()/step()`-ABI.
-Ein ~15-Zeilen-Shim schließt die Lücke:
-```cpp
-#include "safety_overspeed.h"            // generiert
-#include "safety_helpers.h"              // Test-ABI
-void overspeed_reset() { safety_overspeed_initialize(); }
-void overspeed_step(const double g[3], uint8_t estop, bool ack,
-                    const OverspeedParams* p, bool* kill, uint8_t* src, double dbg[3]) {
-    // p ignorieren, wenn coder.Constant genutzt wurde; sonst in struct0_T kopieren.
-    boolean_T k; uint8_T s; double d[3];
-    safety_overspeed(g, estop, ack, &k, &s, d);   // Signatur lt. gen. Header
-    *kill=k; *src=s; dbg[0]=d[0]; dbg[1]=d[1]; dbg[2]=d[2];
-}
-```
-Die exakte generierte Signatur steht im erzeugten `.h`; Reihenfolge/Pointer ggf.
-anpassen. `battery` analog.
+Drei Dinge, die sonst brechen:
+- `project(... LANGUAGES C CXX)` ist gesetzt → Coders `.c` werden als **C**
+  kompiliert (unmangled) → kein LNK2019.
+- **`MATLAB_ROOT`** ist noetig: Coders `rtwtypes.h` zieht `tmwtypes.h` aus
+  `<MATLAB_ROOT>/extern/include`. Pfad in MATLAB per `matlabroot`. Fehlt er,
+  bricht CMake mit klarer Meldung ab.
+- CODEGEN_ROOT wird backslash-tolerant normalisiert; am besten Flag weglassen.
+
+### Codegen-Shims (Safety) — bereits enthalten
+`src/codegen_shim_overspeed.cpp` und `src/codegen_shim_battery.cpp` adaptieren die
+generierte Coder-ABI auf die Test-ABI (`overspeed_reset/step`, `battery_reset/step`).
+Sie passen zu Headern mit **coder.Constant**-Params (kein Struct-Argument):
+`safety_overspeed_init()` + `safety_overspeed(gyro,estop,ack,&kill,&src,dbg)`.
+Params einkompiliert → **S9 (norm-Modus) nicht schaltbar**; bei
+`SAFETY_IMPL=codegen` via `#ifndef SAFETY_CODEGEN_CONST_PARAMS` uebersprungen
+(20 statt 21). Fuer volle S9-Abdeckung Safety-Leafs mit **Laufzeit-Params**
+generieren (coder.Constant entfernen) → Shim bekommt `struct0_T` aus
+`safety_overspeed_types.h`; dann liefere ich die Laufzeit-Shims.
 
 ---
 

@@ -1,19 +1,46 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\test\test_safety.cpp">
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\test\test_safety.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\src\safety_helpers_ref.cpp">
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\src\codegen_shim_overspeed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\src\codegen_shim_battery.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\codegen\lib\safety_overspeed\safety_overspeed.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\codegen\lib\safety_overspeed\safety_overspeed_data.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\codegen\lib\safety_overspeed\safety_overspeed_initialize.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\codegen\lib\safety_overspeed\safety_overspeed_terminate.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\codegen\lib\safety_battery\safety_battery.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\codegen\lib\safety_battery\safety_battery_data.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\codegen\lib\safety_battery\safety_battery_initialize.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\codegen\lib\safety_battery\safety_battery_terminate.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{EB5A22F4-CD74-3E51-858E-C953CE669494}</UniqueIdentifier>
+      <UniqueIdentifier>{EB4F45C3-4159-3A71-BFDF-8E2591C088F9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

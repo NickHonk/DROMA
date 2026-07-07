@@ -22,9 +22,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{87B5DEC8-DA10-39BB-B6AE-E4246C20AD30}</ProjectGuid>
+    <ProjectGuid>{7D15A05D-E6F0-3033-A09A-9B1E25BD12D5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
     <ProjectName>gmock_main</ProjectName>
     <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
@@ -59,26 +59,26 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">gmock_main.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">gmock_main</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">gmock_main.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">gmock_main</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">gmock_main.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">gmock_main</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">gmock_main.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">gmock_main</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) -J -utf-8</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -88,24 +88,27 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TreatWarningAsError>true</TreatWarningAsError>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_UNICODE;UNICODE;_WIN32;STRICT;WIN32_LEAN_AND_MEAN;GTEST_HAS_PTHREAD=0;_HAS_EXCEPTIONS=1;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\Debug\gmock_mainpdb_debug_postfix-NOTFOUND.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\Debug\gmock_mainpdb_debug_postfix-NOTFOUND.pdb</ProgramDataBaseFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_UNICODE;UNICODE;_WIN32;STRICT;WIN32_LEAN_AND_MEAN;GTEST_HAS_PTHREAD=0;_HAS_EXCEPTIONS=1;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -118,18 +121,21 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) -J -utf-8</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <DisableSpecificWarnings>4251;4275;4702</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TreatWarningAsError>true</TreatWarningAsError>
       <UseFullPaths>false</UseFullPaths>
@@ -138,14 +144,15 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
-      <ProgramDataBaseFileName>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\Release\gmock_main.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\Release\gmock_main.pdb</ProgramDataBaseFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_UNICODE;UNICODE;_WIN32;STRICT;WIN32_LEAN_AND_MEAN;GTEST_HAS_PTHREAD=0;_HAS_EXCEPTIONS=1;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -158,18 +165,21 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) -J -utf-8</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <DisableSpecificWarnings>4251;4275;4702</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>MinSpace</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TreatWarningAsError>true</TreatWarningAsError>
       <UseFullPaths>false</UseFullPaths>
@@ -178,14 +188,15 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
-      <ProgramDataBaseFileName>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\MinSizeRel\gmock_main.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\MinSizeRel\gmock_main.pdb</ProgramDataBaseFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_UNICODE;UNICODE;_WIN32;STRICT;WIN32_LEAN_AND_MEAN;GTEST_HAS_PTHREAD=0;_HAS_EXCEPTIONS=1;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -198,33 +209,37 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) -J -utf-8</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4251;4275;4702</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TreatWarningAsError>true</TreatWarningAsError>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_UNICODE;UNICODE;_WIN32;STRICT;WIN32_LEAN_AND_MEAN;GTEST_HAS_PTHREAD=0;_HAS_EXCEPTIONS=1;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\RelWithDebInfo\gmock_main.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\lib\RelWithDebInfo\gmock_main.pdb</ProgramDataBaseFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_UNICODE;UNICODE;_WIN32;STRICT;WIN32_LEAN_AND_MEAN;GTEST_HAS_PTHREAD=0;_HAS_EXCEPTIONS=1;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\include;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -236,11 +251,11 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\CMakeLists.txt">
+    <CustomBuild Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\CMakeLists.txt">
       <UseUtf8Encoding>Always</UseUtf8Encoding>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-src/googlemock/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-src/googlemock/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl" "-BC:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build" --check-stamp-file "C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-build/googlemock/CMakeFiles/generate.stamp"
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl" "-BC:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build" --check-stamp-file "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-build/googlemock/CMakeFiles/generate.stamp"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -248,12 +263,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.25\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindThreads.cmake;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock.pc.in;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock_main.pc.in;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-build\googlemock\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckCSourceCompiles.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckIncludeFile.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckLibraryExists.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindPackageMessage.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindThreads.cmake;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock.pc.in;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock_main.pc.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-build\googlemock\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-src/googlemock/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-src/googlemock/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl" "-BC:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build" --check-stamp-file "C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-build/googlemock/CMakeFiles/generate.stamp"
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl" "-BC:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build" --check-stamp-file "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-build/googlemock/CMakeFiles/generate.stamp"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -261,12 +276,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.25\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindThreads.cmake;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock.pc.in;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock_main.pc.in;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-build\googlemock\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckCSourceCompiles.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckIncludeFile.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckLibraryExists.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindPackageMessage.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindThreads.cmake;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock.pc.in;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock_main.pc.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-build\googlemock\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-src/googlemock/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-src/googlemock/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl" "-BC:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build" --check-stamp-file "C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-build/googlemock/CMakeFiles/generate.stamp"
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl" "-BC:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build" --check-stamp-file "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-build/googlemock/CMakeFiles/generate.stamp"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -274,12 +289,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.25\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindThreads.cmake;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock.pc.in;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock_main.pc.in;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-build\googlemock\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckCSourceCompiles.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckIncludeFile.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckLibraryExists.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindPackageMessage.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindThreads.cmake;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock.pc.in;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock_main.pc.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-build\googlemock\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-src/googlemock/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-src/googlemock/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl" "-BC:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build" --check-stamp-file "C:/Users/Nick/Documents/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-build/googlemock/CMakeFiles/generate.stamp"
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl" "-BC:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build" --check-stamp-file "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/_deps/googletest-build/googlemock/CMakeFiles/generate.stamp"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -287,19 +302,20 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.25\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.25\Modules\FindThreads.cmake;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock.pc.in;C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock_main.pc.in;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-build\googlemock\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckCSourceCompiles.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckIncludeFile.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CheckLibraryExists.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindPackageMessage.cmake;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\FindThreads.cmake;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock.pc.in;C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\cmake\gmock_main.pc.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-build\googlemock\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest-all.cc" />
-    <ClCompile Include="C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\src\gmock-all.cc" />
-    <ClCompile Include="C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\src\gmock_main.cc" />
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest-all.cc" />
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\src\gmock-all.cc" />
+    <ClCompile Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googlemock\src\gmock_main.cc" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="C:\Users\Nick\Documents\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\ZERO_CHECK.vcxproj">
-      <Project>{88143744-9C30-3772-87CD-5351A45B260F}</Project>
+    <ProjectReference Include="C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\ZERO_CHECK.vcxproj">
+      <Project>{D4C48A96-DCB3-37A7-B817-A2AD168A33C7}</Project>
       <Name>ZERO_CHECK</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>

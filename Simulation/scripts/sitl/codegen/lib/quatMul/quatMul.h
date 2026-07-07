@@ -1,0 +1,35 @@
+/*
+ * Academic License - for use in teaching, academic research, and meeting
+ * course requirements at degree granting institutions only.  Not for
+ * government, commercial, or other organizational use.
+ * File: quatMul.h
+ *
+ * MATLAB Coder version            : 25.2
+ * C/C++ source code generated on  : 07-Jul-2026 13:50:07
+ */
+
+#ifndef QUATMUL_H
+#define QUATMUL_H
+
+/* Include Files */
+#include "rtwtypes.h"
+#include <stddef.h>
+#include <stdlib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Function Declarations */
+extern void quatMul(const double a[4], const double c[4], double r[4]);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+/*
+ * File trailer for quatMul.h
+ *
+ * [EOF]
+ */
