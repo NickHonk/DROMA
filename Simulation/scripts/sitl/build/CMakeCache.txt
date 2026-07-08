@@ -280,6 +280,9 @@ GIT_EXECUTABLE:FILEPATH=C:/Program Files/Git/cmd/git.exe
 //Ordner mit test_data_quat*.csv
 GOLDEN_DIR:PATH=C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/data
 
+//Golden-I/O aus log_mcu_golden.m
+GOLDEN_MCU_CSV:FILEPATH=C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/data/golden_mcu_io.csv
+
 //abs tolerance golden vs impl
 GOLDEN_TOL:STRING=1e-9
 
@@ -293,6 +296,10 @@ INSTALL_GTEST:BOOL=ON
 
 //MATLAB root (fuer tmwtypes.h in extern/include)
 MATLAB_ROOT:PATH=C:/Program Files/Matlab/R2025b
+
+//slbuild/packNGo-Ausgabe von mcu (enthaelt mcu.cpp, mcu_data.cpp,
+// mcu.h ...)
+MODEL_ROOT:PATH=C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/mcu_ert_rtw
 
 //ref | codegen
 QUAT_IMPL:STRING=codegen

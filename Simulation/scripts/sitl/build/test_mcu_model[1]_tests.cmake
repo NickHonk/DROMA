@@ -1,0 +1,5 @@
+add_test([=[McuGolden.RotorCmdMatchesGolden]=]  [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_mcu_model.exe]==] [==[--gtest_filter=McuGolden.RotorCmdMatchesGolden]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[McuGolden.RotorCmdMatchesGolden]=]  PROPERTIES WORKING_DIRECTORY [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build]==] SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[McuGolden.DeterministicAcrossFreshInstances]=]  [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_mcu_model.exe]==] [==[--gtest_filter=McuGolden.DeterministicAcrossFreshInstances]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[McuGolden.DeterministicAcrossFreshInstances]=]  PROPERTIES WORKING_DIRECTORY [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build]==] SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  test_mcu_model_TESTS McuGolden.RotorCmdMatchesGolden McuGolden.DeterministicAcrossFreshInstances)

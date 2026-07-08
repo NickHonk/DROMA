@@ -42,19 +42,6 @@ fprintf('Busse Bus_State, Bus_Cmd, Bus_IMU, Bus_Mocap in %s angelegt.\n', ddName
 
 
 %% ---------------------- lokale Funktionen ----------------------
-% function bus = buildBus(specs)
-%     elems = Simulink.BusElement.empty;
-%     for k = 1:size(specs,1)
-%         e            = Simulink.BusElement;
-%         e.Name       = specs{k,1};
-%         e.Dimensions = specs{k,2};
-%         e.DataType   = 'double';
-%         e.Complexity = 'real';
-%         elems(k)     = e; %#ok<AGROW>
-%     end
-%     bus          = Simulink.Bus;
-%     bus.Elements = elems;
-% end
 function bus = buildBus(specs)
     elems = Simulink.BusElement.empty;
     for k = 1:size(specs,1)

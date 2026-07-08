@@ -18,4 +18,6 @@ Battery.B3_Hysteresis_NoChatter 1 0.0068507
 Battery.B4_FloorLatch_Sticky 1 0.0069544
 Battery.B5_EMA_FiltersShortSag 1 0.007066
 Battery.B6_CountRange 1 0.0070555
+McuGolden.RotorCmdMatchesGolden 1 0.0863568
+McuGolden.DeterministicAcrossFreshInstances 2 0.0363875
 ---

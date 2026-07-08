@@ -112,3 +112,34 @@ target_include_directories(test_safety PRIVATE include test ${SAFETY_INC})
 target_compile_definitions(test_safety PRIVATE ${SAFETY_DEF})
 target_link_libraries(test_safety PRIVATE GTest::gtest_main)
 gtest_discover_tests(test_safety)
+
+set(MODEL_ROOT "${CMAKE_SOURCE_DIR}/mcu_ert_rtw" CACHE PATH
+    "slbuild/packNGo-Ausgabe von mcu (enthaelt mcu.cpp, mcu_data.cpp, mcu.h ...)")
+set(GOLDEN_MCU_CSV "${GOLDEN_DIR}/golden_mcu_io.csv" CACHE FILEPATH
+    "Golden-I/O aus log_mcu_golden.m")
+ 
+file(TO_CMAKE_PATH "${MODEL_ROOT}" _MR)
+if(EXISTS "${_MR}/mcu.cpp")
+  # Alle generierten .cpp AUSSER ert_main.cpp (dessen main() kollidiert mit gtest_main).
+  file(GLOB _MCU_SRC "${_MR}/*.cpp")
+  list(FILTER _MCU_SRC EXCLUDE REGEX "ert_main\\.cpp$")
+ 
+  add_executable(test_mcu_model test/test_mcu_model.cpp ${_MCU_SRC})
+  target_include_directories(test_mcu_model PRIVATE include test "${_MR}")
+  target_compile_definitions(test_mcu_model PRIVATE
+      GOLDEN_MCU_CSV="${GOLDEN_MCU_CSV}" GOLDEN_TOL=${GOLDEN_TOL})
+  target_link_libraries(test_mcu_model PRIVATE GTest::gtest_main)
+  gtest_discover_tests(test_mcu_model)
+else()
+  message(STATUS
+    "test_mcu_model uebersprungen: ${_MR}/mcu.cpp fehlt "
+    "(erst configure_mcu_codegen -> slbuild('mcu') laufen lassen).")
+endif()
+
+# --- Diagnose-Executable (kein Test): lokalisiert die erste Golden-Divergenz ---
+if(EXISTS "${_MR}/mcu.cpp")
+  add_executable(diag_mcu_replay test/diag_mcu_replay.cpp ${_MCU_SRC})
+  target_include_directories(diag_mcu_replay PRIVATE include test "${_MR}")
+  target_compile_definitions(diag_mcu_replay PRIVATE
+      GOLDEN_MCU_CSV="${GOLDEN_MCU_CSV}" DIAG_TOL=${GOLDEN_TOL})
+endif()
