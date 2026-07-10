@@ -113,6 +113,15 @@ target_compile_definitions(test_safety PRIVATE ${SAFETY_DEF})
 target_link_libraries(test_safety PRIVATE GTest::gtest_main)
 gtest_discover_tests(test_safety)
 
+# --- Codec-Cross-Check: MATLAB link_tx/link_rx == C++ pkt (mcu_packet.hpp) ----
+# Header-only (include/mcu_packet.hpp) gegen Golden aus dump_link_codec_golden.m.
+# Keine Codegen-Abhaengigkeit -> laeuft immer.
+add_executable(test_link_codec test/test_link_codec.cpp)
+target_include_directories(test_link_codec PRIVATE include test)
+target_compile_definitions(test_link_codec PRIVATE GOLDEN_DIR="${GOLDEN_DIR}")
+target_link_libraries(test_link_codec PRIVATE GTest::gtest_main)
+gtest_discover_tests(test_link_codec)
+
 set(MODEL_ROOT "${CMAKE_SOURCE_DIR}/mcu_ert_rtw" CACHE PATH
     "slbuild/packNGo-Ausgabe von mcu (enthaelt mcu.cpp, mcu_data.cpp, mcu.h ...)")
 set(GOLDEN_MCU_CSV "${GOLDEN_DIR}/golden_mcu_io.csv" CACHE FILEPATH

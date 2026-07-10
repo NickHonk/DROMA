@@ -19,7 +19,7 @@ T_STOP   = 5.0;
 
 % rotor_cmd-Linie (erster Outport des MCU-Blocks) loggen.
 ph = get_param(mcuBlock,'PortHandles');
-outNames = {'rotor_cmd','led'};   % Reihenfolge der MCU-Outports
+outNames = {'rotor_cmd','led','throttle'};   % Reihenfolge der MCU-Outports
 for oIdx = 1:numel(ph.Outport)
     % DataLogging gehoert an das Output-Port-Handle (das das Signal erzeugt),
     % NICHT an die Linie. Der MCU-Outport IST die Quelle -> direkt hier setzen.
@@ -41,10 +41,12 @@ cleanup = onCleanup(@() set_param(mcuBlock,'SimulationMode',modeWas));
 set_param(mcuBlock,'SimulationMode','Normal');
 N = sim(harness,'StopTime',num2str(T_STOP),'ReturnWorkspaceOutputs','on');
 rN = grab(N,'rotor_cmd',Ts_inner,T_STOP);  lN = grab(N,'led',Ts_inner,T_STOP);
+tN = grab(N,'throttle',Ts_inner,T_STOP);
 % --- SIL (baut generierten Code + laeuft ihn im Loop) ---
 set_param(mcuBlock,'SimulationMode','Software-in-the-loop (SIL)');
 S = sim(harness,'StopTime',num2str(T_STOP),'ReturnWorkspaceOutputs','on');
 rS = grab(S,'rotor_cmd',Ts_inner,T_STOP);  lS = grab(S,'led',Ts_inner,T_STOP);
+tS = grab(S,'throttle',Ts_inner,T_STOP);
 
 if isempty(rN) || isempty(rS)
     error('rotor_cmd nicht geloggt — MCU-Ausgang in main verdrahtet?');
@@ -52,6 +54,10 @@ end
 w = max(abs(rN(:)-rS(:)));
 fprintf('\n[SIL vs Normal] rotor_cmd max|d| = %.3e  ueber %d Ticks x %d Rotoren.\n', ...
         w, size(rN,1), size(rN,2));
+if ~isempty(tN) && ~isempty(tS)
+    fprintf('[SIL vs Normal] throttle  max|d| = %.3e  ueber %d Ticks x %d Rotoren.\n', ...
+            max(abs(tN(:)-tS(:))), size(tN,1), size(tN,2));
+end
 led_ok = true;
 if isempty(lN) || isempty(lS)
     fprintf(['[SIL vs Normal] led      = uebersprungen (Ausgang in main ' ...
@@ -78,7 +84,7 @@ function Y = grab(simOut, name, Ts, T)
         Y = []; return;
     end
     tt = sig.Values.Time(:);
-    D  = reshape(sig.Values.Data, numel(tt), []);
+    D  = double(reshape(sig.Values.Data, numel(tt), []));  % cast: led uint8 -> interp1-faehig
     t  = (0:Ts:T).';
     Y  = zeros(numel(t), size(D,2));
     for c = 1:size(D,2)

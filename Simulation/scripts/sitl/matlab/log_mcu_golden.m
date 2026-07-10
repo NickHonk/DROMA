@@ -23,7 +23,7 @@ T_STOP    = 5.0;                  % [s] Simulationsdauer
 % Portnamen in EXAKTER Blockport-Reihenfolge (== ExtU/ExtY-Feldnamen).
 % Bestaetigt: rein Bus_IMU, Bus_Cmd, batt_count ; raus rotor_cmd, led.
 IN_NAMES  = {'Bus_IMU','Bus_Cmd','batt_count'};
-OUT_NAMES = {'rotor_cmd','led'};  % led ist jetzt Root-Outport (uint8, = Batterie-FSM-state).
+OUT_NAMES = {'rotor_cmd','led','throttle'};  % led=Batterie-FSM-state (uint8); throttle[4]=[0,100] (OneShot125-Vorstufe).
 OUT_CSV   = fullfile(fileparts(mfilename('fullpath')),'..','data','golden_mcu_io.csv');
 % ============================================================================
 

@@ -86,5 +86,15 @@ inline double diff_led(const MCU::ExtY_mcu_T& y, const NamedCsv& g, std::size_t 
     return std::abs(static_cast<double>(y.led) - g.get(r, "led.1"));
 }
 
+// --- ExtY throttle[4] ([0,100]) vs Golden -> groesste Abweichung ------------
+inline double diff_throttle(const MCU::ExtY_mcu_T& y, const NamedCsv& g, std::size_t r) {
+    double w = 0.0;
+    for (int i = 0; i < 4; ++i) {
+        double d = std::abs(y.throttle[i] - g.get(r, "throttle." + std::to_string(i+1)));
+        if (d > w) w = d;
+    }
+    return w;
+}
+
 }  // namespace sitl
 #endif

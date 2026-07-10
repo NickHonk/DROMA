@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.245
+// Model version                  : 1.252
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Tue Jul  7 16:24:37 2026
+// C/C++ source code generated on : Fri Jul 10 09:49:45 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Windows64)
@@ -52,11 +52,6 @@ class MCU final
 
   // Constant parameters (default storage)
   struct ConstP_mcu_T {
-    // Expression: quadcop.Gamma_inv
-    //  Referenced by: '<Root>/Gain'
-
-    real_T Gain_Gain[16];
-
     // Expression: controller.kR
     //  Referenced by: '<S4>/Constant'
 
@@ -66,6 +61,16 @@ class MCU final
     //  Referenced by: '<S4>/Constant1'
 
     real_T Constant1_Value_o[9];
+
+    // Expression: quadcop.Gamma_inv
+    //  Referenced by: '<Root>/Gain'
+
+    real_T Gain_Gain[16];
+
+    // Expression: quadcop.p_from_omega_sq
+    //  Referenced by: '<Root>/Polynomial'
+
+    real_T Polynomial_Coefs[3];
   };
 
   // External inputs (root inport signals with default storage)
@@ -79,6 +84,7 @@ class MCU final
   struct ExtY_mcu_T {
     real_T rotor_cmd[4];               // '<Root>/rotor_cmd'
     uint8_T led;                       // '<Root>/led'
+    real_T throttle[4];                // '<Root>/throttle'
   };
 
   // Real-time Model Data Structure

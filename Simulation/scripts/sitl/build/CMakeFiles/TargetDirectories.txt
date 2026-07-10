@@ -1,5 +1,6 @@
 C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/CMakeFiles/test_quat_golden.dir
 C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/CMakeFiles/test_safety.dir
+C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/CMakeFiles/test_link_codec.dir
 C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/CMakeFiles/test_mcu_model.dir
 C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/CMakeFiles/diag_mcu_replay.dir
 C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/CMakeFiles/RUN_TESTS.dir

@@ -5,8 +5,10 @@
 //
 // Erwartung: rotor_cmd bit-nah an Golden (GOLDEN_TOL=1e-9 Default, eng lassen).
 #include <array>
+#include <cmath>
 #include <gtest/gtest.h>
 #include "mcu_io.hpp"
+#include "throttle_poly.hpp"   // P_THROTTLE (aus params.m via run_mcu_recert.m)
 
 #ifndef GOLDEN_MCU_CSV
 #define GOLDEN_MCU_CSV "data/golden_mcu_io.csv"
@@ -16,6 +18,18 @@
 #endif
 
 using namespace sitl;
+
+// throttle-Invariante: clamp(polyval(P, x), 0, 100), Horner wie MATLAB polyval.
+// NICHT bit-exakt gegen den generierten Code moeglich (Polyval-Eingang im Modell
+// ist das vorzeichenbehaftete omega_sq VOR abs; rotor_cmd=sqrt(abs(omega_sq)) ->
+// sqrt(x)^2 weicht ~1 ULP von x ab). Beobachtet |d|<=7.1e-15, Schranke 1e-9.
+static double throttle_ref(double x) {
+    double y = mcuref::P_THROTTLE[0];
+    for (int k = 1; k < mcuref::P_THROTTLE_N; ++k) y = y * x + mcuref::P_THROTTLE[k];
+    if (y > mcuref::THROTTLE_MAX) y = mcuref::THROTTLE_MAX;
+    if (y < mcuref::THROTTLE_MIN) y = mcuref::THROTTLE_MIN;
+    return y;
+}
 
 // Golden einmal laden; fehlt die Datei -> SKIP mit klarer Anweisung (nicht FAIL,
 // damit ctest vor dem ersten log_mcu_golden-Lauf nicht hart bricht).
@@ -32,7 +46,7 @@ TEST(McuGolden, RotorCmdMatchesGolden) {
     if (!g) GTEST_SKIP() << "Golden fehlt: " << GOLDEN_MCU_CSV
                          << " — erst log_mcu_golden.m in MATLAB laufen lassen.";
     MCU obj; obj.initialize();
-    double worst = 0.0; std::size_t worst_row = 0;
+    double worst = 0.0, worst_inv = 0.0; std::size_t worst_row = 0;
     for (std::size_t r = 0; r < g->rows.size(); ++r) {
         MCU::ExtU_mcu_T u{}; wire_inputs(u, *g, r);
         obj.setExternalInputs(&u); obj.step();
@@ -46,29 +60,42 @@ TEST(McuGolden, RotorCmdMatchesGolden) {
         ASSERT_EQ(diff_led(y, *g, r), 0.0)
             << "led-Divergenz in Zeile " << r
             << ": got " << (int)y.led << " expected " << g->get(r,"led.1");
+        // throttle: (a) generierter Code vs Simulink-Golden (<=GOLDEN_TOL).
+        ASSERT_LE(diff_throttle(y, *g, r), (double)GOLDEN_TOL)
+            << "throttle-Golden-Divergenz in Zeile " << r;
+        // (b) Struktur-Invariante: throttle == clamp(polyval(P, rotor_cmd^2)).
+        for (int i = 0; i < 4; ++i) {
+            double di = std::abs(y.throttle[i] - throttle_ref(y.rotor_cmd[i] * y.rotor_cmd[i]));
+            if (di > worst_inv) { worst_inv = di; }
+            ASSERT_LE(di, 1e-9)
+                << "throttle-Invariante verletzt in Zeile " << r << " Kanal " << i;
+        }
     }
     RecordProperty("worst_abs_diff", worst);
     RecordProperty("worst_row", (int)worst_row);
-    SUCCEED() << "max|dq|=" << worst << " @ Zeile " << worst_row;
+    RecordProperty("worst_throttle_invariant", worst_inv);
+    SUCCEED() << "max|dq|=" << worst << " @ Zeile " << worst_row
+              << "; max throttle-Invariante=" << worst_inv;
 }
 
 // Zwei frische Laeufe muessen bit-identisch sein (Determinismus + Reset).
 TEST(McuGolden, DeterministicAcrossFreshInstances) {
     const NamedCsv* g = golden();
     if (!g) GTEST_SKIP() << "Golden fehlt: " << GOLDEN_MCU_CSV;
-    auto run_once = [&](std::vector<std::array<double,5>>& out){
+    auto run_once = [&](std::vector<std::array<double,9>>& out){
         MCU obj; obj.initialize();
         for (std::size_t r = 0; r < g->rows.size(); ++r) {
             MCU::ExtU_mcu_T u{}; wire_inputs(u, *g, r);
             obj.setExternalInputs(&u); obj.step();
             const auto& y = obj.getExternalOutputs();
             out.push_back({y.rotor_cmd[0],y.rotor_cmd[1],y.rotor_cmd[2],y.rotor_cmd[3],
-                           (double)y.led});
+                           (double)y.led,
+                           y.throttle[0],y.throttle[1],y.throttle[2],y.throttle[3]});
         }
     };
-    std::vector<std::array<double,5>> a, b; run_once(a); run_once(b);
+    std::vector<std::array<double,9>> a, b; run_once(a); run_once(b);
     ASSERT_EQ(a.size(), b.size());
     for (std::size_t r = 0; r < a.size(); ++r)
-        for (int i = 0; i < 5; ++i)
+        for (int i = 0; i < 9; ++i)
             EXPECT_DOUBLE_EQ(a[r][i], b[r][i]) << "divergenz Zeile " << r << " ch " << i;
 }
