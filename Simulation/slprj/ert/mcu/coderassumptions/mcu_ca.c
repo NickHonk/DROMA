@@ -17,15 +17,15 @@ const CA_Checks CA_mcu_Exp = {
   64,                                  /* BitPerLongLong */
   32,                                  /* BitPerFloat */
   64,                                  /* BitPerDouble */
-  64,                                  /* BitPerPointer */
-  64,                                  /* BitPerSizeT */
-  64,                                  /* BitPerPtrDiffT */
+  32,                                  /* BitPerPointer */
+  32,                                  /* BitPerSizeT */
+  32,                                  /* BitPerPtrDiffT */
   CA_LITTLE_ENDIAN,                    /* Endianess */
   CA_ZERO,                             /* IntDivRoundTo */
   1,                                   /* ShiftRightIntArith */
-  0,                                   /* LongLongMode */
+  1,                                   /* LongLongMode */
   0,                                   /* PortableWordSizes */
-  "Intel->x86-64 (Windows64)",         /* HWDeviceType */
+  "ARM Compatible->ARM Cortex-M",      /* HWDeviceType */
   0,                                   /* MemoryAtStartup */
   0,                                   /* DynamicMemoryAtStartup */
   0,                                   /* DenormalFlushToZero */

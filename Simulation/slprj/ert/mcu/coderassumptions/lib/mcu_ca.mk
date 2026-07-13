@@ -2,7 +2,7 @@
 ## Makefile generated for component 'mcu_ca'. 
 ## 
 ## Makefile     : mcu_ca.mk
-## Generated on : Tue Jul 07 17:17:06 2026
+## Generated on : Mon Jul 13 11:54:31 2026
 ## Final product: ./mcu_ca.lib
 ## Product type : static library
 ## 
@@ -176,7 +176,7 @@ INCLUDES = $(INCLUDES_BUILDINFO)
 
 DEFINES_BUILD_ARGS = -DINTEGER_CODE=0
 DEFINES_CUSTOM = 
-DEFINES_OPTS = -DCA_CHECK_FLOATING_POINT_ENABLED=1 -DCA_CHECK_LONG_LONG_ENABLED=0 -DCA_CHECK_DYNAMIC_MEMORY=0 -DCA_MODEL_SPECIFIC_CHECKS_ENABLED=0 -DCA_CHECK_DAZ_ENABLED=1
+DEFINES_OPTS = -DCA_CHECK_FLOATING_POINT_ENABLED=1 -DCA_CHECK_LONG_LONG_ENABLED=1 -DCA_CHECK_DYNAMIC_MEMORY=0 -DCA_MODEL_SPECIFIC_CHECKS_ENABLED=0 -DCA_CHECK_DAZ_ENABLED=1
 
 DEFINES = $(DEFINES_BUILD_ARGS) $(DEFINES_CUSTOM) $(DEFINES_OPTS)
 
@@ -222,19 +222,17 @@ SYSTEM_LIBS =
 # C Compiler
 #---------------
 
-CFLAGS_TFL = -msse2 -fno-predictive-commoning
 CFLAGS_BASIC = $(DEFINES) $(INCLUDES) @$(COMPILER_COMMAND_FILE)
 
-CFLAGS += $(CFLAGS_TFL) $(CFLAGS_BASIC)
+CFLAGS += $(CFLAGS_BASIC)
 
 #-----------------
 # C++ Compiler
 #-----------------
 
-CPPFLAGS_TFL = -msse2 -fno-predictive-commoning
 CPPFLAGS_BASIC = $(DEFINES) $(INCLUDES) @$(COMPILER_COMMAND_FILE)
 
-CPPFLAGS += $(CPPFLAGS_TFL) $(CPPFLAGS_BASIC)
+CPPFLAGS += $(CPPFLAGS_BASIC)
 
 #---------------------
 # MEX C++ Compiler

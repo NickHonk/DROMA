@@ -7,20 +7,18 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.252
+// Model version                  : 1.268
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Fri Jul 10 09:49:45 2026
+// C/C++ source code generated on : Mon Jul 13 12:30:04 2026
 //
 // Target selection: ert.tlc
-// Embedded hardware selection: Intel->x86-64 (Windows64)
+// Embedded hardware selection: ARM Compatible->ARM Cortex-M
 // Code generation objectives: Unspecified
 // Validation result: Not run
 //
 #include "mcu.h"
 #include "rtwtypes.h"
-#include <emmintrin.h>
 #include <cmath>
-#include "mcu_private.h"
 
 static void rate_scheduler(MCU::RT_MODEL_mcu_T *const mcu_M);
 
@@ -131,31 +129,9 @@ real_T MCU::mcu_norm_j(const real_T x[4])
   return scale * std::sqrt(y);
 }
 
-real_T rt_roundd(real_T u)
-{
-  real_T y;
-  if (std::abs(u) < 4.503599627370496E+15) {
-    if (u >= 0.5) {
-      y = std::floor(u + 0.5);
-    } else if (u > -0.5) {
-      y = 0.0;
-    } else {
-      y = std::ceil(u - 0.5);
-    }
-  } else {
-    y = u;
-  }
-
-  return y;
-}
-
 // Model step function
 void MCU::step()
 {
-  __m128d tmp_4;
-  __m128d tmp_6;
-  __m128d tmp_7;
-  __m128d tmp_8;
   real_T R[9];
   real_T Rdes[9];
   real_T Rdes_0[9];
@@ -166,23 +142,21 @@ void MCU::step()
   real_T rtb_tau_ref[3];
   real_T rtb_tau_ref_0[3];
   real_T theta[3];
-  real_T tmp_3[3];
-  real_T tmp_5[2];
   real_T R_tmp;
   real_T R_tmp_0;
   real_T R_tmp_1;
   real_T R_tmp_2;
-  real_T Rdes_tmp;
-  real_T Rdes_tmp_0;
-  real_T Rdes_tmp_1;
-  real_T Rdes_tmp_2;
+  real_T R_tmp_3;
+  real_T R_tmp_4;
+  real_T R_tmp_5;
+  real_T R_tmp_6;
+  real_T nE;
   real_T na;
   real_T q_err_idx_1;
   real_T q_err_idx_2;
   real_T q_err_idx_3;
   real_T rtb_q_des_idx_1;
   real_T rtb_q_des_idx_2;
-  real_T rtb_q_des_idx_3;
   real_T rtb_q_ref_idx_3;
   real_T tmp;
   real_T tmp_0;
@@ -190,20 +164,20 @@ void MCU::step()
   real_T tmp_2;
   int32_T S_tmp_tmp;
   int32_T S_tmp_tmp_0;
-  int32_T i;
+  int32_T rtb_q_des_idx_0_tmp;
   int_T idx;
   boolean_T over_inst;
   static const int8_T b_b[3]{ 0, 0, 1 };
 
   // Sum: '<Root>/Add' incorporates:
   //   Constant: '<Root>/Constant1'
-  //   Gain: '<Root>/Gain1'
   //   Inport: '<Root>/Bus_IMU'
   //   Sum: '<Root>/Subtract'
 
-  _mm_storeu_pd(&rtb_Add[0], _mm_add_pd(_mm_sub_pd(_mm_loadu_pd
-    (&mcu_U.Bus_IMU_k.imu_gyro[0]), _mm_set_pd(-0.17453292519943295,
-    0.17453292519943295)), _mm_loadu_pd(&mcu_ConstB.Gain1[0])));
+  rtb_Add[0] = (mcu_U.Bus_IMU_k.imu_gyro[0] - 0.17453292519943295) +
+    mcu_ConstB.Gain1[0];
+  rtb_Add[1] = (mcu_U.Bus_IMU_k.imu_gyro[1] - -0.17453292519943295) +
+    mcu_ConstB.Gain1[1];
   rtb_Add[2] = (mcu_U.Bus_IMU_k.imu_gyro[2] - 0.17453292519943295) +
     mcu_ConstB.Gain1[2];
 
@@ -251,30 +225,26 @@ void MCU::step()
 
   na = mcu_norm(mcu_U.Bus_IMU_k.imu_acc);
   if (na > 1.0E-6) {
-    R_tmp = mcu_DW.q[0] * mcu_DW.q[0];
+    R_tmp_1 = mcu_DW.q[0] * mcu_DW.q[0];
     q_err_idx_1 = mcu_DW.q[1] * mcu_DW.q[1];
     q_err_idx_2 = mcu_DW.q[2] * mcu_DW.q[2];
     q_err_idx_3 = mcu_DW.q[3] * mcu_DW.q[3];
-    S_tmp[0] = ((R_tmp + q_err_idx_1) - q_err_idx_2) - q_err_idx_3;
-    tmp_7 = _mm_set1_pd(mcu_DW.q[0]);
-    tmp_8 = _mm_set1_pd(2.0);
-    tmp_6 = _mm_mul_pd(_mm_add_pd(_mm_mul_pd(_mm_set1_pd(mcu_DW.q[1]),
-      _mm_loadu_pd(&mcu_DW.q[2])), _mm_mul_pd(_mm_mul_pd(tmp_7, _mm_set_pd
-      (mcu_DW.q[2], mcu_DW.q[3])), _mm_set_pd(-1.0, 1.0))), tmp_8);
-    _mm_storeu_pd(&tmp_5[0], tmp_6);
-    S_tmp[3] = tmp_5[0];
-    S_tmp[6] = tmp_5[1];
-    S_tmp[1] = (mcu_DW.q[1] * mcu_DW.q[2] - mcu_DW.q[0] * mcu_DW.q[3]) * 2.0;
-    R_tmp -= q_err_idx_1;
-    S_tmp[4] = (R_tmp + q_err_idx_2) - q_err_idx_3;
-    tmp_7 = _mm_mul_pd(_mm_add_pd(_mm_mul_pd(_mm_set_pd(mcu_DW.q[1], mcu_DW.q[2]),
-      _mm_set1_pd(mcu_DW.q[3])), _mm_mul_pd(tmp_7, _mm_loadu_pd(&mcu_DW.q[1]))),
-                       tmp_8);
-    _mm_storeu_pd(&tmp_5[0], tmp_7);
-    S_tmp[7] = tmp_5[0];
-    S_tmp[2] = tmp_5[1];
-    S_tmp[5] = (mcu_DW.q[2] * mcu_DW.q[3] - mcu_DW.q[0] * mcu_DW.q[1]) * 2.0;
-    S_tmp[8] = (R_tmp - q_err_idx_2) + q_err_idx_3;
+    S_tmp[0] = ((R_tmp_1 + q_err_idx_1) - q_err_idx_2) - q_err_idx_3;
+    rtb_q_ref_idx_3 = mcu_DW.q[1] * mcu_DW.q[2];
+    R_tmp_2 = mcu_DW.q[0] * mcu_DW.q[3];
+    S_tmp[3] = (rtb_q_ref_idx_3 + R_tmp_2) * 2.0;
+    R_tmp_3 = mcu_DW.q[1] * mcu_DW.q[3];
+    R_tmp_4 = mcu_DW.q[0] * mcu_DW.q[2];
+    S_tmp[6] = (R_tmp_3 - R_tmp_4) * 2.0;
+    S_tmp[1] = (rtb_q_ref_idx_3 - R_tmp_2) * 2.0;
+    R_tmp_1 -= q_err_idx_1;
+    S_tmp[4] = (R_tmp_1 + q_err_idx_2) - q_err_idx_3;
+    q_err_idx_1 = mcu_DW.q[2] * mcu_DW.q[3];
+    rtb_q_ref_idx_3 = mcu_DW.q[0] * mcu_DW.q[1];
+    S_tmp[7] = (q_err_idx_1 + rtb_q_ref_idx_3) * 2.0;
+    S_tmp[2] = (R_tmp_3 + R_tmp_4) * 2.0;
+    S_tmp[5] = (q_err_idx_1 - rtb_q_ref_idx_3) * 2.0;
+    S_tmp[8] = (R_tmp_1 - q_err_idx_2) + q_err_idx_3;
     rtb_Add[0] = mcu_U.Bus_IMU_k.imu_acc[0] / na;
     rtb_Add[1] = mcu_U.Bus_IMU_k.imu_acc[1] / na;
     rtb_Add[2] = mcu_U.Bus_IMU_k.imu_acc[2] / na;
@@ -282,18 +252,16 @@ void MCU::step()
     rtb_q_des_idx_1 = 0.0;
     rtb_q_des_idx_2 = 0.0;
     for (idx = 0; idx < 3; idx++) {
-      R_tmp = b_b[idx];
-      tmp_7 = _mm_add_pd(_mm_mul_pd(_mm_loadu_pd(&S_tmp[3 * idx]), _mm_set1_pd
-        (R_tmp)), _mm_set_pd(rtb_q_des_idx_1, na));
-      _mm_storeu_pd(&tmp_5[0], tmp_7);
-      na = tmp_5[0];
-      rtb_q_des_idx_1 = tmp_5[1];
-      rtb_q_des_idx_2 += S_tmp[3 * idx + 2] * R_tmp;
+      rtb_q_des_idx_0_tmp = b_b[idx];
+      na += S_tmp[3 * idx] * static_cast<real_T>(rtb_q_des_idx_0_tmp);
+      rtb_q_des_idx_1 += S_tmp[3 * idx + 1] * static_cast<real_T>
+        (rtb_q_des_idx_0_tmp);
+      rtb_q_des_idx_2 += S_tmp[3 * idx + 2] * static_cast<real_T>
+        (rtb_q_des_idx_0_tmp);
     }
 
-    _mm_storeu_pd(&theta[0], _mm_sub_pd(_mm_mul_pd(_mm_set_pd(na, rtb_Add[1]),
-      _mm_set_pd(rtb_Add[2], rtb_q_des_idx_2)), _mm_mul_pd(_mm_set_pd(rtb_Add[0],
-      rtb_q_des_idx_1), _mm_set_pd(rtb_q_des_idx_2, rtb_Add[2]))));
+    theta[0] = rtb_Add[1] * rtb_q_des_idx_2 - rtb_q_des_idx_1 * rtb_Add[2];
+    theta[1] = na * rtb_Add[2] - rtb_Add[0] * rtb_q_des_idx_2;
     theta[2] = rtb_Add[0] * rtb_q_des_idx_1 - na * rtb_Add[1];
   } else {
     theta[0] = 0.0;
@@ -301,33 +269,22 @@ void MCU::step()
     theta[2] = 0.0;
   }
 
-  na = mcu_norm_j(mcu_U.Bus_Cmd_l.q_ext);
-  if (na > 0.5) {
-    tmp_7 = _mm_set1_pd(na);
-    _mm_storeu_pd(&tmp_5[0], _mm_div_pd(_mm_loadu_pd(&mcu_U.Bus_Cmd_l.q_ext[0]),
-      tmp_7));
-    na = tmp_5[0];
-    rtb_q_des_idx_1 = tmp_5[1];
-    _mm_storeu_pd(&tmp_5[0], _mm_div_pd(_mm_loadu_pd(&mcu_U.Bus_Cmd_l.q_ext[2]),
-      tmp_7));
-    rtb_q_des_idx_2 = tmp_5[0];
-    rtb_q_des_idx_3 = tmp_5[1];
-    _mm_storeu_pd(&tmp_5[0], _mm_add_pd(_mm_add_pd(_mm_add_pd(_mm_mul_pd
-      (_mm_set1_pd(mcu_DW.q[0]), _mm_set_pd(tmp_5[0], rtb_q_des_idx_1)),
-      _mm_mul_pd(_mm_mul_pd(_mm_set_pd(-mcu_DW.q[1], na), _mm_set_pd(tmp_5[1],
-      -mcu_DW.q[1])), _mm_set_pd(-1.0, 1.0))), _mm_mul_pd(_mm_set_pd(na,
-      -mcu_DW.q[2]), _mm_set_pd(-mcu_DW.q[2], tmp_5[1]))), _mm_mul_pd(_mm_mul_pd
-      (_mm_set_pd(rtb_q_des_idx_1, tmp_5[0]), _mm_set1_pd(-mcu_DW.q[3])),
-      _mm_set_pd(1.0, -1.0))));
-    q_err_idx_1 = tmp_5[0];
-    q_err_idx_2 = tmp_5[1];
-    q_err_idx_3 = ((mcu_DW.q[0] * rtb_q_des_idx_3 + -mcu_DW.q[1] *
-                    rtb_q_des_idx_2) - rtb_q_des_idx_1 * -mcu_DW.q[2]) + na *
-      -mcu_DW.q[3];
+  nE = mcu_norm_j(mcu_U.Bus_Cmd_l.q_ext);
+  if (nE > 0.5) {
+    na = mcu_U.Bus_Cmd_l.q_ext[0] / nE;
+    rtb_q_des_idx_1 = mcu_U.Bus_Cmd_l.q_ext[1] / nE;
+    rtb_q_des_idx_2 = mcu_U.Bus_Cmd_l.q_ext[2] / nE;
+    nE = mcu_U.Bus_Cmd_l.q_ext[3] / nE;
+    q_err_idx_1 = ((mcu_DW.q[0] * rtb_q_des_idx_1 + na * -mcu_DW.q[1]) +
+                   -mcu_DW.q[2] * nE) - rtb_q_des_idx_2 * -mcu_DW.q[3];
+    q_err_idx_2 = ((mcu_DW.q[0] * rtb_q_des_idx_2 - -mcu_DW.q[1] * nE) + na *
+                   -mcu_DW.q[2]) + rtb_q_des_idx_1 * -mcu_DW.q[3];
+    q_err_idx_3 = ((mcu_DW.q[0] * nE + -mcu_DW.q[1] * rtb_q_des_idx_2) -
+                   rtb_q_des_idx_1 * -mcu_DW.q[2]) + na * -mcu_DW.q[3];
     if (((mcu_DW.q[0] * na - -mcu_DW.q[1] * rtb_q_des_idx_1) - -mcu_DW.q[2] *
-         rtb_q_des_idx_2) - -mcu_DW.q[3] * rtb_q_des_idx_3 < 0.0) {
-      q_err_idx_1 = -tmp_5[0];
-      q_err_idx_2 = -tmp_5[1];
+         rtb_q_des_idx_2) - -mcu_DW.q[3] * nE < 0.0) {
+      q_err_idx_1 = -q_err_idx_1;
+      q_err_idx_2 = -q_err_idx_2;
       q_err_idx_3 = -q_err_idx_3;
     }
 
@@ -349,55 +306,50 @@ void MCU::step()
   rtb_Add[2] = mcu_U.Bus_IMU_k.imu_gyro[2] - 0.17453292519943295;
   theta[2] = ((25.0 * rtb_tau_ref[2] + theta[2]) + (mcu_U.Bus_IMU_k.imu_gyro[2]
     - 0.17453292519943295)) * 0.001;
-  rtb_q_des_idx_3 = mcu_norm(theta);
-  if (rtb_q_des_idx_3 > 1.0E-9) {
-    na = rtb_q_des_idx_3 / 2.0;
+  nE = mcu_norm(theta);
+  if (nE > 1.0E-9) {
+    na = nE / 2.0;
     q_err_idx_1 = std::sin(na);
     na = std::cos(na);
-    tmp_7 = _mm_mul_pd(_mm_div_pd(_mm_loadu_pd(&theta[0]), _mm_set1_pd
-      (rtb_q_des_idx_3)), _mm_set1_pd(q_err_idx_1));
-    _mm_storeu_pd(&tmp_5[0], tmp_7);
-    rtb_q_des_idx_1 = tmp_5[0];
-    rtb_q_des_idx_2 = tmp_5[1];
-    rtb_q_des_idx_3 = theta[2] / rtb_q_des_idx_3 * q_err_idx_1;
+    rtb_q_des_idx_1 = theta[0] / nE * q_err_idx_1;
+    rtb_q_des_idx_2 = theta[1] / nE * q_err_idx_1;
+    nE = theta[2] / nE * q_err_idx_1;
   } else {
     na = 1.0;
-    tmp_7 = _mm_mul_pd(_mm_set1_pd(0.5), _mm_loadu_pd(&theta[0]));
-    _mm_storeu_pd(&tmp_5[0], tmp_7);
-    rtb_q_des_idx_1 = tmp_5[0];
-    rtb_q_des_idx_2 = tmp_5[1];
-    rtb_q_des_idx_3 = 0.5 * theta[2];
+    rtb_q_des_idx_1 = 0.5 * theta[0];
+    rtb_q_des_idx_2 = 0.5 * theta[1];
+    nE = 0.5 * theta[2];
   }
 
-  R_tmp = mcu_DW.q[0];
+  R_tmp_1 = mcu_DW.q[0];
   q_err_idx_1 = mcu_DW.q[1];
   q_err_idx_2 = mcu_DW.q[2];
   q_err_idx_3 = mcu_DW.q[3];
   rtb_q_ref_idx_3 = mcu_DW.q[0];
+  R_tmp_2 = mcu_DW.q[1];
+  R_tmp_3 = mcu_DW.q[2];
+  R_tmp_4 = mcu_DW.q[3];
+  R_tmp = mcu_DW.q[0];
   R_tmp_0 = mcu_DW.q[1];
-  R_tmp_1 = mcu_DW.q[2];
-  R_tmp_2 = mcu_DW.q[3];
-  Rdes_tmp = mcu_DW.q[0];
-  Rdes_tmp_0 = mcu_DW.q[1];
-  Rdes_tmp_1 = mcu_DW.q[2];
-  Rdes_tmp_2 = mcu_DW.q[3];
+  R_tmp_5 = mcu_DW.q[2];
+  R_tmp_6 = mcu_DW.q[3];
   tmp = mcu_DW.q[0];
   tmp_0 = mcu_DW.q[1];
   tmp_1 = mcu_DW.q[2];
   tmp_2 = mcu_DW.q[3];
-  mcu_DW.q[0] = ((R_tmp * na - q_err_idx_1 * rtb_q_des_idx_1) - q_err_idx_2 *
-                 rtb_q_des_idx_2) - q_err_idx_3 * rtb_q_des_idx_3;
-  mcu_DW.q[1] = ((rtb_q_ref_idx_3 * rtb_q_des_idx_1 + na * R_tmp_0) + R_tmp_1 *
-                 rtb_q_des_idx_3) - rtb_q_des_idx_2 * R_tmp_2;
-  mcu_DW.q[2] = ((Rdes_tmp * rtb_q_des_idx_2 - Rdes_tmp_0 * rtb_q_des_idx_3) +
-                 na * Rdes_tmp_1) + rtb_q_des_idx_1 * Rdes_tmp_2;
-  mcu_DW.q[3] = ((tmp * rtb_q_des_idx_3 + tmp_0 * rtb_q_des_idx_2) -
-                 rtb_q_des_idx_1 * tmp_1) + na * tmp_2;
-  tmp_7 = _mm_set1_pd(mcu_norm_j(mcu_DW.q));
-  tmp_8 = _mm_div_pd(_mm_loadu_pd(&mcu_DW.q[0]), tmp_7);
-  _mm_storeu_pd(&mcu_DW.q[0], tmp_8);
-  tmp_7 = _mm_div_pd(_mm_loadu_pd(&mcu_DW.q[2]), tmp_7);
-  _mm_storeu_pd(&mcu_DW.q[2], tmp_7);
+  mcu_DW.q[0] = ((R_tmp_1 * na - q_err_idx_1 * rtb_q_des_idx_1) - q_err_idx_2 *
+                 rtb_q_des_idx_2) - q_err_idx_3 * nE;
+  mcu_DW.q[1] = ((rtb_q_ref_idx_3 * rtb_q_des_idx_1 + na * R_tmp_2) + R_tmp_3 *
+                 nE) - rtb_q_des_idx_2 * R_tmp_4;
+  mcu_DW.q[2] = ((R_tmp * rtb_q_des_idx_2 - R_tmp_0 * nE) + na * R_tmp_5) +
+    rtb_q_des_idx_1 * R_tmp_6;
+  mcu_DW.q[3] = ((tmp * nE + tmp_0 * rtb_q_des_idx_2) - rtb_q_des_idx_1 * tmp_1)
+    + na * tmp_2;
+  R_tmp_1 = mcu_norm_j(mcu_DW.q);
+  mcu_DW.q[0] /= R_tmp_1;
+  mcu_DW.q[1] /= R_tmp_1;
+  mcu_DW.q[2] /= R_tmp_1;
+  mcu_DW.q[3] /= R_tmp_1;
 
   // RateTransition: '<Root>/Rate Transition'
   over_inst = ((&mcu_M)->Timing.TaskCounters.TID[1] == 0);
@@ -420,7 +372,7 @@ void MCU::step()
     q_err_idx_2 = 0.0;
     rtb_q_des_idx_2 = 0.0;
     q_err_idx_3 = 0.0;
-    rtb_q_des_idx_3 = 0.0;
+    nE = 0.0;
     rtb_q_ref_idx_3 = 0.0;
     theta[0] = 0.0;
     rtb_tau_ref[0] = 0.0;
@@ -439,7 +391,7 @@ void MCU::step()
     q_err_idx_2 = mcu_U.Bus_Cmd_l.q_ref[1];
     rtb_q_des_idx_2 = mcu_U.Bus_Cmd_l.q_des[2];
     q_err_idx_3 = mcu_U.Bus_Cmd_l.q_ref[2];
-    rtb_q_des_idx_3 = mcu_U.Bus_Cmd_l.q_des[3];
+    nE = mcu_U.Bus_Cmd_l.q_des[3];
     rtb_q_ref_idx_3 = mcu_U.Bus_Cmd_l.q_ref[3];
     theta[0] = mcu_U.Bus_Cmd_l.Omega_ref[0];
     rtb_tau_ref[0] = mcu_U.Bus_Cmd_l.tau_ref[0];
@@ -456,208 +408,165 @@ void MCU::step()
   //   Constant: '<S4>/Constant1'
   //   MATLAB Function: '<S3>/MATLAB Function'
 
-  R_tmp = mcu_DW.q[0] * mcu_DW.q[0];
-  R_tmp_0 = mcu_DW.q[1] * mcu_DW.q[1];
-  R_tmp_1 = mcu_DW.q[2] * mcu_DW.q[2];
-  R_tmp_2 = mcu_DW.q[3] * mcu_DW.q[3];
-  R[0] = ((R_tmp + R_tmp_0) - R_tmp_1) - R_tmp_2;
-  tmp_7 = _mm_set1_pd(mcu_DW.q[0]);
-  tmp_8 = _mm_set1_pd(2.0);
-  tmp_6 = _mm_mul_pd(_mm_add_pd(_mm_mul_pd(_mm_set1_pd(mcu_DW.q[1]),
-    _mm_loadu_pd(&mcu_DW.q[2])), _mm_mul_pd(_mm_mul_pd(tmp_7, _mm_set_pd
-    (mcu_DW.q[2], mcu_DW.q[3])), _mm_set_pd(-1.0, 1.0))), tmp_8);
-  _mm_storeu_pd(&R[1], tmp_6);
-  R[3] = (mcu_DW.q[1] * mcu_DW.q[2] - mcu_DW.q[0] * mcu_DW.q[3]) * 2.0;
-  R_tmp -= R_tmp_0;
-  R[4] = (R_tmp + R_tmp_1) - R_tmp_2;
-  tmp_7 = _mm_mul_pd(_mm_add_pd(_mm_mul_pd(_mm_set_pd(mcu_DW.q[1], mcu_DW.q[2]),
-    _mm_set1_pd(mcu_DW.q[3])), _mm_mul_pd(tmp_7, _mm_loadu_pd(&mcu_DW.q[1]))),
-                     tmp_8);
-  _mm_storeu_pd(&R[5], tmp_7);
-  R[7] = (mcu_DW.q[2] * mcu_DW.q[3] - mcu_DW.q[0] * mcu_DW.q[1]) * 2.0;
-  R[8] = (R_tmp - R_tmp_1) + R_tmp_2;
-  R_tmp = na * na;
-  R_tmp_0 = rtb_q_des_idx_1 * rtb_q_des_idx_1;
-  R_tmp_1 = rtb_q_des_idx_2 * rtb_q_des_idx_2;
-  R_tmp_2 = rtb_q_des_idx_3 * rtb_q_des_idx_3;
-  Rdes[0] = ((R_tmp + R_tmp_0) - R_tmp_1) - R_tmp_2;
-  Rdes_tmp = rtb_q_des_idx_1 * rtb_q_des_idx_2;
-  Rdes_tmp_0 = na * rtb_q_des_idx_3;
-  Rdes[1] = (Rdes_tmp + Rdes_tmp_0) * 2.0;
-  Rdes_tmp_1 = rtb_q_des_idx_1 * rtb_q_des_idx_3;
-  Rdes_tmp_2 = na * rtb_q_des_idx_2;
-  Rdes[2] = (Rdes_tmp_1 - Rdes_tmp_2) * 2.0;
-  Rdes[3] = (Rdes_tmp - Rdes_tmp_0) * 2.0;
-  R_tmp -= R_tmp_0;
-  Rdes[4] = (R_tmp + R_tmp_1) - R_tmp_2;
-  R_tmp_0 = rtb_q_des_idx_2 * rtb_q_des_idx_3;
-  Rdes_tmp = na * rtb_q_des_idx_1;
-  Rdes[5] = (R_tmp_0 + Rdes_tmp) * 2.0;
-  Rdes[6] = (Rdes_tmp_1 + Rdes_tmp_2) * 2.0;
-  Rdes[7] = (R_tmp_0 - Rdes_tmp) * 2.0;
-  Rdes[8] = (R_tmp - R_tmp_1) + R_tmp_2;
+  R_tmp_1 = mcu_DW.q[0] * mcu_DW.q[0];
+  R_tmp_2 = mcu_DW.q[1] * mcu_DW.q[1];
+  R_tmp_3 = mcu_DW.q[2] * mcu_DW.q[2];
+  R_tmp_4 = mcu_DW.q[3] * mcu_DW.q[3];
+  R[0] = ((R_tmp_1 + R_tmp_2) - R_tmp_3) - R_tmp_4;
+  R_tmp = mcu_DW.q[1] * mcu_DW.q[2];
+  R_tmp_0 = mcu_DW.q[0] * mcu_DW.q[3];
+  R[1] = (R_tmp + R_tmp_0) * 2.0;
+  R_tmp_5 = mcu_DW.q[1] * mcu_DW.q[3];
+  R_tmp_6 = mcu_DW.q[0] * mcu_DW.q[2];
+  R[2] = (R_tmp_5 - R_tmp_6) * 2.0;
+  R[3] = (R_tmp - R_tmp_0) * 2.0;
+  R_tmp_1 -= R_tmp_2;
+  R[4] = (R_tmp_1 + R_tmp_3) - R_tmp_4;
+  R_tmp_2 = mcu_DW.q[2] * mcu_DW.q[3];
+  R_tmp = mcu_DW.q[0] * mcu_DW.q[1];
+  R[5] = (R_tmp_2 + R_tmp) * 2.0;
+  R[6] = (R_tmp_5 + R_tmp_6) * 2.0;
+  R[7] = (R_tmp_2 - R_tmp) * 2.0;
+  R[8] = (R_tmp_1 - R_tmp_3) + R_tmp_4;
+  R_tmp_1 = na * na;
+  R_tmp_2 = rtb_q_des_idx_1 * rtb_q_des_idx_1;
+  R_tmp_3 = rtb_q_des_idx_2 * rtb_q_des_idx_2;
+  R_tmp_4 = nE * nE;
+  Rdes[0] = ((R_tmp_1 + R_tmp_2) - R_tmp_3) - R_tmp_4;
+  R_tmp = rtb_q_des_idx_1 * rtb_q_des_idx_2;
+  R_tmp_0 = na * nE;
+  Rdes[1] = (R_tmp + R_tmp_0) * 2.0;
+  R_tmp_5 = rtb_q_des_idx_1 * nE;
+  R_tmp_6 = na * rtb_q_des_idx_2;
+  Rdes[2] = (R_tmp_5 - R_tmp_6) * 2.0;
+  Rdes[3] = (R_tmp - R_tmp_0) * 2.0;
+  R_tmp_1 -= R_tmp_2;
+  Rdes[4] = (R_tmp_1 + R_tmp_3) - R_tmp_4;
+  R_tmp_2 = rtb_q_des_idx_2 * nE;
+  R_tmp = na * rtb_q_des_idx_1;
+  Rdes[5] = (R_tmp_2 + R_tmp) * 2.0;
+  Rdes[6] = (R_tmp_5 + R_tmp_6) * 2.0;
+  Rdes[7] = (R_tmp_2 - R_tmp) * 2.0;
+  Rdes[8] = (R_tmp_1 - R_tmp_3) + R_tmp_4;
   for (idx = 0; idx < 3; idx++) {
-    for (i = 0; i < 3; i++) {
-      S_tmp_tmp = 3 * idx + i;
-      S_tmp[S_tmp_tmp] = R[3 * i + idx];
-      Rdes_0[S_tmp_tmp] = (Rdes[3 * i + 1] * R[3 * idx + 1] + Rdes[3 * i] * R[3 *
-                           idx]) + Rdes[3 * i + 2] * R[3 * idx + 2];
+    for (rtb_q_des_idx_0_tmp = 0; rtb_q_des_idx_0_tmp < 3; rtb_q_des_idx_0_tmp++)
+    {
+      S_tmp_tmp = 3 * idx + rtb_q_des_idx_0_tmp;
+      S_tmp[S_tmp_tmp] = R[3 * rtb_q_des_idx_0_tmp + idx];
+      Rdes_0[S_tmp_tmp] = (Rdes[3 * rtb_q_des_idx_0_tmp + 1] * R[3 * idx + 1] +
+                           Rdes[3 * rtb_q_des_idx_0_tmp] * R[3 * idx]) + Rdes[3 *
+        rtb_q_des_idx_0_tmp + 2] * R[3 * idx + 2];
       S_tmp_0[S_tmp_tmp] = 0.0;
     }
   }
 
   for (idx = 0; idx < 3; idx++) {
-    rtb_q_des_idx_3 = S_tmp_0[3 * idx];
+    nE = S_tmp_0[3 * idx];
     S_tmp_tmp = 3 * idx + 1;
-    R_tmp_0 = S_tmp_0[S_tmp_tmp];
+    R_tmp_2 = S_tmp_0[S_tmp_tmp];
     S_tmp_tmp_0 = 3 * idx + 2;
-    R_tmp_1 = S_tmp_0[S_tmp_tmp_0];
-    for (i = 0; i < 3; i++) {
-      R_tmp = Rdes[3 * idx + i];
-      tmp_7 = _mm_add_pd(_mm_mul_pd(_mm_loadu_pd(&S_tmp[3 * i]), _mm_set1_pd
-        (R_tmp)), _mm_set_pd(R_tmp_0, rtb_q_des_idx_3));
-      _mm_storeu_pd(&tmp_5[0], tmp_7);
-      rtb_q_des_idx_3 = tmp_5[0];
-      R_tmp_0 = tmp_5[1];
-      R_tmp_1 += S_tmp[3 * i + 2] * R_tmp;
+    R_tmp_3 = S_tmp_0[S_tmp_tmp_0];
+    for (rtb_q_des_idx_0_tmp = 0; rtb_q_des_idx_0_tmp < 3; rtb_q_des_idx_0_tmp++)
+    {
+      R_tmp_1 = Rdes[3 * idx + rtb_q_des_idx_0_tmp];
+      nE += S_tmp[3 * rtb_q_des_idx_0_tmp] * R_tmp_1;
+      R_tmp_2 += S_tmp[3 * rtb_q_des_idx_0_tmp + 1] * R_tmp_1;
+      R_tmp_3 += S_tmp[3 * rtb_q_des_idx_0_tmp + 2] * R_tmp_1;
     }
 
-    S_tmp_0[S_tmp_tmp_0] = R_tmp_1;
-    S_tmp_0[S_tmp_tmp] = R_tmp_0;
-    S_tmp_0[3 * idx] = rtb_q_des_idx_3;
+    S_tmp_0[S_tmp_tmp_0] = R_tmp_3;
+    S_tmp_0[S_tmp_tmp] = R_tmp_2;
+    S_tmp_0[3 * idx] = nE;
   }
 
-  for (idx = 0; idx <= 6; idx += 2) {
-    tmp_7 = _mm_loadu_pd(&Rdes_0[idx]);
-    tmp_8 = _mm_loadu_pd(&S_tmp_0[idx]);
-    _mm_storeu_pd(&R[idx], _mm_mul_pd(_mm_sub_pd(tmp_7, tmp_8), _mm_set1_pd(0.5)));
-  }
-
-  for (idx = 8; idx < 9; idx++) {
+  for (idx = 0; idx < 9; idx++) {
     R[idx] = (Rdes_0[idx] - S_tmp_0[idx]) * 0.5;
   }
 
   na = R[5];
   rtb_q_des_idx_1 = R[6];
   rtb_q_des_idx_2 = R[1];
-  rtb_q_des_idx_3 = q_err_idx_1 * q_err_idx_1;
-  R_tmp = q_err_idx_2 * q_err_idx_2;
-  R_tmp_0 = q_err_idx_3 * q_err_idx_3;
-  R_tmp_1 = rtb_q_ref_idx_3 * rtb_q_ref_idx_3;
-  Rdes_0[0] = ((rtb_q_des_idx_3 + R_tmp) - R_tmp_0) - R_tmp_1;
-  R_tmp_2 = q_err_idx_2 * q_err_idx_3;
-  Rdes_tmp = q_err_idx_1 * rtb_q_ref_idx_3;
-  Rdes_0[1] = (R_tmp_2 + Rdes_tmp) * 2.0;
-  Rdes_tmp_0 = q_err_idx_2 * rtb_q_ref_idx_3;
-  Rdes_tmp_1 = q_err_idx_1 * q_err_idx_3;
-  Rdes_0[2] = (Rdes_tmp_0 - Rdes_tmp_1) * 2.0;
-  Rdes_0[3] = (R_tmp_2 - Rdes_tmp) * 2.0;
-  rtb_q_des_idx_3 -= R_tmp;
-  Rdes_0[4] = (rtb_q_des_idx_3 + R_tmp_0) - R_tmp_1;
-  R_tmp = q_err_idx_3 * rtb_q_ref_idx_3;
-  R_tmp_2 = q_err_idx_1 * q_err_idx_2;
-  Rdes_0[5] = (R_tmp + R_tmp_2) * 2.0;
-  Rdes_0[6] = (Rdes_tmp_0 + Rdes_tmp_1) * 2.0;
-  Rdes_0[7] = (R_tmp - R_tmp_2) * 2.0;
-  Rdes_0[8] = (rtb_q_des_idx_3 - R_tmp_0) + R_tmp_1;
+  nE = q_err_idx_1 * q_err_idx_1;
+  R_tmp_1 = q_err_idx_2 * q_err_idx_2;
+  R_tmp_2 = q_err_idx_3 * q_err_idx_3;
+  R_tmp_3 = rtb_q_ref_idx_3 * rtb_q_ref_idx_3;
+  Rdes_0[0] = ((nE + R_tmp_1) - R_tmp_2) - R_tmp_3;
+  R_tmp_4 = q_err_idx_2 * q_err_idx_3;
+  R_tmp = q_err_idx_1 * rtb_q_ref_idx_3;
+  Rdes_0[1] = (R_tmp_4 + R_tmp) * 2.0;
+  R_tmp_0 = q_err_idx_2 * rtb_q_ref_idx_3;
+  R_tmp_5 = q_err_idx_1 * q_err_idx_3;
+  Rdes_0[2] = (R_tmp_0 - R_tmp_5) * 2.0;
+  Rdes_0[3] = (R_tmp_4 - R_tmp) * 2.0;
+  nE -= R_tmp_1;
+  Rdes_0[4] = (nE + R_tmp_2) - R_tmp_3;
+  R_tmp_1 = q_err_idx_3 * rtb_q_ref_idx_3;
+  R_tmp_4 = q_err_idx_1 * q_err_idx_2;
+  Rdes_0[5] = (R_tmp_1 + R_tmp_4) * 2.0;
+  Rdes_0[6] = (R_tmp_0 + R_tmp_5) * 2.0;
+  Rdes_0[7] = (R_tmp_1 - R_tmp_4) * 2.0;
+  Rdes_0[8] = (nE - R_tmp_2) + R_tmp_3;
   for (idx = 0; idx < 3; idx++) {
-    rtb_q_des_idx_3 = 0.0;
-    R_tmp_0 = 0.0;
-    R_tmp_1 = 0.0;
-    for (i = 0; i < 3; i++) {
-      R_tmp = Rdes_0[3 * idx + i];
-      tmp_7 = _mm_add_pd(_mm_mul_pd(_mm_loadu_pd(&S_tmp[3 * i]), _mm_set1_pd
-        (R_tmp)), _mm_set_pd(R_tmp_0, rtb_q_des_idx_3));
-      _mm_storeu_pd(&tmp_5[0], tmp_7);
-      rtb_q_des_idx_3 = tmp_5[0];
-      R_tmp_0 = tmp_5[1];
-      R_tmp_1 += S_tmp[3 * i + 2] * R_tmp;
+    nE = 0.0;
+    R_tmp_2 = 0.0;
+    R_tmp_3 = 0.0;
+    for (rtb_q_des_idx_0_tmp = 0; rtb_q_des_idx_0_tmp < 3; rtb_q_des_idx_0_tmp++)
+    {
+      R_tmp_1 = Rdes_0[3 * idx + rtb_q_des_idx_0_tmp];
+      nE += S_tmp[3 * rtb_q_des_idx_0_tmp] * R_tmp_1;
+      R_tmp_2 += S_tmp[3 * rtb_q_des_idx_0_tmp + 1] * R_tmp_1;
+      R_tmp_3 += S_tmp[3 * rtb_q_des_idx_0_tmp + 2] * R_tmp_1;
     }
 
-    S_tmp_0[3 * idx + 2] = R_tmp_1;
-    S_tmp_0[3 * idx + 1] = R_tmp_0;
-    S_tmp_0[3 * idx] = rtb_q_des_idx_3;
+    S_tmp_0[3 * idx + 2] = R_tmp_3;
+    S_tmp_0[3 * idx + 1] = R_tmp_2;
+    S_tmp_0[3 * idx] = nE;
   }
 
-  rtb_q_des_idx_3 = theta[1];
-  q_err_idx_1 = theta[0];
-  q_err_idx_2 = theta[2];
-  for (idx = 0; idx <= 0; idx += 2) {
-    tmp_7 = _mm_loadu_pd(&S_tmp_0[idx + 3]);
-    tmp_8 = _mm_loadu_pd(&S_tmp_0[idx]);
-    tmp_6 = _mm_loadu_pd(&S_tmp_0[idx + 6]);
-    tmp_4 = _mm_loadu_pd(&rtb_Add[idx]);
-    _mm_storeu_pd(&theta[idx], _mm_sub_pd(tmp_4, _mm_add_pd(_mm_add_pd
-      (_mm_mul_pd(tmp_7, _mm_set1_pd(rtb_q_des_idx_3)), _mm_mul_pd(tmp_8,
-      _mm_set1_pd(q_err_idx_1))), _mm_mul_pd(tmp_6, _mm_set1_pd(q_err_idx_2)))));
-    tmp_7 = _mm_loadu_pd(&rtb_tau_ref[idx]);
-    _mm_storeu_pd(&rtb_tau_ref_0[idx], _mm_sub_pd(tmp_7, _mm_add_pd(_mm_add_pd
-      (_mm_mul_pd(_mm_loadu_pd(&mcu_ConstP.Constant_Value_m[idx + 3]),
-                  _mm_set1_pd(rtb_q_des_idx_1)), _mm_mul_pd(_mm_loadu_pd
-      (&mcu_ConstP.Constant_Value_m[idx]), _mm_set1_pd(na))), _mm_mul_pd
-      (_mm_loadu_pd(&mcu_ConstP.Constant_Value_m[idx + 6]), _mm_set1_pd
-       (rtb_q_des_idx_2)))));
-    _mm_storeu_pd(&tmp_3[idx], _mm_set1_pd(0.0));
-  }
-
-  for (idx = 2; idx < 3; idx++) {
-    _mm_storeu_pd(&tmp_5[0], _mm_sub_pd(_mm_set_pd(rtb_tau_ref[idx], rtb_Add[idx]),
-      _mm_add_pd(_mm_add_pd(_mm_mul_pd(_mm_set_pd
-      (mcu_ConstP.Constant_Value_m[idx + 3], S_tmp_0[idx + 3]), _mm_set_pd
-      (rtb_q_des_idx_1, rtb_q_des_idx_3)), _mm_mul_pd(_mm_set_pd
-      (mcu_ConstP.Constant_Value_m[idx], S_tmp_0[idx]), _mm_set_pd(na,
-      q_err_idx_1))), _mm_mul_pd(_mm_set_pd(mcu_ConstP.Constant_Value_m[idx + 6],
-      S_tmp_0[idx + 6]), _mm_set_pd(rtb_q_des_idx_2, q_err_idx_2)))));
-    theta[idx] = tmp_5[0];
-    rtb_tau_ref_0[idx] = tmp_5[1];
-  }
-
-  R_tmp = 0.0;
+  nE = theta[1];
+  rtb_q_ref_idx_3 = theta[0];
+  R_tmp_2 = theta[2];
+  R_tmp_1 = 0.0;
   q_err_idx_1 = 0.0;
   q_err_idx_2 = 0.0;
   for (idx = 0; idx < 3; idx++) {
-    _mm_storeu_pd(&tmp_5[0], _mm_add_pd(_mm_mul_pd(_mm_loadu_pd
-      (&mcu_ConstP.Constant1_Value_o[3 * idx]), _mm_set1_pd(theta[idx])),
-      _mm_set_pd(q_err_idx_1, R_tmp)));
-    R_tmp = tmp_5[0];
-    q_err_idx_1 = tmp_5[1];
-    q_err_idx_2 += mcu_ConstP.Constant1_Value_o[3 * idx + 2] * theta[idx];
+    theta[idx] = rtb_Add[idx] - ((S_tmp_0[idx + 3] * nE + S_tmp_0[idx] *
+      rtb_q_ref_idx_3) + S_tmp_0[idx + 6] * R_tmp_2);
+    rtb_tau_ref_0[idx] = rtb_tau_ref[idx] - ((mcu_ConstP.Constant_Value_m[idx +
+      3] * rtb_q_des_idx_1 + mcu_ConstP.Constant_Value_m[idx] * na) +
+      mcu_ConstP.Constant_Value_m[idx + 6] * rtb_q_des_idx_2);
+    q_err_idx_3 = theta[idx];
+    R_tmp_1 += mcu_ConstP.Constant1_Value_o[3 * idx] * q_err_idx_3;
+    q_err_idx_1 += mcu_ConstP.Constant1_Value_o[3 * idx + 1] * q_err_idx_3;
+    q_err_idx_2 += mcu_ConstP.Constant1_Value_o[3 * idx + 2] * q_err_idx_3;
   }
-
-  tmp_3[2] = q_err_idx_2;
-  tmp_3[1] = q_err_idx_1;
-  tmp_3[0] = R_tmp;
-  tmp_7 = _mm_sub_pd(_mm_loadu_pd(&rtb_tau_ref_0[0]), _mm_loadu_pd(&tmp_3[0]));
 
   // SignalConversion generated from: '<Root>/Gain' incorporates:
   //   MATLAB Function: '<S4>/MATLAB Function'
 
-  _mm_storeu_pd(&rtb_F_cmd_0[1], tmp_7);
+  rtb_F_cmd_0[1] = rtb_tau_ref_0[0] - R_tmp_1;
+  rtb_F_cmd_0[2] = rtb_tau_ref_0[1] - q_err_idx_1;
   rtb_F_cmd_0[3] = rtb_tau_ref_0[2] - q_err_idx_2;
 
   // Gain: '<Root>/Gain'
   na = 0.0;
   rtb_q_des_idx_1 = 0.0;
   rtb_q_des_idx_2 = 0.0;
-  rtb_q_des_idx_3 = 0.0;
+  nE = 0.0;
   for (idx = 0; idx < 4; idx++) {
-    i = idx << 2;
-    tmp_7 = _mm_set1_pd(rtb_F_cmd_0[idx]);
-    _mm_storeu_pd(&tmp_5[0], _mm_add_pd(_mm_mul_pd(_mm_loadu_pd
-      (&mcu_ConstP.Gain_Gain[i]), tmp_7), _mm_set_pd(rtb_q_des_idx_1, na)));
-    na = tmp_5[0];
-    rtb_q_des_idx_1 = tmp_5[1];
-    _mm_storeu_pd(&tmp_5[0], _mm_add_pd(_mm_mul_pd(_mm_loadu_pd
-      (&mcu_ConstP.Gain_Gain[i + 2]), tmp_7), _mm_set_pd(rtb_q_des_idx_3,
-      rtb_q_des_idx_2)));
-    rtb_q_des_idx_2 = tmp_5[0];
-    rtb_q_des_idx_3 = tmp_5[1];
+    R_tmp_1 = rtb_F_cmd_0[idx];
+    rtb_q_des_idx_0_tmp = idx << 2;
+    na += mcu_ConstP.Gain_Gain[rtb_q_des_idx_0_tmp] * R_tmp_1;
+    rtb_q_des_idx_1 += mcu_ConstP.Gain_Gain[rtb_q_des_idx_0_tmp + 1] * R_tmp_1;
+    rtb_q_des_idx_2 += mcu_ConstP.Gain_Gain[rtb_q_des_idx_0_tmp + 2] * R_tmp_1;
+    nE += mcu_ConstP.Gain_Gain[rtb_q_des_idx_0_tmp + 3] * R_tmp_1;
   }
 
   // End of Gain: '<Root>/Gain'
 
   // Switch: '<Root>/Switch' incorporates:
   //   MATLAB Function: '<Root>/MATLAB Function'
+  //   Switch: '<Root>/Switch1'
 
   if (mcu_DW.latched) {
     // Outport: '<Root>/rotor_cmd' incorporates:
@@ -667,6 +576,14 @@ void MCU::step()
     mcu_Y.rotor_cmd[1] = 0.0;
     mcu_Y.rotor_cmd[2] = 0.0;
     mcu_Y.rotor_cmd[3] = 0.0;
+
+    // Outport: '<Root>/throttle' incorporates:
+    //   Constant: '<Root>/Constant4'
+
+    mcu_Y.throttle[0] = 0.0;
+    mcu_Y.throttle[1] = 0.0;
+    mcu_Y.throttle[2] = 0.0;
+    mcu_Y.throttle[3] = 0.0;
   } else {
     // Outport: '<Root>/rotor_cmd' incorporates:
     //   Abs: '<Root>/Abs'
@@ -675,85 +592,83 @@ void MCU::step()
     mcu_Y.rotor_cmd[0] = std::sqrt(std::abs(na));
     mcu_Y.rotor_cmd[1] = std::sqrt(std::abs(rtb_q_des_idx_1));
     mcu_Y.rotor_cmd[2] = std::sqrt(std::abs(rtb_q_des_idx_2));
-    mcu_Y.rotor_cmd[3] = std::sqrt(std::abs(rtb_q_des_idx_3));
+    mcu_Y.rotor_cmd[3] = std::sqrt(std::abs(nE));
+
+    // Polyval: '<Root>/Polynomial'
+    q_err_idx_1 = -2.9813898214245487E-13;
+    q_err_idx_2 = -2.9813898214245487E-13;
+    q_err_idx_3 = -2.9813898214245487E-13;
+    rtb_q_ref_idx_3 = -2.9813898214245487E-13;
+    for (idx = 0; idx < 2; idx++) {
+      R_tmp_1 = mcu_ConstP.Polynomial_Coefs[idx + 1];
+      q_err_idx_1 = q_err_idx_1 * na + R_tmp_1;
+      q_err_idx_2 = q_err_idx_2 * rtb_q_des_idx_1 + R_tmp_1;
+      q_err_idx_3 = q_err_idx_3 * rtb_q_des_idx_2 + R_tmp_1;
+      rtb_q_ref_idx_3 = rtb_q_ref_idx_3 * nE + R_tmp_1;
+    }
+
+    // End of Polyval: '<Root>/Polynomial'
+
+    // Saturate: '<Root>/Saturation'
+    if (q_err_idx_1 > 100.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[0] = 100.0;
+    } else if (q_err_idx_1 < 0.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[0] = 0.0;
+    } else {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[0] = q_err_idx_1;
+    }
+
+    if (q_err_idx_2 > 100.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[1] = 100.0;
+    } else if (q_err_idx_2 < 0.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[1] = 0.0;
+    } else {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[1] = q_err_idx_2;
+    }
+
+    if (q_err_idx_3 > 100.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[2] = 100.0;
+    } else if (q_err_idx_3 < 0.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[2] = 0.0;
+    } else {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[2] = q_err_idx_3;
+    }
+
+    if (rtb_q_ref_idx_3 > 100.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[3] = 100.0;
+    } else if (rtb_q_ref_idx_3 < 0.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[3] = 0.0;
+    } else {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[3] = rtb_q_ref_idx_3;
+    }
+
+    // End of Saturate: '<Root>/Saturation'
   }
 
   // End of Switch: '<Root>/Switch'
-
-  // Polyval: '<Root>/Polynomial'
-  q_err_idx_1 = -2.9813898214245487E-13;
-  q_err_idx_2 = -2.9813898214245487E-13;
-  q_err_idx_3 = -2.9813898214245487E-13;
-  rtb_q_ref_idx_3 = -2.9813898214245487E-13;
-  for (idx = 0; idx < 2; idx++) {
-    R_tmp = mcu_ConstP.Polynomial_Coefs[idx + 1];
-    q_err_idx_1 = q_err_idx_1 * na + R_tmp;
-    q_err_idx_2 = q_err_idx_2 * rtb_q_des_idx_1 + R_tmp;
-    q_err_idx_3 = q_err_idx_3 * rtb_q_des_idx_2 + R_tmp;
-    rtb_q_ref_idx_3 = rtb_q_ref_idx_3 * rtb_q_des_idx_3 + R_tmp;
-  }
-
-  // End of Polyval: '<Root>/Polynomial'
-
-  // Saturate: '<Root>/Saturation'
-  if (q_err_idx_1 > 100.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[0] = 100.0;
-  } else if (q_err_idx_1 < 0.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[0] = 0.0;
-  } else {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[0] = q_err_idx_1;
-  }
-
-  if (q_err_idx_2 > 100.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[1] = 100.0;
-  } else if (q_err_idx_2 < 0.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[1] = 0.0;
-  } else {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[1] = q_err_idx_2;
-  }
-
-  if (q_err_idx_3 > 100.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[2] = 100.0;
-  } else if (q_err_idx_3 < 0.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[2] = 0.0;
-  } else {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[2] = q_err_idx_3;
-  }
-
-  if (rtb_q_ref_idx_3 > 100.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[3] = 100.0;
-  } else if (rtb_q_ref_idx_3 < 0.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[3] = 0.0;
-  } else {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[3] = rtb_q_ref_idx_3;
-  }
-
-  // End of Saturate: '<Root>/Saturation'
   if (over_inst) {
-    // MATLAB Function: '<Root>/volts to 12-bit counts' incorporates:
+    // MATLAB Function: '<Root>/MATLAB Function1' incorporates:
     //   Inport: '<Root>/batt_count'
 
-    na = rt_roundd(mcu_U.batt_count / 0.014652161172161169);
-
-    // MATLAB Function: '<Root>/MATLAB Function1'
     if (!mcu_DW.Vf_not_empty) {
-      mcu_DW.Vf = 0.014652161172161169 * na;
+      mcu_DW.Vf = 0.016673728813559323 * mcu_U.batt_count;
       mcu_DW.Vf_not_empty = true;
     }
 
-    mcu_DW.Vf += (0.014652161172161169 * na - mcu_DW.Vf) * 0.76034896355822423;
+    mcu_DW.Vf += (0.016673728813559323 * mcu_U.batt_count - mcu_DW.Vf) *
+      0.76034896355822423;
     switch (mcu_DW.state) {
      case 0U:
       if (mcu_DW.Vf <= 14.0) {

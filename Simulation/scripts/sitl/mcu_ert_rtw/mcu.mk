@@ -2,7 +2,7 @@
 ## Makefile generated for component 'mcu'. 
 ## 
 ## Makefile     : mcu.mk
-## Generated on : Tue Jul 07 15:42:17 2026
+## Generated on : Mon Jul 13 12:02:42 2026
 ## Final product: $(RELATIVE_PATH_TO_ANCHOR)/mcu.exe
 ## Product type : executable
 ## 
@@ -225,19 +225,17 @@ SYSTEM_LIBS =
 # C Compiler
 #---------------
 
-CFLAGS_TFL = -msse2 -fno-predictive-commoning
 CFLAGS_BASIC = $(DEFINES) $(INCLUDES) @$(COMPILER_COMMAND_FILE)
 
-CFLAGS += $(CFLAGS_TFL) $(CFLAGS_BASIC)
+CFLAGS += $(CFLAGS_BASIC)
 
 #-----------------
 # C++ Compiler
 #-----------------
 
-CPPFLAGS_TFL = -msse2 -fno-predictive-commoning
 CPPFLAGS_BASIC = $(DEFINES) $(INCLUDES) @$(COMPILER_COMMAND_FILE)
 
-CPPFLAGS += $(CPPFLAGS_TFL) $(CPPFLAGS_BASIC)
+CPPFLAGS += $(CPPFLAGS_BASIC)
 
 #---------------------
 # MEX C++ Compiler

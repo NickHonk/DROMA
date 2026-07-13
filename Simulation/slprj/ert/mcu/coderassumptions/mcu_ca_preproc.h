@@ -5,7 +5,7 @@
  *
  * Hardware Implementation Specification:
  *
- * HWDeviceType: Intel->x86-64 (Windows64)
+ * HWDeviceType: ARM Compatible->ARM Cortex-M
  * PortableWordSizes: off
  * PreprocMaxBitsUint: 32
  * PreprocMaxBitsSint: 32
@@ -13,7 +13,7 @@
  * BitPerShort: 16
  * BitPerInt: 32
  * BitPerLong: 32
- * LongLongMode: off
+ * LongLongMode: on
  * BitPerLongLong: 64
  */
 
@@ -48,4 +48,6 @@ match your compiler (defined in limits.h).
 Consider adjusting Hardware Implementation data type sizes to \
 match your compiler (defined in limits.h).
 #endif
+
+/* Skipping ulong_long/long_long check: insufficient preprocessor integer range. */
 #endif                                 /* MCU_CA_PREPROC_H */

@@ -5,23 +5,23 @@ function [led, batt_land, V_filt] = safety_battery(batt_count, safety)
 % Kette: ADC-count --> V_batt --> V_filt --> led
 %        V_filt <= V_floor --(Latch bis Reboot) --> batt_land
 %
-%   WARN/CRIT -> LED. Bediener im Raum sieht sie, loest MANUELL GCS-Soft-Land
+%   WARN/CRIT -> LED. Bediener im Raum sieht LED, loest manuell softe Landung
 %               (estop=1 => Uplink) aus, solange Marge da ist.
-%   FLOOR     -> batt_land = true -> onboard BLINDER Hard-Floor-Descent 
+%   FLOOR     -> batt_land = true -> onboard blinde Landung 
 %               (safety_landcmd.m) als Backstop, falls niemand reagiert.
-% KILL (Overspeed/Hard-Kill) dominiert: rotors_cmd=0 nachgelagert sticht jeden LAND.
+% KILL (Overspeed/Hard-Kill) dominiert: rotors_cmd=0 nachgelagert gewinnt immer
 %
 % LATCH IST PERMANENT —> KEIN Re-Arm. Zwei Gruende:
 %   1) Akkuwechsel = Teensy-Reboot -> persistent wird genullt.
 %   2) WICHTIGER: Im Descent faellt der Schub auf 0.98*m*g -> weniger Strom ->
-%      V erholt sich UEBER den Floor. Ohne Latch wuerde batt_land deasserten,
+%      V erholt sich UEBER den Floor. Ohne Latch wuerde batt_land wieder auf null gesetzt,
 %      das GCS-Kommando (Hover @ m*g) kaeme zurueck, Last steigt, V sackt wieder
 %      -> GRENZZYKLUS Sinken<->Schweben auf fast leerem Akku. Der Latch verhindert
 %      das: einmal committed -> bis zum Boden sinken.
 %
 % Eingaenge:
 %   batt_count : ADC-Rohwert (12 bit, 0..4095). In Sim aus simulierter V-Rampe
-%                (count = round((V_batt - b)/k)); auf HW analogRead(A16/Pin40).
+%                (count = round((V_batt - b)/k)); auf HW analogRead(A17/Pin41).
 %   safety     : struct  .batt_k .batt_b .batt_alpha .V_warn .V_crit .V_floor
 %                        .V_hyst
 % Ausgaenge:

@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.257
+// Model version                  : 1.268
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Fri Jul 10 10:49:04 2026
+// C/C++ source code generated on : Mon Jul 13 12:31:53 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -19,7 +19,6 @@
 #include "mcu.h"
 #include "rtwtypes.h"
 #include <cmath>
-#include "mcu_private.h"
 
 static void rate_scheduler(MCU::RT_MODEL_mcu_T *const mcu_M);
 
@@ -128,24 +127,6 @@ real_T MCU::mcu_norm_j(const real_T x[4])
   }
 
   return scale * std::sqrt(y);
-}
-
-real_T rt_roundd(real_T u)
-{
-  real_T y;
-  if (std::abs(u) < 4.503599627370496E+15) {
-    if (u >= 0.5) {
-      y = std::floor(u + 0.5);
-    } else if (u > -0.5) {
-      y = 0.0;
-    } else {
-      y = std::ceil(u - 0.5);
-    }
-  } else {
-    y = u;
-  }
-
-  return y;
 }
 
 // Model step function
@@ -585,6 +566,7 @@ void MCU::step()
 
   // Switch: '<Root>/Switch' incorporates:
   //   MATLAB Function: '<Root>/MATLAB Function'
+  //   Switch: '<Root>/Switch1'
 
   if (mcu_DW.latched) {
     // Outport: '<Root>/rotor_cmd' incorporates:
@@ -594,6 +576,14 @@ void MCU::step()
     mcu_Y.rotor_cmd[1] = 0.0;
     mcu_Y.rotor_cmd[2] = 0.0;
     mcu_Y.rotor_cmd[3] = 0.0;
+
+    // Outport: '<Root>/throttle' incorporates:
+    //   Constant: '<Root>/Constant4'
+
+    mcu_Y.throttle[0] = 0.0;
+    mcu_Y.throttle[1] = 0.0;
+    mcu_Y.throttle[2] = 0.0;
+    mcu_Y.throttle[3] = 0.0;
   } else {
     // Outport: '<Root>/rotor_cmd' incorporates:
     //   Abs: '<Root>/Abs'
@@ -603,84 +593,82 @@ void MCU::step()
     mcu_Y.rotor_cmd[1] = std::sqrt(std::abs(rtb_q_des_idx_1));
     mcu_Y.rotor_cmd[2] = std::sqrt(std::abs(rtb_q_des_idx_2));
     mcu_Y.rotor_cmd[3] = std::sqrt(std::abs(nE));
+
+    // Polyval: '<Root>/Polynomial'
+    q_err_idx_1 = -2.9813898214245487E-13;
+    q_err_idx_2 = -2.9813898214245487E-13;
+    q_err_idx_3 = -2.9813898214245487E-13;
+    rtb_q_ref_idx_3 = -2.9813898214245487E-13;
+    for (idx = 0; idx < 2; idx++) {
+      R_tmp_1 = mcu_ConstP.Polynomial_Coefs[idx + 1];
+      q_err_idx_1 = q_err_idx_1 * na + R_tmp_1;
+      q_err_idx_2 = q_err_idx_2 * rtb_q_des_idx_1 + R_tmp_1;
+      q_err_idx_3 = q_err_idx_3 * rtb_q_des_idx_2 + R_tmp_1;
+      rtb_q_ref_idx_3 = rtb_q_ref_idx_3 * nE + R_tmp_1;
+    }
+
+    // End of Polyval: '<Root>/Polynomial'
+
+    // Saturate: '<Root>/Saturation'
+    if (q_err_idx_1 > 100.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[0] = 100.0;
+    } else if (q_err_idx_1 < 0.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[0] = 0.0;
+    } else {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[0] = q_err_idx_1;
+    }
+
+    if (q_err_idx_2 > 100.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[1] = 100.0;
+    } else if (q_err_idx_2 < 0.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[1] = 0.0;
+    } else {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[1] = q_err_idx_2;
+    }
+
+    if (q_err_idx_3 > 100.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[2] = 100.0;
+    } else if (q_err_idx_3 < 0.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[2] = 0.0;
+    } else {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[2] = q_err_idx_3;
+    }
+
+    if (rtb_q_ref_idx_3 > 100.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[3] = 100.0;
+    } else if (rtb_q_ref_idx_3 < 0.0) {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[3] = 0.0;
+    } else {
+      // Outport: '<Root>/throttle'
+      mcu_Y.throttle[3] = rtb_q_ref_idx_3;
+    }
+
+    // End of Saturate: '<Root>/Saturation'
   }
 
   // End of Switch: '<Root>/Switch'
-
-  // Polyval: '<Root>/Polynomial'
-  q_err_idx_1 = -2.9813898214245487E-13;
-  q_err_idx_2 = -2.9813898214245487E-13;
-  q_err_idx_3 = -2.9813898214245487E-13;
-  rtb_q_ref_idx_3 = -2.9813898214245487E-13;
-  for (idx = 0; idx < 2; idx++) {
-    R_tmp_1 = mcu_ConstP.Polynomial_Coefs[idx + 1];
-    q_err_idx_1 = q_err_idx_1 * na + R_tmp_1;
-    q_err_idx_2 = q_err_idx_2 * rtb_q_des_idx_1 + R_tmp_1;
-    q_err_idx_3 = q_err_idx_3 * rtb_q_des_idx_2 + R_tmp_1;
-    rtb_q_ref_idx_3 = rtb_q_ref_idx_3 * nE + R_tmp_1;
-  }
-
-  // End of Polyval: '<Root>/Polynomial'
-
-  // Saturate: '<Root>/Saturation'
-  if (q_err_idx_1 > 100.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[0] = 100.0;
-  } else if (q_err_idx_1 < 0.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[0] = 0.0;
-  } else {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[0] = q_err_idx_1;
-  }
-
-  if (q_err_idx_2 > 100.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[1] = 100.0;
-  } else if (q_err_idx_2 < 0.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[1] = 0.0;
-  } else {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[1] = q_err_idx_2;
-  }
-
-  if (q_err_idx_3 > 100.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[2] = 100.0;
-  } else if (q_err_idx_3 < 0.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[2] = 0.0;
-  } else {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[2] = q_err_idx_3;
-  }
-
-  if (rtb_q_ref_idx_3 > 100.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[3] = 100.0;
-  } else if (rtb_q_ref_idx_3 < 0.0) {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[3] = 0.0;
-  } else {
-    // Outport: '<Root>/throttle'
-    mcu_Y.throttle[3] = rtb_q_ref_idx_3;
-  }
-
-  // End of Saturate: '<Root>/Saturation'
   if (over_inst) {
-    // MATLAB Function: '<Root>/volts to 12-bit counts' incorporates:
+    // MATLAB Function: '<Root>/MATLAB Function1' incorporates:
     //   Inport: '<Root>/batt_count'
 
-    na = rt_roundd(mcu_U.batt_count / 0.014652161172161169);
-
-    // MATLAB Function: '<Root>/MATLAB Function1'
     if (!mcu_DW.Vf_not_empty) {
-      mcu_DW.Vf = 0.014652161172161169 * na;
+      mcu_DW.Vf = 0.016673728813559323 * mcu_U.batt_count;
       mcu_DW.Vf_not_empty = true;
     }
 
-    mcu_DW.Vf += (0.014652161172161169 * na - mcu_DW.Vf) * 0.76034896355822423;
+    mcu_DW.Vf += (0.016673728813559323 * mcu_U.batt_count - mcu_DW.Vf) *
+      0.76034896355822423;
     switch (mcu_DW.state) {
      case 0U:
       if (mcu_DW.Vf <= 14.0) {

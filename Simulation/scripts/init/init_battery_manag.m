@@ -13,14 +13,16 @@ arguments (Output)
 end
 
 % --- ADC / HW (PM06 V2, Teensy) ---
-safety.batt_pin = 41; % Pin 41 = A17 SPANNUNG (Handover-Lock; 40/A16 = Strom-Telemetrie).
+safety.batt_pin = 40; % Pin 40 = A16 Spannung (41/A17 = Strom).
                       % Nur Doku — im Codegen ungenutzt (Modell liest batt_count als Inport).
 safety.adc_bits = 12; % analogReadResolution(12)
 
-% V_batt = k*count + b (Spannungsteiler 18.182 von PM06 V2, Vref 3.3, 12 bit):
-% k = 3.3*18.182/4095 ≈ 0.0146521 V/count,  b = 0.
-% k,b aus realer HW-Messung NOCH OFFEN -> hier Idealwerte als Platzhalter.
-safety.batt_k = 3.3*18.182/4095; % Steigung
+% V_batt = k*count + b.  k,b aus realer HW-Messung (Teensy Pin 40, 12 bit):
+%   Messpunkt: batt_count = 944 <-> V_akku = 15.74 V (Multimeter am XT60).
+%   k = 15.74/944 = 0.0166737 V/count,  b = 0 (rein ohmscher Teiler).
+% Effektiver Teiler = k*4095/3.3 = 20.69:1 (Datenblatt-18.182 war zu optimistisch;
+% deckt sich mit der ~21:1-Messung: 0.75 V @ 15.75 V).
+safety.batt_k = 15.74/944; % Steigung = 0.0166737 V/count (HW-kalibriert)
 safety.batt_b = 0.0; % offset
  
 % --- Tiefpass ---
@@ -38,6 +40,7 @@ safety.hardfloor_thrust_frac = 0.99; % F_des = 0.98*m*g (ueberlebbare Sinkrate).
 safety.m = quadcop.m;
 safety.g = quadcop.g;
  
-% Quervalidierung Bereich: V_pin(4S) = 0.726..0.924 V -> count 901..1147
-% (~22..28 % des 12-bit-Bereichs). Keine Ueberspannung am Pin (<3.3 V).
+% Quervalidierung (k=0.0166737): V_akku 12.0..16.8 V -> V_pin 0.580..0.812 V
+% -> count 720..1008 (~18..25 % des 12-bit-Bereichs). Schwellen in counts:
+% V_warn 14.0->840, V_crit 13.4->804, V_floor 12.0->720. Keine Ueberspannung (<3.3 V).
 end

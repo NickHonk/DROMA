@@ -7,12 +7,12 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.252
+// Model version                  : 1.268
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Fri Jul 10 09:49:45 2026
+// C/C++ source code generated on : Mon Jul 13 12:30:04 2026
 //
 // Target selection: ert.tlc
-// Embedded hardware selection: Intel->x86-64 (Windows64)
+// Embedded hardware selection: ARM Compatible->ARM Cortex-M
 // Code generation objectives: Unspecified
 // Validation result: Not run
 //
@@ -52,6 +52,11 @@ class MCU final
 
   // Constant parameters (default storage)
   struct ConstP_mcu_T {
+    // Expression: quadcop.p_from_omega_sq
+    //  Referenced by: '<Root>/Polynomial'
+
+    real_T Polynomial_Coefs[3];
+
     // Expression: controller.kR
     //  Referenced by: '<S4>/Constant'
 
@@ -66,11 +71,6 @@ class MCU final
     //  Referenced by: '<Root>/Gain'
 
     real_T Gain_Gain[16];
-
-    // Expression: quadcop.p_from_omega_sq
-    //  Referenced by: '<Root>/Polynomial'
-
-    real_T Polynomial_Coefs[3];
   };
 
   // External inputs (root inport signals with default storage)
@@ -176,12 +176,6 @@ extern const MCU::ConstB_mcu_T mcu_ConstB;// constant block i/o
 extern const MCU::ConstP_mcu_T mcu_ConstP;
 
 //-
-//  These blocks were eliminated from the model due to optimizations:
-//
-//  Block '<Root>/Scope' : Unused code path elimination
-
-
-//-
 //  The generated code includes comments that allow you to trace directly
 //  back to the appropriate location in the model.  The basic format
 //  is <system>/block_name, where system is the system number (uniquely
@@ -201,9 +195,8 @@ extern const MCU::ConstP_mcu_T mcu_ConstP;
 //  '<S3>'   : 'mcu/Mahony filter'
 //  '<S4>'   : 'mcu/geometrical attitude controller'
 //  '<S5>'   : 'mcu/handing the hard descent in case of low battery'
-//  '<S6>'   : 'mcu/volts to 12-bit counts'
-//  '<S7>'   : 'mcu/Mahony filter/MATLAB Function'
-//  '<S8>'   : 'mcu/geometrical attitude controller/MATLAB Function'
+//  '<S6>'   : 'mcu/Mahony filter/MATLAB Function'
+//  '<S7>'   : 'mcu/geometrical attitude controller/MATLAB Function'
 
 #endif                                 // mcu_h_
 

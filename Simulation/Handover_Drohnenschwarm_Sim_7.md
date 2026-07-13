@@ -73,10 +73,10 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
   ihn physikalisch → Sim=HW automatisch. Acc **hebelarm-roh** durch die HAL.
   (Falls je aggressiver geflogen wird: Option 2 = Zentripetal-Kompensation
   `f−ω×(ω×r)` aus `imu_gyro` **innerhalb `mcu.slx`**, dann Re-Cert.)
-- **Batterie:** `batt_count = (double)analogRead(41)` (A17=SPANNUNG), **12 bit**,
-  **rohe counts** (Volt-Umrechnung macht Modell-Subsystem S6). Strom (Pin40/A16)
-  = nur Telemetrie, **nicht** ins Modell. Umrouting 34/35→40/41 war nötig (34/35
-  haben keinen ADC).
+- **Batterie:** `batt_count = (double)analogRead(40)` (A16=SPANNUNG, Wiring-Ist),
+  **12 bit**, **rohe counts** → Modell rechnet `Vf = k·batt_count`, `k=0.0166737`
+  (HW-kal.). Strom (Pin41/A17) = nur Telemetrie, **nicht** ins Modell. Umrouting
+  34/35→40/41 war nötig (34/35 haben keinen ADC).
 - **ESC = OneShot125.** `analogWriteFrequency(pin,1000)` + `analogWriteResolution(12)`
   → count 512..1024 = 125..250 µs. Mapping **`count = 512 + throttle*5.12`**
   (`throttle` bereits [0,100] geclampt). Pins/Richtung: **M1=33 CCW, M2=2 CW,
@@ -239,8 +239,8 @@ nicht `led`). Die „25/50/75 %-Pins"-Suche war gegenstandslos.
 - **ESC:** **keine** Boot-Kalibrierung (kein throttle-max-Sweep → sicher mit Props);
   nur Arming (min-Halten `ARM_MS`). ESCs extern vorkalibriert, Endpunkte 512/1024.
 - **RF24:** `begin(&SPI1)` (Fallback `SPI1.setMOSI/MISO/SCK` als Kommentar).
-- **Batt-Pin:** 41 = Spannung (A17) → `batt_count`, 40 = Strom (Telemetrie).
-  `init_battery_manag.batt_pin` 40→41 korrigiert (war stale, im Codegen ungenutzt).
+- **Batt-Pin:** **40 = Spannung (A16, Wiring-Ist)** → `batt_count`, 41 = Strom
+  (Telemetrie). `init_battery_manag.batt_pin=40` (Doku, im Codegen ungenutzt).
 - **Timing-Budget:** `micros()` um den Tick, max-Dauer + Overruns, ~1×/s per
   `Serial [tick]`-Report (statt Platzhalter — im Betrieb ablesen).
 - **API-Reconcile:** `mcu_packet.hpp` um `id_matches(buf,id)` + `unpack(buf,cmd)`
@@ -267,22 +267,40 @@ nicht `led`). Die „25/50/75 %-Pins"-Suche war gegenstandslos.
   (Bias/Scale) bei Bedarf separat.
 - **Batt (noch nicht prüfbar):** `batt=0(0.00V)` — nur USB, kein Flug-Akku am PM06.
   Erst mit angestecktem 4S-Akku verifizierbar.
-- **⚠️⚠️ FAILSAFE-BUG (vor bestromtem Flug fixen!):** `estop==2` **setzt** `latched`
-  (mcu.cpp Z. 226), und `latched → rotor_cmd=0` (Z. 662). ABER der in §3b neue
-  `throttle`-Outport (`clamp(polyval(P, omega_sq))`, Z. 683–741) ist **NICHT** vom
-  `latched`-Gate erfasst. Da der **HAL die ESCs aus `throttle`** treibt (nicht
-  `rotor_cmd`), **stoppt der Failsafe die Motoren NICHT** (throttle bleibt 0–16 %,
-  reagiert auf Lage). Bench-verifiziert.
-  **Fix:** in `mcu.slx` `throttle` durch das `latched`-Gate → `throttle = latched ?
-  0 : clamp(polyval(...))` (Switch am Ausgang, auf **0** schalten — NICHT Polynom
-  mit 0 speisen, `polyval(P,0)=8.4 %`). Danach §3b-Re-Zert (Golden neu, Gate A+B;
-  test_mcu_model muss dann throttle==0 bei latched prüfen).
-- **Accel-Nutzung:** `imu_acc` speist die **Onboard-Attitude-Schätzung** (Mahony-
-  artig, `mcu_DW.q`, fusioniert mit `q_ext`/Mocap); der Regler nutzt `q`, nicht
-  rohen Accel. → Schiefmontage wirkt über die Schätzung, aber gedämpft durch
-  `q_ext`. Fix ist eine **Alignment-Rotation** (oder physisch level montieren),
-  KEINE Standard-6-Lagen-Accel-Kalib (die korrigiert Sensor-Bias/Scale, nicht
-  Montage). Der ~5 %-Betragsfehler ist separat (Scale, minor).
+- **✅ FAILSAFE-BUG GEFIXT (§3b-Re-Zert #2):** Der in §3b neue `throttle`-Outport
+  war NICHT vom `latched`-Gate erfasst → da der HAL die ESCs aus `throttle` treibt,
+  stoppte der Failsafe die Motoren nicht (Bench: `thr[2 16 …]` bei estop=2). **Fix
+  (Nutzer):** in `mcu.slx` `throttle` durch das `latched`-Gate → generierter Code
+  Z. 663 `if (latched) throttle[0..3]=0`. Regeneriert (Host + ARM), Golden neu,
+  **Gate B 28/28** inkl. neuem `McuFailsafe.Estop2KillsThrottleAndRotor`
+  (estop=2 → throttle==0 UND rotor_cmd==0). **Offen:** Drohne neu flashen →
+  Bench-Gegentest `thr[0 0 0 0]`; Gate A (SIL) interaktiv.
+- **✅ Accel: nichts zu tun.** `imu_acc` speist die Onboard-Attitude-Schätzung
+  (Mahony `mcu_DW.q`, fusioniert mit `q_ext`/Mocap). Gains `ka=1.0`, `kE=25.0` →
+  Mocap 26:1 dominant → ~6°-Schiefmontage ergibt nur **~0.23°** stationären Bias
+  (`≈6°·ka/(ka+kE)`). Zudem wird der Accel **normiert** → der ~5 %-Betragsfehler
+  kürzt sich raus (nur Richtung zählt). **`ka=1.0` lassen** (einzige Drift-
+  Absicherung bei `Kᵢ=0`), **kein `R_align`, keine Kalib.**
+- **✅ Batt: kalibriert + Modell-Semantik gefixt (Session 8).**
+  1. *Verdrahtung:* Spannung lag versehentlich an **Pin 40** (nicht 41). HAL auf
+     `PIN_BATT_V=40` gestellt (Pin 41 = Strom/Telemetrie). Danach `batt_count≈944`.
+  2. *Scale:* realer Teiler **~20.7:1**, NICHT 18.182 (Datenblatt zu optimistisch).
+     Messpunkt `batt_count=944 ↔ 15.74 V` → **`safety.batt_k = 15.74/944 = 0.0166737`
+     V/count**, `b=0`. In `init_battery_manag.m` gesetzt + HW-kommentiert.
+  3. *⚠️ Semantik-Bruch (gefunden + behoben):* mcu-Inport `batt_count` wurde im
+     Modell als **Volt** behandelt — der Block **„volts to 12-bit counts"**
+     (`na=round(V/k)`, ein ADC-Quantisierer) saß fälschlich *im* mcu-Subsystem
+     (=Firmware). Auf HW (rohe counts rein) ergab das `Vf=k·round(944/k)=944` →
+     Warn-FSM (14/13.4/12 V) blind, **Batterieschutz tot**. **Fix (Option A):**
+     Quantisierer aus `mcu.slx` gelöscht, Inport direkt auf „MATLAB Function1"
+     (macht `Vf=k·na`) → jetzt `Vf=k·batt_count=15.74 V`. Plant `main.slx`
+     Gain „batt_voltage" auf **944** (counts) gesetzt. Host+ARM neu generiert
+     (`Vf = 0.0166737 * batt_count`, Quantisierer weg), **Gate B 28/28** grün.
+     HAL sendet weiter rohe `analogRead`-counts (passt zum Inport), Telemetrie-
+     Print auf neues k. Offen: Selbsttest reflashen → Report muss **15.74 V** zeigen.
+- **log_mcu_golden robust:** kommentiert die GS-`Serial`-Blöcke (die der Nutzer für
+  §3d in `main` einbaute) für die headless-Sim in-memory aus (Disk unberührt),
+  sonst „Serial Configuration: No ports selected".
 
 **Firmware-Build-Hinweis:** `drone_hal.cpp` braucht auf dem Include-Pfad die
 ARM-`mcu.h` (`hardware\mcu_arm\mcu_ert_rtw\`) **und** die SSOT `mcu_packet.hpp`

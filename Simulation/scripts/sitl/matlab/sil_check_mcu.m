@@ -11,11 +11,25 @@
 %  ert_cpp_sitl-ConfigSet ist aktiv (configure_mcu_codegen). SIL baut den Code
 %  bei Bedarf selbst.
 function sil_check_mcu(harness, mcuBlock)
-if nargin < 1, harness  = 'main'; end
-if nargin < 2, mcuBlock = 'main/running on the quadrocopter MCU'; end
+if nargin < 1 
+    harness  = 'main'; 
+end
+if nargin < 2 
+    mcuBlock = 'main/running on the quadrocopter MCU'; 
+end
 load_system(harness);
 Ts_inner = evalin('base','Ts_inner');
 T_STOP   = 5.0;
+
+% GS-Serial-Bloecke (Design A) fuer die Sim auskommentieren (oeffnen sonst einen
+% COM-Port -> "No ports selected"). GS-Ausgang, MCU-Grenze unberuehrt. onCleanup
+% stellt sie wieder her (Modell wird nicht gespeichert).
+serialBlks = find_system(harness,'LookUnderMasks','on','FollowLinks','on', ...
+                         'RegExp','on','Name','[Ss]erial');
+serialPrev = get_param(serialBlks,'Commented');
+for b = 1:numel(serialBlks), set_param(serialBlks{b},'Commented','on'); end
+serialCleanup = onCleanup(@() cellfun(@(bl,st) set_param(bl,'Commented',st), ...
+                                      serialBlks, serialPrev, 'UniformOutput', false)); %#ok<NASGU>
 
 % rotor_cmd-Linie (erster Outport des MCU-Blocks) loggen.
 ph = get_param(mcuBlock,'PortHandles');

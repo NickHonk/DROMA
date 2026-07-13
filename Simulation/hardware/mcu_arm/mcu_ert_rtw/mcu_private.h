@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.257
+// Model version                  : 1.268
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Fri Jul 10 10:49:04 2026
+// C/C++ source code generated on : Mon Jul 13 12:31:53 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -20,9 +20,6 @@
 #define mcu_private_h_
 #include "rtwtypes.h"
 #include "mcu_types.h"
-
-extern real_T rt_roundd(real_T u);
-
 #endif                                 // mcu_private_h_
 
 //

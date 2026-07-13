@@ -32,6 +32,19 @@ assert(evalin('base','exist(''Ts_inner'',''var'')'), ...
        'Ts_inner fehlt im Base-Workspace (params.m via PreLoadFcn?).');
 Ts_inner = evalin('base','Ts_inner');
 
+%% --- GS-Serial-Bloecke (Design A) fuer die headless Golden-Sim auskommentieren --
+%  'Serial Configuration'/'Serial Send' oeffnen beim Sim-Start einen COM-Port ->
+%  Fehler "No ports selected" headless. Sie sind GS-Ausgang und beeinflussen die
+%  MCU-Grenze NICHT. In-memory auskommentieren, nach der Sim wiederherstellen
+%  (Modell wird NICHT gespeichert -> deine GS-Seite bleibt auf Disk unangetastet).
+serialBlks = find_system(TOP_MODEL,'LookUnderMasks','on','FollowLinks','on', ...
+                         'RegExp','on','Name','[Ss]erial');
+serialPrev = get_param(serialBlks,'Commented');
+for b = 1:numel(serialBlks), set_param(serialBlks{b},'Commented','on'); end
+if ~isempty(serialBlks)
+    fprintf('log_mcu_golden: %d Serial-Block(e) fuer die Sim auskommentiert.\n', numel(serialBlks));
+end
+
 %% --- 1) Line-Logging an der MCU-Grenze aktivieren ---------------------------
 ph  = get_param(MCU_BLOCK,'PortHandles');
 assert(numel(ph.Inport)  == numel(IN_NAMES), ...
@@ -52,6 +65,9 @@ set_param(cs,'SignalLogging','on','SignalLoggingName','logsout');
 simOut = sim(TOP_MODEL, 'StopTime', num2str(T_STOP), ...
                         'SaveOutput','on','ReturnWorkspaceOutputs','on');
 logs = simOut.get('logsout');
+
+% Serial-Bloecke wiederherstellen (in-memory; Disk war nie betroffen).
+for b = 1:numel(serialBlks), set_param(serialBlks{b},'Commented',serialPrev{b}); end
 
 %% --- 3) Basisraster + Spalten sammeln --------------------------------------
 t = (0:Ts_inner:T_STOP).';

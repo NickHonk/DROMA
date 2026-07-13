@@ -10,8 +10,8 @@
 //        Achsdrehung Body<-Sensor R_bs: [x_b;y_b;z_b] = [ y_s; -x_s; z_s ].
 //        Gyro-Bias: 3 s Startup-Mittelung (Drohne still) -> abziehen.
 //        Acc: hebelarm-ROH durchreichen (Kompensation sitzt bewusst NICHT hier).
-//   - Batterie: analogRead(41)=SPANNUNG (A17), 12 bit, ROHE counts -> batt_count
-//        (Volt-Umrechnung macht das Modell, S6). Strom (Pin40/A16) = nur Telemetrie.
+//   - Batterie: analogRead(40)=SPANNUNG (A16, Wiring-Ist), 12 bit, ROHE counts ->
+//        batt_count (Volt-Umrechnung im Modell, S6). Strom (Pin41/A17) = nur Telemetrie.
 //   - ESC: OneShot125 via analogWriteFrequency(1000)+analogWriteResolution(12):
 //        count = 512 + throttle*5.12  ->  125..250 us  (throttle bereits [0,100]).
 //        Boot: NUR Arming (min-Halten), KEINE Kalibrierung. ESCs extern
@@ -46,8 +46,8 @@
 static constexpr uint8_t PIN_PWM[4] = {33, 2, 4, 3};   // M1 CCW, M2 CW, M3 CCW, M4 CW
 static constexpr uint8_t PIN_LED       = 5;            // WARN-LED  (state>=1, gelb)
 static constexpr uint8_t PIN_STAT_100  = 10;           // CRIT-LED  (state==2, rot)
-static constexpr uint8_t PIN_BATT_V    = 41;           // A17 SPANNUNG
-static constexpr uint8_t PIN_BATT_I    = 40;           // A16 STROM (Telemetrie)
+static constexpr uint8_t PIN_BATT_V    = 40;           // A16: SPANNUNG (Wiring-Ist, war urspr. 41)
+static constexpr uint8_t PIN_BATT_I    = 41;           // A17: STROM (Telemetrie)
 static constexpr uint8_t PIN_BCD[4]    = {17, 16, 39, 38}; // BCD 1/2/4/8, INPUT_PULLUP, active-low
 static constexpr uint8_t PIN_NRF_CE    = 14;
 static constexpr uint8_t PIN_NRF_CSN   = 0;
@@ -173,7 +173,7 @@ static void on_tick() { g_tick = true; }  // ISR: nur Flag; I2C/SPI im loop()
 static void selftest_report(const MCU::ExtY_mcu_T& y) {
     static uint32_t n = 0;
     if (++n < 100) return; n = 0;
-    double V = g_U.batt_count * 0.014652161172161169;        // Volt wie Modell-S6
+    double V = g_U.batt_count * 0.016673728813559323;        // Volt wie Modell (k HW-kal. 15.74/944)
     Serial.printf("id=%u gyro[% .3f % .3f % .3f] acc[% .2f % .2f % .2f] "
                   "batt=%.0f(%.2fV) bias[% .3f % .3f % .3f] link=%lums estop=%u "
                   "thr[%.0f %.0f %.0f %.0f] tickmax=%luus\n",

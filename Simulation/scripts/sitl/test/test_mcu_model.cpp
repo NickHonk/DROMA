@@ -99,3 +99,25 @@ TEST(McuGolden, DeterministicAcrossFreshInstances) {
         for (int i = 0; i < 9; ++i)
             EXPECT_DOUBLE_EQ(a[r][i], b[r][i]) << "divergenz Zeile " << r << " ch " << i;
 }
+
+// Failsafe: estop==2 -> latched -> BEIDE Aktuator-Ausgaenge auf 0.
+// Regression fuer den §3b-Bug: der throttle-Outport war NICHT vom latched-Gate
+// erfasst -> der HAL (esc_write_all(throttle)) haette die Motoren bei Link-Verlust
+// NICHT gestoppt. Braucht kein Golden (konstruiert die Eingaenge selbst).
+TEST(McuFailsafe, Estop2KillsThrottleAndRotor) {
+    MCU obj; obj.initialize();
+    MCU::ExtU_mcu_T u{};
+    u.Bus_IMU_k.imu_acc[2] = 9.81;                 // Schwerkraft -> Estimator laeuft
+    u.Bus_Cmd_l.F_des = 9.4666;                     // ~Hover (F_des>0 -> ohne Kill waere throttle>0)
+    u.Bus_Cmd_l.q_des[0] = 1.0;
+    u.Bus_Cmd_l.q_ref[0] = 1.0;
+    u.Bus_Cmd_l.q_ext[0] = 1.0;
+    u.Bus_Cmd_l.estop = 2;                          // Hard-Kill (setzt latched, mcu.cpp Z.226)
+    u.batt_count = 1000.0;
+    for (int k = 0; k < 20; ++k) { obj.setExternalInputs(&u); obj.step(); }
+    const auto& y = obj.getExternalOutputs();
+    for (int i = 0; i < 4; ++i) {
+        EXPECT_EQ(0.0, y.throttle[i])  << "throttle["  << i << "] nicht gekillt bei estop=2";
+        EXPECT_EQ(0.0, y.rotor_cmd[i]) << "rotor_cmd[" << i << "] nicht gekillt bei estop=2";
+    }
+}
