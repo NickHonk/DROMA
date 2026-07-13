@@ -122,6 +122,13 @@ target_compile_definitions(test_link_codec PRIVATE GOLDEN_DIR="${GOLDEN_DIR}")
 target_link_libraries(test_link_codec PRIVATE GTest::gtest_main)
 gtest_discover_tests(test_link_codec)
 
+# --- GS-Frame-Cross-Check: MATLAB pack_gcs_frame == C++ gcs::parse (gcs_frame.hpp)
+add_executable(test_gcs_frame test/test_gcs_frame.cpp)
+target_include_directories(test_gcs_frame PRIVATE include test)
+target_compile_definitions(test_gcs_frame PRIVATE GOLDEN_DIR="${GOLDEN_DIR}")
+target_link_libraries(test_gcs_frame PRIVATE GTest::gtest_main)
+gtest_discover_tests(test_gcs_frame)
+
 set(MODEL_ROOT "${CMAKE_SOURCE_DIR}/mcu_ert_rtw" CACHE PATH
     "slbuild/packNGo-Ausgabe von mcu (enthaelt mcu.cpp, mcu_data.cpp, mcu.h ...)")
 set(GOLDEN_MCU_CSV "${GOLDEN_DIR}/golden_mcu_io.csv" CACHE FILEPATH

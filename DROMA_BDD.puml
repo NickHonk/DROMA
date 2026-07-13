@@ -1,0 +1,96 @@
+@startuml DROMA_BDD
+' =====================================================================
+'  DROMA — SysML Block Definition Diagram (Kompositions-Hierarchie)
+'  Quelle: main.slx + plant/sensors/mcu/link/gcu.slx  (XML-Parsing)
+'  Zeigt: welcher Block AUS WELCHEN Teilen besteht (schwarze Raute = Komposition)
+' =====================================================================
+skinparam backgroundColor #FEFEFE
+skinparam shadowing false
+skinparam linetype ortho
+skinparam defaultFontName "Segoe UI"
+hide empty members
+hide circle
+skinparam class {
+  BackgroundColor<<Deployed Software>> #D4E6F1
+  BorderColor<<Deployed Software>>     #2E86C1
+  BackgroundColor<<SITL Environment>>  #D5F5E3
+  BorderColor<<SITL Environment>>      #27AE60
+  BackgroundColor<<Testbench>>         #FCF3CF
+  BorderColor<<Testbench>>             #B7950B
+  BackgroundColor<<part>>              #FBFCFC
+  BorderColor<<part>>                  #85929E
+  FontColor black
+}
+
+title <b>DROMA — SysML Block Definition Diagram (Kompositions-Hierarchie)</b>\n<size:10>Quelle: main.slx und referenzierte Modelle (XML-Parsing) — Raute = Komposition</size>
+
+' =====================  EBENE 0: Prüfstand  ==========================
+class "DROMA SITL-Prüfstand\n(main.slx)" as SYS <<Testbench>>
+
+' =====================  EBENE 1: Komponenten  ========================
+class "FlightController\n(mcu.slx -> C++)" as MCU <<Deployed Software>>
+class "GroundControl\n(gcu.slx)"          as GCU <<Deployed Software>>
+class "Plant\n(plant.slx)"                as PLANT <<SITL Environment>>
+class "SensorSuite\n(sensors.slx)"        as SENS <<SITL Environment>>
+class "CommLink\n(link.slx)"              as LINK <<SITL Environment>>
+
+SYS *-- MCU
+SYS *-- GCU
+SYS *-- PLANT
+SYS *-- SENS
+SYS *-- LINK
+
+' =====================  EBENE 2: FlightController  ===================
+class "Attitude-Estimator\n(Mahony-Filter)"            as F_EST  <<part>>
+class "Geometrischer\nAttitude-Controller"             as F_CTRL <<part>>
+class "Low-Battery-Failsafe\n(Hard-Descent, Stateflow)" as F_FS   <<part>>
+class "Batterie-Supervisor\n(V-Filter, LED, batt_land)" as F_BAT  <<part>>
+class "ADC\n(Volt -> 12-bit-Counts)"                   as F_ADC  <<part>>
+class "Arming / E-Stop-Gate"                           as F_ARM  <<part>>
+MCU *-- F_EST
+MCU *-- F_CTRL
+MCU *-- F_FS
+MCU *-- F_BAT
+MCU *-- F_ADC
+MCU *-- F_ARM
+note bottom of F_CTRL
+  Motor-Mapping omega^2 -> Throttle [%]
+  (Polynom + Saturation) => Ausgang "throttle"
+end note
+
+' =====================  EBENE 2: GroundControl  =====================
+class "Positionsregler"                as G_POS  <<part>>
+class "Landing-Supervisor\n(soft/hard, estop)" as G_LAND <<part>>
+class "Command-Generator\n(-> Bus_Cmd)" as G_CMD  <<part>>
+GCU *-- G_POS
+GCU *-- G_LAND
+GCU *-- G_CMD
+
+' =====================  EBENE 2: Plant  =============================
+class "Starrkörper-Dynamik\n(6-DOF)"        as P_RB   <<part>>
+class "Propeller-/Rotor-Modell\n(c_T, c_tau)" as P_PROP <<part>>
+PLANT *-- P_RB
+PLANT *-- P_PROP
+
+' =====================  EBENE 2: SensorSuite  =======================
+class "Accelerometer-Modell\n(3-axis)"   as S_ACC <<part>>
+class "Gyroskop-Modell\n(3-axis)"        as S_GYR <<part>>
+class "Mocap-Modell\n(Quaternion-Pose)"  as S_MOC <<part>>
+SENS *-- S_ACC
+SENS *-- S_GYR
+SENS *-- S_MOC
+
+' =====================  EBENE 2: CommLink  ==========================
+class "TX-Encoder\n(Packing, Quaternion 4B)" as L_TX <<part>>
+class "RX-Decoder\n(Unpacking)"              as L_RX <<part>>
+LINK *-- L_TX
+LINK *-- L_RX
+
+legend right
+  |= Farbe |= Stereotyp / Allokation |
+  |<#FCF3CF>   | <<Testbench>>  – SITL-Gesamtmodell (main.slx) |
+  |<#D4E6F1>   | <<Deployed Software>>  – generierter/Ziel-Code |
+  |<#D5F5E3>   | <<SITL Environment>>  – Host-PC-Simulation |
+  |<#FBFCFC>   | <<part>>  – interner Teilblock |
+endlegend
+@enduml

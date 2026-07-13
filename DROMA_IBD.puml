@@ -1,0 +1,67 @@
+@startuml DROMA_IBD
+' =====================================================================
+'  DROMA — SysML Internal Block Diagram (Signalfluss / Regelkreis)
+'  Quelle: main.slx <Line>-Verschaltung der 5 ModelReference-Blöcke
+'  logische Schnittstelle = blau gestrichelt (Datenbus)
+'  physikalische Schnittstelle = rot fett (PWM, Kraft, Messung)
+' =====================================================================
+skinparam backgroundColor #FEFEFE
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam defaultFontName "Segoe UI"
+skinparam component {
+  BackgroundColor<<Deployed Software>> #D4E6F1
+  BorderColor<<Deployed Software>>     #2E86C1
+  BackgroundColor<<SITL Environment>>  #D5F5E3
+  BorderColor<<SITL Environment>>      #27AE60
+  BackgroundColor<<HW>>                #FADBD8
+  BorderColor<<HW>>                    #C0392B
+  FontColor black
+}
+
+title <b>DROMA — SysML Internal Block Diagram (Signalfluss)</b>\n<size:10>innerer Loop auf der Drohne · äußerer Loop über die Bodenstation</size>
+
+package "SITL-Umgebung (Host-PC)" as ZSITL {
+  component "**Plant**\n<size:9>plant.slx — 6-DOF + Propeller</size>" as PLANT <<SITL Environment>>
+  component "**SensorSuite**\n<size:9>sensors.slx — IMU + Mocap</size>" as SENS <<SITL Environment>>
+  component "**CommLink**\n<size:9>link.slx — TX/RX-Codec</size>" as LINK <<SITL Environment>>
+}
+
+package "Drohne" as ZDRONE {
+  component "**FlightController**\n<size:9>mcu.slx -> C++</size>\n<size:8>Mahony | Attitude-Ctrl | Failsafe</size>\n<size:8>ADC | Batt-Supervisor | E-Stop-Gate</size>" as MCU <<Deployed Software>>
+  component "Akku\n<size:9>batt_count</size>" as BATT <<HW>>
+}
+
+package "Bodenstation" as ZGS {
+  component "**GroundControl**\n<size:9>gcu.slx — Positionsregler + Landing</size>" as GCU <<Deployed Software>>
+}
+
+' ================= PHYSIKALISCHE Schnittstellen (rot, fett) ==========
+MCU   -[#C0392B,bold]->  PLANT : «phys» rotor_cmd\n<size:9>Motorbefehl / Schub</size>
+PLANT -[#C0392B,bold]->  SENS  : «phys» Bewegung\n<size:9>Bus_State, accel_body, dw/dt, R</size>
+
+' ================= LOGISCHE Schnittstellen (blau, gestrichelt) =======
+SENS  -[#1F77B4,dashed]->  MCU  : «log» Bus_IMU
+LINK  -[#1F77B4,dashed]->  MCU  : «log» Bus_Cmd\n<size:9>Sollwerte (q_ref, Omega_ref, ...)</size>
+GCU   -[#1F77B4,dashed]->  LINK : «log» Bus_Cmd
+SENS  -[#1F77B4,dashed]->  GCU  : «log» Bus_Mocap
+PLANT -[#1F77B4,dashed]->  GCU  : «log» Bus_State\n<size:9>Telemetrie (Rate Transition)</size>
+BATT  -[#1F77B4,dashed]->  MCU  : «log» batt_count
+
+' ================= Hardware-orientierte Ausgänge (in SITL terminiert) =
+note bottom of MCU
+  Weitere FlightController-Ausgänge (auf Ziel-HW,
+  im SITL-Lauf nur beobachtet):
+  • throttle -> ESC-PWM  (physikalisch)
+  • led      -> Status-LED
+end note
+
+legend right
+  |= Stil |= Bedeutung |
+  |<#1F77B4>  - -   | logische Schnittstelle (Datenbus, getaktet) |
+  |<#C0392B>  ===   | physikalische Schnittstelle (PWM, Kraft, Messung) |
+  |<#D4E6F1>        | <<Deployed Software>> |
+  |<#D5F5E3>        | <<SITL Environment>> |
+  |<#FADBD8>        | <<HW>> Hardware |
+endlegend
+@enduml

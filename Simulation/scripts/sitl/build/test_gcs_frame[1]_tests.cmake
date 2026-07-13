@@ -1,0 +1,5 @@
+add_test([=[GcsFrame.ParseMatchesGolden]=]  [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_gcs_frame.exe]==] [==[--gtest_filter=GcsFrame.ParseMatchesGolden]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[GcsFrame.ParseMatchesGolden]=]  PROPERTIES WORKING_DIRECTORY [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build]==] SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[GcsFrame.RejectsCorruption]=]  [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_gcs_frame.exe]==] [==[--gtest_filter=GcsFrame.RejectsCorruption]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[GcsFrame.RejectsCorruption]=]  PROPERTIES WORKING_DIRECTORY [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build]==] SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  test_gcs_frame_TESTS GcsFrame.ParseMatchesGolden GcsFrame.RejectsCorruption)

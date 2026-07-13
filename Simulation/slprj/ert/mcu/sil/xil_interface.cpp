@@ -65,6 +65,9 @@ real_T o_rotor_cmd[4];
 /* interface data */
 uint8_T o_led;
 
+/* interface data */
+real_T o_throttle[4];
+
 #define mdlref_TID0                    0
 #define mdlref_TID1                    1
 
@@ -99,9 +102,9 @@ MCU * get_ModelMDLOBJ_ptr(void)
 }
 
 static XILIOData xil_fcnid0_task1_output_u[12];
-static XILIOData xil_fcnid0_task1_y[3];
+static XILIOData xil_fcnid0_task1_y[4];
 static XILIOData xil_fcnid0_init_u[3];
-static XILIOData xil_fcnid0_init_y[3];
+static XILIOData xil_fcnid0_init_y[4];
 
 /* In-the-Loop Interface functions - see xil_interface.h */
 XIL_INTERFACE_ERROR_CODE xilProcessParams(uint32_T xilFcnId)
@@ -193,6 +196,15 @@ XIL_INTERFACE_ERROR_CODE xilInitialize(uint32_T xilFcnId)
 
   {
     o_led = 0;
+  }
+
+  {
+    {
+      uint32_T elementIdx_0;
+      for (elementIdx_0 = 0; elementIdx_0 < 4; elementIdx_0++) {
+        o_throttle[elementIdx_0] = 0;
+      }                                /* for */
+    }
   }
 
   /* Single In-the-Loop Component */
@@ -439,7 +451,8 @@ XIL_INTERFACE_ERROR_CODE xilOutput(uint32_T xilFcnId, uint32_T xilTID)
     ModelMDLOBJ.step(i_Bus_IMU_imu_gyro, i_Bus_IMU_imu_acc, &(i_Bus_Cmd_F_des),
                      i_Bus_Cmd_q_des, i_Bus_Cmd_q_ref, i_Bus_Cmd_Omega_ref,
                      i_Bus_Cmd_tau_ref, i_Bus_Cmd_q_ext, &(i_Bus_Cmd_estop),
-                     &(i_Bus_Cmd_ack), &(i_batt_count), o_rotor_cmd, &(o_led));
+                     &(i_Bus_Cmd_ack), &(i_batt_count), o_rotor_cmd, &(o_led),
+                     o_throttle);
 
     /* call scheduler */
     rate_scheduler();
@@ -498,6 +511,12 @@ XIL_INTERFACE_ERROR_CODE xilGetTargetToHostData(uint32_T xilFcnId,
           xil_fcnid0_init_y[tableIdx++].address = (MemUnit_T *) dataAddress;
         }
 
+        {
+          void * dataAddress = (void *) &(o_throttle[0]);
+          xil_fcnid0_init_y[tableIdx].memUnitLength = 4 * sizeof(real_T);
+          xil_fcnid0_init_y[tableIdx++].address = (MemUnit_T *) dataAddress;
+        }
+
         xil_fcnid0_init_y[tableIdx].memUnitLength = 0;
         xil_fcnid0_init_y[tableIdx++].address = (MemUnit_T *) 0;
         initComplete = 1;
@@ -536,6 +555,12 @@ XIL_INTERFACE_ERROR_CODE xilGetTargetToHostData(uint32_T xilFcnId,
         {
           void * dataAddress = (void *) &(o_led);
           xil_fcnid0_task1_y[tableIdx].memUnitLength = 1 * sizeof(uint8_T);
+          xil_fcnid0_task1_y[tableIdx++].address = (MemUnit_T *) dataAddress;
+        }
+
+        {
+          void * dataAddress = (void *) &(o_throttle[0]);
+          xil_fcnid0_task1_y[tableIdx].memUnitLength = 4 * sizeof(real_T);
           xil_fcnid0_task1_y[tableIdx++].address = (MemUnit_T *) dataAddress;
         }
 

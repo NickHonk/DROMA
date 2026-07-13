@@ -183,5 +183,15 @@ inline void unpack(const uint8_t buf[SIZE], Cmd& c, uint8_t& id, uint8_t& seq) {
     for (int i=0;i<3;++i) c.tau_ref[i]   = detail::dequantize(detail::get_i16(buf + off::TAU + 2*i), FS_TAU);
 }
 
+// --- Firmware-Komfort (Design A, drone_hal.cpp) ------------------------------
+// App-ID-Gate: Broadcast, jede Drohne nimmt nur ihr eigenes id-Byte (buf[0]).
+inline bool id_matches(const uint8_t buf[SIZE], uint8_t own_id) {
+    return buf[off::ID] == own_id;
+}
+// unpack ohne id/seq (die HAL braucht nur das Bus_Cmd; id ist per Gate schon geprueft).
+inline void unpack(const uint8_t buf[SIZE], Cmd& c) {
+    uint8_t id, seq; unpack(buf, c, id, seq);
+}
+
 }  // namespace pkt
 #endif  // MCU_PACKET_HPP

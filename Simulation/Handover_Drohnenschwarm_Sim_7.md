@@ -114,6 +114,23 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
 | `dump_link_codec_golden.m` | Golden-Dumper (`link_tx/rx`, pdrop=0, 219 Fälle) | `scripts\sitl\matlab\` |
 | `link_codec_golden.csv` | Golden 219×54 | `scripts\sitl\data\` |
 | `test_link_codec.cpp` | CTest `test_link_codec` (L1/L2 + Header) | `scripts\sitl\test\` |
+| `configure_mcu_codegen.m` | **parametrisiert** (`target` host/arm) | `scripts\sitl\matlab\` |
+| `run_mcu_recert.m` | §3b: Host-Regen + Poly-Dump + Golden | `scripts\sitl\matlab\` |
+| `run_gate_a.m` | Gate A headless-Wrapper (SIL interaktiv fahren) | `scripts\sitl\matlab\` |
+| `run_mcu_arm_codegen.m` | §3f: ARM-Codegen → `hardware\mcu_arm\` | `scripts\sitl\matlab\` |
+| `throttle_poly.hpp` | generiert (`P` aus `quadcop.p_from_omega_sq`) | `scripts\sitl\include\` |
+| `mcu_io.hpp` | +`diff_throttle` | `scripts\sitl\include\` |
+| `hardware\mcu_arm\mcu_ert_rtw\` | ARM-generierte MCU-Klasse (Cortex-M7) | `hardware\mcu_arm\` |
+| `gcs_frame.hpp` | USB-Frame-Contract GS↔Sender (SSOT) | `scripts\sitl\include\` |
+| `pack_gcs_frame.m` | MATLAB-Spiegel + Simulink-Serial-Send-Spec | `scripts\functions\` |
+| `dump_gcs_frame_golden.m` + `.csv` | Golden 66×104 | `scripts\sitl\matlab\` / `data\` |
+| `test_gcs_frame.cpp` | CTest `test_gcs_frame` (parse + CRC/Sync) | `scripts\sitl\test\` |
+| `gcs_sender.cpp` | **Sende-Teensy-Firmware** (Design A) | `hardware\` |
+| `build_sketches.sh` | assembliert flashbare Sketches → `hardware\build\` (+`--compile`/`--upload`) | `hardware\` |
+| `prune_mcu_configs.m` | Modell-Hygiene: nummerierte Config-Set-Dups entfernen | `scripts\sitl\matlab\` |
+| `i2c_scan.cpp` | Bench: MPU-Adresse 0x68/0x69 prüfen (ADO-Bodge) | `hardware\` |
+| `esc_calibrate.cpp` | Bench: ESC-Einlernen + Motor-Test (Serial-geführt) | `hardware\` |
+| `drone_hal.cpp` `HAL_SELFTEST` | Bench-Selbsttest: Motoren min, I/O-Report ~10 Hz | `hardware\` |
 
 ---
 
@@ -134,7 +151,41 @@ Codec isoliert).
   **chart_22/31** (19×int16) sind tot, aber noch im Modell → bei Gelegenheit raus.
   `scripts\functions\link_tx.m`/`link_rx.m` wurden auf chart_40/50 re-synct.
 
-### 3b. SITL-Re-Zert für `throttle` (Diffs stehen, Ausführung offen)
+### 3b. SITL-Re-Zert für `throttle` — ✅ ERLEDIGT (Session 8)
+`mcu.slx` neu generiert (`throttle[4]` in `ExtY`, `Abs→Sqrt` für `rotor_cmd`,
+`Polyval→Saturation[0,100]` für `throttle`). Golden neu (5001 Ticks, 37 Spalten,
+`throttle.1..4`). Diffs angewandt: `OUT_NAMES += throttle` (`log_mcu_golden.m`),
+`diff_throttle` (`mcu_io.hpp`), `test_mcu_model.cpp` (throttle-Golden-Diff ≤1e-9
++ Determinismus auf 9 Kanäle). Automations-Helfer: `run_mcu_recert.m` (Regen+
+Poly-Dump+Golden), `run_gate_a.m` (Gate A).
+
+**Gate-Status:**
+- **Gate B (Host-Golden, MATLAB-frei, tick-exakt): 25/25 GRÜN.** Das ist die
+  maßgebliche Zertifizierung (throttle-Golden-Diff ≤1e-9, Invariante ≤1e-9,
+  Determinismus 9 Kanäle, + Codec-Tests).
+- **Gate A (SIL): GRÜN (interaktiv gefahren).** rotor_cmd max|d|=1.137e-12,
+  throttle max|d|=2.842e-14, led 0 Mismatches → „bit-nah". `grab`-uint8-Cast
+  gefixt, throttle mitverglichen.
+  *Hinweis:* headless (`-batch`) scheitert SIL an der MinGW-Toolchain
+  (`rtwshared.bat` beim `_sharedutils`-Build „nicht gefunden") — aus Bash **und**
+  PowerShell identisch, also `-batch`-SIL-Setup, nicht MSYS-PATH. **Gate A daher
+  interaktiv in der MATLAB-IDE fahren** (Gate B läuft headless/CTest).
+
+**Polyval-Invariante — Befund (wichtig):** bit-exakt am MCU-Rand **unmöglich**.
+Der Polyval-Eingang im Modell ist das **vorzeichenbehaftete `omega_sq` VOR `abs`**;
+am Rand existiert nur `rotor_cmd = sqrt(abs(omega_sq))`. `sqrt∘square ≠ id`
+(~1 ULP) + Vorzeichenverlust → nur `clamp(polyval(P, rotor_cmd²))` rekonstruierbar,
+und das nur bis **7.1e-15** (nicht 0.0). Entscheidung Session 8: **Toleranz-
+Invariante ≤1e-9** (in `test_mcu_model.cpp`), `P` aus `throttle_poly.hpp` (dump
+aus `quadcop.p_from_omega_sq`). Coverage-Lücke: dieser Golden triggert **weder
+Sättigung** (throttle 18.96–28.92) **noch negatives `omega_sq`** — Sat-/Sign-Pfad
+ungetestet; für deren Abdeckung bräuchte es einen Golden mit aggressiveren
+Kommandos.
+
+**Nebenfund/behoben:** `sil_check_mcu>grab` castete `led` (uint8) nicht auf
+`double` → `interp1`-Crash, sobald `led`/`throttle` verdrahtet sind. Cast ergänzt.
+
+Historische Notiz (ursprüngliche Diff-Liste):
 1. `mcu.slx`: `throttle`-Outport + `[0,100]`-Clamp verifizieren, **neu generieren**
    (aktuelles `mcu.h` hat noch kein `throttle`). Clamp-Reihenfolge: Polynom zuerst,
    dann `[0,100]`.
@@ -149,29 +200,113 @@ Codec isoliert).
 ### 3c. `link.slx` neu verdrahten
 Drei Signale statt zwei durch RT+Delay (siehe §0.4). ICs aus `init_link`.
 
-### 3d. GS-Seite (Simulink + Sende-Teensy)
-- Simulink: pro Drohne `id` setzen, USB-Float-Frame `[sync|id|Bus_Cmd|checksum]`.
-- Sende-Teensy: `pkt::pack` + `seq[0..2]`, `radio.write`. Broadcast-Adr/Kanal/
-  Datenrate wählen (GS + 3 Drohnen teilen).
+### 3d. GS-Seite — ✅ Sende-Teensy + Frame-Contract erledigt, Simulink spezifiziert (Session 8)
+**USB-Frame-Contract (SSOT, gelockt):** `gcs_frame.hpp` — 82 B, LE, fixe Länge:
+`[0..1] AA 55 | [2] id | [3..78] 19×float32 (F_des, q_des[4], q_ref[4],
+Omega_ref[3], tau_ref[3], q_ext[4]) | [79] estop | [80] ack | [81] crc8`
+(CRC-8/SMBus Poly 0x07 über Bytes [2..80]).
+- **Verify-first:** `test_gcs_frame` (CTest) — MATLAB `pack_gcs_frame.m` ↔ C++
+  `gcs::parse` float32-exakt (66 Fälle) + CRC/Sync fangen Korruption. **27/27 grün.**
+- **Sende-Teensy:** `hardware/gcs_sender.cpp` — Serial-Sync-Hunt → `gcs::parse` →
+  float32→double → `pkt::pack(cmd, id, seq[id]++)` → `radio.write(29)`. seq **pro
+  Drohne**. nRF identisch zum HAL: `0xE7E7E7E7E7`, **Kanal 76** (jetzt auch im
+  Drohnen-HAL gepinnt), 1 Mbps, Auto-Ack aus.
+- **Simulink-Seite (Spec, du baust):** in der GCS pro Drohne `id` setzen und
+  `Bus_Cmd` **exakt nach `pack_gcs_frame.m`** in einen 82-B-uint8-Vektor packen
+  (float32 LE via `typecast(single(...),'uint8')`, CRC-8 wie dort), dann per
+  **Serial Send** (USB) rausschreiben. `pack_gcs_frame.m` ist die ausführbare Spec.
 
-### 3e. HAL — offene HW-Details (im Code als TODO)
-- **Status-LEDs:** nur Sammel-LED (Pin 5) + `STATUS_100%` (Pin 10) bekannt. Pins
-  für 25/50/75 % fehlen im Schaltplan-Dump. **Und:** `mcu.slx`-`state`-Werte →
-  %-Level-Tabelle nötig, um `drive_leds()` zu dekodieren.
-- **ESC-Einlern-Timings** (Platzhalter 3 s/3 s) an reale ESCs anpassen.
-- **Timing-Budget messen:** MPU-Burst @400 kHz ≈0.4 ms + `step()` + IO in 1 ms?
-  (`micros()` um den Tick). Ggf. non-blocking/DMA-I²C.
-- **RF24-Version:** unterstützt `begin(&SPI1)`? Sonst `SPI1.setMOSI/MISO/SCK` vor
-  `begin()` oder RF24 (TMRh20) updaten.
-- **ADO→GND-Bodge** auf dem PCB (Pull-Down R8 bestücken) → 0x68.
-- **Batt-ADC-Umrouting** 40/41 verdrahten; prüfen dass 40/41 sonst frei sind.
+**Firmware-Compile verifiziert (Arduino-CLI, Teensy 4.1):**
+- Teensy-Core `teensy:avr@1.60.0` + RF24 1.6.1 via `arduino-cli` installiert.
+- `gcs_sender` **kompiliert** (FLASH code 14456). `drone_hal` **kompiliert** (FLASH
+  code 53956, RAM1 ~448 KB frei) — inkl. ARM-generierter MCU-Klasse.
+- **Bug gefangen + gefixt:** RF24-Teensy-Header macht `#define printf Serial.printf`
+  → kollidiert mit unserem `Serial.printf` (Timing-Report). Im HAL nach dem
+  RF24-Include mit `#undef printf` neutralisiert.
+- **Compile-Rezept:** Sketch-Ordner (Headers + ggf. ARM-`mcu.*` ohne `ert_main.cpp`
+  daneben), `arduino-cli compile -b teensy:avr:teensy41 <dir>`. Pfade **ohne
+  Leerzeichen** (Projektpfad hat „MAS Versuchsaufbau" → im Scratchpad bauen).
 
-### 3f. ARM-Codegen-Config (danach)
-`configure_mcu_codegen.m`-Variante: `ProdHWDeviceType`→ARM Cortex-M7 (weg von
-Intel x86-64/SSE2; `<emmintrin.h>` muss aus dem Output verschwinden), `double`
-behalten, Solver DISCRETE fixed-step `Ts_inner`, **SingleTasking**, Klassenname
-**`MCU`** gepinnt, kein `-ffast-math`, FPU round-to-nearest. GenCodeOnly (Kompilat
-via Teensy-Toolchain, nicht aus MATLAB).
+### 3e. HAL — ✅ vervollständigt (Session 8, HW-Entscheidungen gelockt)
+**Befund (wichtig):** der `led`-Ausgang ist **kein 25/50/75/100 %-Ladebalken**,
+sondern eine **3-Zustands-Warn-FSM** aus `mcu.slx` (`MATLAB Function1`):
+`led=state` ∈ {**0** NORMAL, **1** WARN (Vf≤14.0 V), **2** CRIT (Vf≤13.4 V)},
+Hysterese 14.2/13.6. `landed` (Vf≤12.0) ist separat (Hard-Floor-Sinkflug intern,
+nicht `led`). Die „25/50/75 %-Pins"-Suche war gegenstandslos.
+
+**Gelockte Entscheidungen + im `drone_hal.cpp` umgesetzt:**
+- **LED:** 2 diskrete LEDs — Pin5 = WARN (state≥1), Pin10 = CRIT (state==2).
+- **ESC:** **keine** Boot-Kalibrierung (kein throttle-max-Sweep → sicher mit Props);
+  nur Arming (min-Halten `ARM_MS`). ESCs extern vorkalibriert, Endpunkte 512/1024.
+- **RF24:** `begin(&SPI1)` (Fallback `SPI1.setMOSI/MISO/SCK` als Kommentar).
+- **Batt-Pin:** 41 = Spannung (A17) → `batt_count`, 40 = Strom (Telemetrie).
+  `init_battery_manag.batt_pin` 40→41 korrigiert (war stale, im Codegen ungenutzt).
+- **Timing-Budget:** `micros()` um den Tick, max-Dauer + Overruns, ~1×/s per
+  `Serial [tick]`-Report (statt Platzhalter — im Betrieb ablesen).
+- **API-Reconcile:** `mcu_packet.hpp` um `id_matches(buf,id)` + `unpack(buf,cmd)`
+  (2-arg) ergänzt; HAL nutzt jetzt `pkt::Cmd`/`pkt::SIZE` (vorher `PktCmd`/`N_BYTES`
+  → kompilierte nicht). SITL-Tests unberührt (25/25).
+
+**HW-Bring-up-Log (Session 8):**
+- **ESC (erledigt):** BLHeli_S + OneShot125 laufen mit **Default-Endpunkten** sauber
+  (Motor spin ab ~5–10 % zuverlässig) → **kein Einlernen nötig** (Endpunkte sind bei
+  OneShot125 protokoll-definiert 125/250 µs). **Drehrichtungen bereits korrekt**
+  (M1/M3 CCW, M2/M4 CW). `esc_calibrate.cpp` bleibt als Bench-Werkzeug/Motortest.
+  Bestätigt die arm-only-Entscheidung der Flug-Firmware.
+- **MPU (erledigt):** `i2c_scan` findet **0x68** → ADO-Bodge sitzt.
+- **nRF SPI1 (BUG gefunden + gefixt):** `RF24.begin(&SPI1)` **hing** (auch mit
+  verdrahtetem Modul) — Teensy braucht SPI1 EXPLIZIT: `SPI1.setMOSI(26);
+  setMISO(1); setSCK(27); SPI1.begin();` **vor** `RF24.begin(&SPI1)`, sonst
+  blockiert der erste SPI-Transfer. In `drone_hal.cpp` **und** `gcs_sender.cpp`
+  gefixt. Bench: `nRF ok=1 chip=1`.
+- **Timing-Budget (bestätigt):** `tickmax ≈ 464 µs`, `overruns = 0/1000` →
+  1-kHz-Tick mit >50 % Reserve. Der `HAL_SELFTEST`-Report druckt es live.
+- **Gyro (ok):** Bias 3 s abgezogen, ~0 still, reagiert auf Bewegung.
+- **Acc (kleiner Offset):** z ≈ +9.2 (z-up korrekt), aber |a| ≈ 9.27 (~5 % niedrig)
+  + y-Offset ~−1.0 → leichte Schräglage/Accel-Offset. Für Bench ok; Accel-Kalib
+  (Bias/Scale) bei Bedarf separat.
+- **Batt (noch nicht prüfbar):** `batt=0(0.00V)` — nur USB, kein Flug-Akku am PM06.
+  Erst mit angestecktem 4S-Akku verifizierbar.
+- **⚠️⚠️ FAILSAFE-BUG (vor bestromtem Flug fixen!):** `estop==2` **setzt** `latched`
+  (mcu.cpp Z. 226), und `latched → rotor_cmd=0` (Z. 662). ABER der in §3b neue
+  `throttle`-Outport (`clamp(polyval(P, omega_sq))`, Z. 683–741) ist **NICHT** vom
+  `latched`-Gate erfasst. Da der **HAL die ESCs aus `throttle`** treibt (nicht
+  `rotor_cmd`), **stoppt der Failsafe die Motoren NICHT** (throttle bleibt 0–16 %,
+  reagiert auf Lage). Bench-verifiziert.
+  **Fix:** in `mcu.slx` `throttle` durch das `latched`-Gate → `throttle = latched ?
+  0 : clamp(polyval(...))` (Switch am Ausgang, auf **0** schalten — NICHT Polynom
+  mit 0 speisen, `polyval(P,0)=8.4 %`). Danach §3b-Re-Zert (Golden neu, Gate A+B;
+  test_mcu_model muss dann throttle==0 bei latched prüfen).
+- **Accel-Nutzung:** `imu_acc` speist die **Onboard-Attitude-Schätzung** (Mahony-
+  artig, `mcu_DW.q`, fusioniert mit `q_ext`/Mocap); der Regler nutzt `q`, nicht
+  rohen Accel. → Schiefmontage wirkt über die Schätzung, aber gedämpft durch
+  `q_ext`. Fix ist eine **Alignment-Rotation** (oder physisch level montieren),
+  KEINE Standard-6-Lagen-Accel-Kalib (die korrigiert Sensor-Bias/Scale, nicht
+  Montage). Der ~5 %-Betragsfehler ist separat (Scale, minor).
+
+**Firmware-Build-Hinweis:** `drone_hal.cpp` braucht auf dem Include-Pfad die
+ARM-`mcu.h` (`hardware\mcu_arm\mcu_ert_rtw\`) **und** die SSOT `mcu_packet.hpp`
+(`scripts\sitl\include\`) — beide ins Teensy/PlatformIO-Projekt ziehen.
+
+### 3f. ARM-Codegen-Config — ✅ ERLEDIGT (Session 8)
+`configure_mcu_codegen(mdl, target)` **parametrisiert**: `target='host'` (Default,
+SITL/x86, Verhalten wie bisher, Config `ert_cpp_sitl`) | `target='arm'`
+(Cortex-M7, Config `ert_cpp_arm`). ARM setzt `ProdHWDeviceType='ARM
+Compatible->ARM Cortex-M'`, `ProdEndianess=LittleEndian`, `ProdLongLongMode=on`,
+`ProdEqTarget=on`; gemeinsam: C++ class `MCU`, SingleTasking, DISCRETE `Ts_inner`,
+GenCodeOnly, kein `-ffast-math`.
+Runner `run_mcu_arm_codegen.m` lenkt CodeGen-/Cache-Ordner nach **`hardware\mcu_arm\`**
+um (eigenes `slprj`) → **SITL-`scripts\sitl\mcu_ert_rtw\` bleibt unberührt** (Gate B
+weiter 25/25).
+**Verifiziert (ohne ARM-Binary, GenCodeOnly):**
+- x86-Intrinsics: Host 1 Quelldatei (`<emmintrin.h>`), **ARM 0** ✓
+- `mcu.cpp`-Kommentar: **„ARM Compatible->ARM Cortex-M"** (Host: Intel x86-64) ✓
+- `rtwtypes.h` ARM: `int32_T=int`, `int64_T=long long` (long=32→64 via long long),
+  **`real_T=double`** (double behalten) ✓
+- `class MCU final`, genau **ein `step()`**, ExtY `rotor_cmd[4]`+`throttle[4]` ✓
+**Offen für Deployment:** Kompilat via Teensy/PlatformIO-Toolchain (nicht aus
+MATLAB); `-ffast-math` aus, FPU round-to-nearest im Firmware-Compiler setzen.
+Der ARM-Code (`hardware\mcu_arm\mcu_ert_rtw\`) sitzt neben `drone_hal.cpp`.
 
 ### 3g. Danach
 HIL, dann Schwarm (kein onboard-EKF — aus Roadmap gestrichen, Teil 5).

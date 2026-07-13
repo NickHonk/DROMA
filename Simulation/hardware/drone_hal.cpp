@@ -14,24 +14,38 @@
 //        (Volt-Umrechnung macht das Modell, S6). Strom (Pin40/A16) = nur Telemetrie.
 //   - ESC: OneShot125 via analogWriteFrequency(1000)+analogWriteResolution(12):
 //        count = 512 + throttle*5.12  ->  125..250 us  (throttle bereits [0,100]).
+//        Boot: NUR Arming (min-Halten), KEINE Kalibrierung. ESCs extern
+//        vorkalibriert, Endpunkte 512/1024.
+//   - Status-LED: led = 3-Zustands-Warn-FSM (0 NORMAL / 1 WARN / 2 CRIT), KEIN
+//        Ladebalken. Pin5 = WARN (state>=1), Pin10 = CRIT (state==2).
 //   - nRF24L01 @ SPI1 (SCK27/MOSI26/MISO1), CE14, CSN0, IRQ9. Design A:
 //        Broadcast, Auto-Ack AUS, 29-Byte-Payload, App-ID-Gate via BCD.
+//        begin(&SPI1) (Fallback fuer aeltere Lib im Code kommentiert).
 //   - Failsafe: kein gueltiges Paket seit 100 ms -> estop=2 (Hard-Kill, safety_overspeed).
 //
-// OFFEN (mit TODO markiert): Status-LED-Pins 25/50/75 %, ESC-Einlern-Timings.
+// OFFEN (HW-Bestaetigung noetig): ADO->GND-Bodge (R8) fuer 0x68; ESC-Endpunkte
+// extern eingelernt; Timing-Budget im Betrieb pruefen (Serial [tick]-Report).
 
 #include <Arduino.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <RF24.h>          // TMRh20 RF24; muss begin(&SPI1) unterstuetzen
+#ifdef printf
+#undef printf              // RF24 (Teensy) macht '#define printf Serial.printf' -> kollidiert
+#endif                     //   mit unserem Serial.printf (-> Serial.Serial.printf). Neutralisieren.
 #include "mcu.h"           // generierte Klasse MCU (ExtU/ExtY)
 #include "mcu_packet.hpp"  // pkt::unpack / id_matches (single source of truth)
 
+// ---- Bench-Selbsttest -------------------------------------------------------
+// Einkommentieren -> Pruefstand-Firmware: Motoren bleiben SICHER auf min, die
+// Drohne printet stattdessen alle I/O-Pfade (Gyro/Acc/Batt/Link/estop/throttle/
+// Timing) ~10x/s ueber Serial. Fuer den Flug AUSKOMMENTIERT lassen.
+#define HAL_SELFTEST
+
 // ------------------------------ Pinbelegung (PCB Drohne_Teensy) --------------
 static constexpr uint8_t PIN_PWM[4] = {33, 2, 4, 3};   // M1 CCW, M2 CW, M3 CCW, M4 CW
-static constexpr uint8_t PIN_LED       = 5;            // Sammel-LED
-static constexpr uint8_t PIN_STAT_100  = 10;           // STATUS_100%
-// TODO: STATUS_25/50/75 %-Pins nachtragen, sobald aus dem Schaltplan bestaetigt.
+static constexpr uint8_t PIN_LED       = 5;            // WARN-LED  (state>=1, gelb)
+static constexpr uint8_t PIN_STAT_100  = 10;           // CRIT-LED  (state==2, rot)
 static constexpr uint8_t PIN_BATT_V    = 41;           // A17 SPANNUNG
 static constexpr uint8_t PIN_BATT_I    = 40;           // A16 STROM (Telemetrie)
 static constexpr uint8_t PIN_BCD[4]    = {17, 16, 39, 38}; // BCD 1/2/4/8, INPUT_PULLUP, active-low
@@ -49,19 +63,26 @@ static constexpr uint8_t MPU_PWR_MGMT_1 = 0x6B, MPU_GYRO_CONFIG = 0x1B,
                          MPU_ACCEL_CONFIG = 0x1C, MPU_ACCEL_XOUT_H = 0x3B;
 static constexpr uint32_t LINK_TIMEOUT_MS = 100;      // Failsafe
 static constexpr uint32_t BIAS_MS = 3000;             // Gyro-Bias-Mittelung
+static constexpr uint32_t ARM_MS  = 2000;             // Arming-Wartezeit (ESC-Piep)
 static const uint64_t     NRF_BCAST_ADDR = 0xE7E7E7E7E7ULL;
 static constexpr int      ESC_MIN = 512, ESC_MAX = 1024;
+static constexpr uint32_t TICK_US = 1000;             // 1-kHz-Basistakt
+static constexpr uint32_t TIMING_REPORT_TICKS = 1000; // Timing-Budget alle ~1 s melden
 
 // ------------------------------ Globals --------------------------------------
 static MCU               g_mcu;
 static MCU::ExtU_mcu_T   g_U;                // wird jeden Tick befuellt
-static pkt::PktCmd       g_cmd;              // letztes gueltiges Kommando (ZOH)
+static pkt::Cmd       g_cmd;              // letztes gueltiges Kommando (ZOH)
 static double            g_gyro_bias[3] = {0,0,0};
 static uint8_t           g_own_id = 0;
 static volatile bool     g_tick = false;
 static volatile uint32_t g_t_last_rx = 0;    // millis() des letzten gueltigen Pakets
 static RF24              g_radio(PIN_NRF_CE, PIN_NRF_CSN);
 static IntervalTimer     g_timer;
+// Timing-Budget: max. Tick-Dauer (MPU-Burst + step() + IO) messen; Overruns zaehlen.
+static uint32_t          g_tick_dt_max = 0;
+static uint32_t          g_tick_overruns = 0;
+static uint32_t          g_tick_count = 0;
 
 // ------------------------------ MPU-6050 -------------------------------------
 static void mpu_write(uint8_t reg, uint8_t val) {
@@ -107,18 +128,19 @@ static inline void esc_write_all(const double throttle[4]) {
 
 // ------------------------------ Status-LED -----------------------------------
 static void drive_leds(uint8_t state) {
-    // state = Batterie-FSM-state (mcu_DW.state). Sammel-LED an, solange nicht 0.
-    digitalWrite(PIN_LED, state != 0);
-    // TODO: state -> {25/50/75/100 %}-Muster dekodieren, sobald Pins feststehen.
-    digitalWrite(PIN_STAT_100, state /* == VOLL ? */ ? HIGH : LOW);
+    // led = Batterie-Warn-FSM (mcu_DW.state), 3 Zustaende — KEIN Ladebalken:
+    //   0 = NORMAL, 1 = WARN (Vf<=14.0 V), 2 = CRIT (Vf<=13.4 V).
+    // Mapping (gelockt): Pin5 = WARN aktiv (state>=1), Pin10 = CRIT (state==2).
+    digitalWrite(PIN_LED,      state >= 1 ? HIGH : LOW);   // gelb: handeln
+    digitalWrite(PIN_STAT_100, state == 2 ? HIGH : LOW);   // rot: kritisch
 }
 
 // ------------------------------ nRF ------------------------------------------
 // Broadcast pollen: nur Pakete mit passender ID annehmen (Design A).
 static void nrf_poll() {
-    uint8_t buf[pkt::N_BYTES];
+    uint8_t buf[pkt::SIZE];
     while (g_radio.available()) {
-        g_radio.read(buf, pkt::N_BYTES);
+        g_radio.read(buf, pkt::SIZE);
         if (!pkt::id_matches(buf, g_own_id)) continue; // Fremdpaket verwerfen
         pkt::unpack(buf, g_cmd);                       // ZOH: g_cmd haelt bis zum naechsten
         g_t_last_rx = millis();
@@ -126,12 +148,12 @@ static void nrf_poll() {
 }
 
 // ------------------------------ Startup-FSM ----------------------------------
-static void esc_calibrate_and_arm() {
-    // TODO: Timings/Sequenz an deine ESCs anpassen (Endpunkte = Flug-Endpunkte!).
-    for (int i=0;i<4;++i) analogWrite(PIN_PWM[i], ESC_MAX); // max fuer Einlernen
-    delay(3000);                                            // Piep abwarten
-    for (int i=0;i<4;++i) analogWrite(PIN_PWM[i], ESC_MIN); // min -> Endpunkt gelernt
-    delay(3000);                                            // Arming
+static void esc_arm() {
+    // Gelockt: KEINE Boot-Kalibrierung (kein throttle-max-Sweep -> sicher mit Props).
+    // ESCs sind extern vorkalibriert; Endpunkte MUESSEN 512/1024 (=125/250 us) sein.
+    // Hier nur scharfschalten: min-Signal halten, bis die ESCs armen (Piep).
+    for (int i=0;i<4;++i) analogWrite(PIN_PWM[i], ESC_MIN);
+    delay(ARM_MS);
 }
 static void estimate_gyro_bias() {
     double g[3], a[3], sum[3] = {0,0,0}; uint32_t n = 0, t0 = millis();
@@ -146,8 +168,33 @@ static void estimate_gyro_bias() {
 // ------------------------------ 1-kHz-Tick -----------------------------------
 static void on_tick() { g_tick = true; }  // ISR: nur Flag; I2C/SPI im loop()
 
+#ifdef HAL_SELFTEST
+// Bench-Report ~10 Hz: jeden I/O-Pfad einmal sichtbar machen (Motoren bleiben min).
+static void selftest_report(const MCU::ExtY_mcu_T& y) {
+    static uint32_t n = 0;
+    if (++n < 100) return; n = 0;
+    double V = g_U.batt_count * 0.014652161172161169;        // Volt wie Modell-S6
+    Serial.printf("id=%u gyro[% .3f % .3f % .3f] acc[% .2f % .2f % .2f] "
+                  "batt=%.0f(%.2fV) bias[% .3f % .3f % .3f] link=%lums estop=%u "
+                  "thr[%.0f %.0f %.0f %.0f] tickmax=%luus\n",
+        g_own_id,
+        g_U.Bus_IMU_k.imu_gyro[0], g_U.Bus_IMU_k.imu_gyro[1], g_U.Bus_IMU_k.imu_gyro[2],
+        g_U.Bus_IMU_k.imu_acc[0],  g_U.Bus_IMU_k.imu_acc[1],  g_U.Bus_IMU_k.imu_acc[2],
+        g_U.batt_count, V,
+        g_gyro_bias[0], g_gyro_bias[1], g_gyro_bias[2],
+        (unsigned long)(millis() - g_t_last_rx), g_U.Bus_Cmd_l.estop,
+        y.throttle[0], y.throttle[1], y.throttle[2], y.throttle[3],
+        (unsigned long)g_tick_dt_max);
+}
+#endif
+
 // ------------------------------ setup ----------------------------------------
 void setup() {
+    Serial.begin(115200);                                    // Timing-Budget-Report (non-blocking)
+#ifdef HAL_SELFTEST
+    { uint32_t ts=millis(); while(!Serial && millis()-ts<2000){} }   // USB-CDC kurz abwarten
+    Serial.println("[boot] 1 setup start");
+#endif
     for (int i=0;i<4;++i) pinMode(PIN_PWM[i], OUTPUT);
     pinMode(PIN_LED, OUTPUT); pinMode(PIN_STAT_100, OUTPUT);
     for (int i=0;i<4;++i) pinMode(PIN_BCD[i], INPUT_PULLUP);
@@ -159,34 +206,64 @@ void setup() {
 
     analogReadResolution(12);                                // batt_count roh 0..4095
 
+    // MPU-6050 @ 0x68 setzt voraus: ADO->GND (PCB-Bodge, Pull-Down R8 bestueckt).
+    // Ohne Bodge floatet ADO -> Adresse 0x69; dann MPU_ADDR anpassen.
     Wire.begin(); Wire.setClock(400000);                     // Fast-Mode Pflicht (1 kHz-Budget)
     mpu_write(MPU_PWR_MGMT_1, 0x00);                         // wake
     mpu_write(MPU_GYRO_CONFIG, 0x08);                        // FS_SEL=1 (+-500 dps)
     mpu_write(MPU_ACCEL_CONFIG, 0x08);                       // AFS_SEL=1 (+-4 g)
+#ifdef HAL_SELFTEST
+    Serial.println("[boot] 2 MPU konfiguriert");
+#endif
 
     g_own_id = read_bcd_id();
 
-    // nRF Broadcast, Auto-Ack AUS (Design A) auf SPI1 (26/1/27 = Default-SPI1-Pins)
-    g_radio.begin(&SPI1);
+    // nRF Broadcast, Auto-Ack AUS (Design A) auf SPI1 (26/1/27 = Default-SPI1-Pins).
+    // Teensy: SPI1-Pins EXPLIZIT setzen + SPI1.begin() VOR RF24::begin(&SPI1),
+    // sonst haengt der erste SPI-Transfer in RF24::begin (peripherie nicht enabled).
+#if defined(HAL_SELFTEST) && defined(SELFTEST_SKIP_NRF)
+    Serial.println("[boot] 3 nRF UEBERSPRUNGEN (SELFTEST_SKIP_NRF)");
+#else
+  #ifdef HAL_SELFTEST
+    Serial.println("[boot] 3 nRF begin (SPI1 explizit)...");
+  #endif
+    SPI1.setMOSI(26); SPI1.setMISO(1); SPI1.setSCK(27);
+    SPI1.begin();
+    bool nrf_ok = g_radio.begin(&SPI1);
     g_radio.setAutoAck(false);
-    g_radio.setPayloadSize(pkt::N_BYTES);
+    g_radio.setPayloadSize(pkt::SIZE);
     g_radio.setDataRate(RF24_1MBPS);
-    // g_radio.setChannel(76);
+    g_radio.setChannel(76);                                  // == gcs_sender.cpp (GS + 3 Drohnen teilen)
     g_radio.openReadingPipe(1, NRF_BCAST_ADDR);
     g_radio.startListening();
+  #ifdef HAL_SELFTEST
+    Serial.printf("[boot] 4 nRF ok=%d chip=%d\n", (int)nrf_ok, (int)g_radio.isChipConnected());
+  #else
+    (void)nrf_ok;
+  #endif
+#endif
 
-    // Startup-Sequenz (Drohne am Boden, still): ESC einlernen+armen, Gyro-Bias
-    esc_calibrate_and_arm();
+    // Startup-Sequenz (Drohne am Boden, still): ESC armen, Gyro-Bias
+#ifndef HAL_SELFTEST
+    esc_arm();                                               // Flug: scharfschalten (min-Halten)
+#endif                                                       // Selbsttest: ESCs bleiben min (aus setup)
+#ifdef HAL_SELFTEST
+    Serial.println("[boot] 5 gyro bias (3 s, still halten)...");
+#endif
     estimate_gyro_bias();
 
     // Init-Kommando = sicher (kein Schub), bis das erste Paket kommt
-    g_cmd = pkt::PktCmd{};                                   // alles 0
+    g_cmd = pkt::Cmd{};                                   // alles 0
     g_cmd.q_des[0]=1; g_cmd.q_ref[0]=1; g_cmd.q_ext[0]=1;   // Identitaets-Quats
     g_cmd.estop = 2;                                         // bis Link steht: gekillt
     g_t_last_rx = 0;
 
     MCU::initialize();
-    g_timer.begin(on_tick, 1000);                            // 1 kHz, us
+    g_timer.begin(on_tick, TICK_US);                         // 1 kHz
+#ifdef HAL_SELFTEST
+    Serial.printf("[boot] 6 bias done [% .3f % .3f % .3f]; loop laeuft ab jetzt.\n",
+                  g_gyro_bias[0], g_gyro_bias[1], g_gyro_bias[2]);
+#endif
 }
 
 // ------------------------------ loop -----------------------------------------
@@ -194,6 +271,7 @@ void loop() {
     nrf_poll();                                              // Pakete jederzeit annehmen
     if (!g_tick) return;
     g_tick = false;
+    uint32_t t_tick0 = micros();                             // Timing-Budget: Tick-Start
 
     // 1) Bus_IMU: MPU lesen (bereits in {B}, SI), Gyro-Bias abziehen, Acc roh
     double gyro[3], acc[3];
@@ -221,6 +299,23 @@ void loop() {
     const MCU::ExtY_mcu_T& y = g_mcu.getExternalOutputs();
 
     // 5) Aktorik: throttle -> OneShot125, led-state -> LEDs
+#ifdef HAL_SELFTEST
+    for (int i=0;i<4;++i) analogWrite(PIN_PWM[i], ESC_MIN);  // Selbsttest: Motoren SICHER (min)
+    drive_leds(y.led);
+    selftest_report(y);
+#else
     esc_write_all(y.throttle);
     drive_leds(y.led);
+#endif
+
+    // 6) Timing-Budget: max. Tick-Dauer + Overruns (>1 ms) messen, ~1x/s melden.
+    uint32_t dt = micros() - t_tick0;
+    if (dt > g_tick_dt_max) g_tick_dt_max = dt;
+    if (dt > TICK_US) ++g_tick_overruns;
+    if (++g_tick_count >= TIMING_REPORT_TICKS) {
+        Serial.printf("[tick] max=%lu us, overruns=%lu / %lu\n",
+                      (unsigned long)g_tick_dt_max, (unsigned long)g_tick_overruns,
+                      (unsigned long)g_tick_count);
+        g_tick_dt_max = 0; g_tick_overruns = 0; g_tick_count = 0;
+    }
 }

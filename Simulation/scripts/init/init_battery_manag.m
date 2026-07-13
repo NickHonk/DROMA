@@ -13,7 +13,8 @@ arguments (Output)
 end
 
 % --- ADC / HW (PM06 V2, Teensy) ---
-safety.batt_pin = 40; % Pin 40 = A16 
+safety.batt_pin = 41; % Pin 41 = A17 SPANNUNG (Handover-Lock; 40/A16 = Strom-Telemetrie).
+                      % Nur Doku — im Codegen ungenutzt (Modell liest batt_count als Inport).
 safety.adc_bits = 12; % analogReadResolution(12)
 
 % V_batt = k*count + b (Spannungsteiler 18.182 von PM06 V2, Vref 3.3, 12 bit):

@@ -1682,6 +1682,31 @@ static void sendInitializeCommand(SimStruct *S)
                       }
                     }
                   }
+
+                  {
+                    /* DataInterface: output, 3 */
+                    void * dataInterfacePtr = (void *) ssGetOutputPortSignal(S,
+                      2);
+
+                    {
+                      uint8_T * simDataMemUnitPtr;
+
+                      /* DataInterface: output, 3 */
+                      simDataMemUnitPtr = ( uint8_T *) dataInterfacePtr;
+
+                      {
+                        size_t num_elements = 4;
+
+                        {
+                          if (xilReadData(S, simDataMemUnitPtr, num_elements,
+                                          MEM_UNIT_DOUBLE_TYPE) !=
+                              XILHOSTAPPSVC_SUCCESS) {
+                            return;
+                          }            /* if */
+                        }
+                      }
+                    }
+                  }
                   break;
                 }
 
@@ -1935,7 +1960,7 @@ static void mdlInitializeSizes(SimStruct *S)
     return;
   }
 
-  slmrInitializeIOPortDataVectors(S, 11, 2);
+  slmrInitializeIOPortDataVectors(S, 11, 3);
   if (!ssSetNumInputPorts(S, 11))
     return;
   if (!ssSetInputPortVectorDimension(S, 0, 3))
@@ -2268,7 +2293,7 @@ static void mdlInitializeSizes(SimStruct *S)
   ssSetInputPortOverWritable(S, 10, false);
   ssSetInputPortSampleTime(S, 10, 1.0);
   ssSetInputPortOffsetTime(S, 10, 0.0);
-  if (!ssSetNumOutputPorts(S, 2))
+  if (!ssSetNumOutputPorts(S, 3))
     return;
   if (!ssSetOutputPortVectorDimension(S, 0, 4))
     return;
@@ -2334,6 +2359,38 @@ static void mdlInitializeSizes(SimStruct *S)
   }                                    /* if */
 
   ssSetOutputPortICAttributes(S, 1, false, false, false);
+  if (!ssSetOutputPortVectorDimension(S, 2, 4))
+    return;
+  ssSetOutputPortDimensionsMode(S, 2, FIXED_DIMS_MODE);
+  ssSetOutputPortFrameData(S, 2, FRAME_NO);
+  if (ssGetSimMode(S) != SS_SIMMODE_SIZES_CALL_ONLY) {
+    ssSetOutputPortDataType(S, 2, SS_DOUBLE);
+  }
+
+  if (ssGetSimMode(S) != SS_SIMMODE_SIZES_CALL_ONLY) {
+
+#if defined (MATLAB_MEX_FILE)
+
+    UnitId unitIdReg;
+    ssRegisterUnitFromExpr(
+      S,
+      "",
+      &unitIdReg);
+    if (unitIdReg == INVALID_UNIT_ID)
+      return;
+    ssSetOutputPortUnit(S, 2, unitIdReg);
+
+#endif
+
+  }
+
+  ssSetOutputPortSampleTime(S, 2, 0.001);
+  ssSetOutputPortOffsetTime(S, 2, 0.0);
+  if (ssRTWGenIsCodeGen(S) || ssIsExternalSim(S) ) {
+    ssSetOutputPortOkToMerge(S, 2, SS_OK_TO_MERGE_CONDITIONAL);
+  }                                    /* if */
+
+  ssSetOutputPortICAttributes(S, 2, false, false, false);
 
   {
     int_T zcsIdx = 0;
@@ -2343,6 +2400,8 @@ static void mdlInitializeSizes(SimStruct *S)
   ssSetOutputPortIsFedByBlockWithModesNoZCs(S, 0, 0);
   ssSetOutputPortIsNonContinuous(S, 1, 0);
   ssSetOutputPortIsFedByBlockWithModesNoZCs(S, 1, 0);
+  ssSetOutputPortIsNonContinuous(S, 2, 0);
+  ssSetOutputPortIsFedByBlockWithModesNoZCs(S, 2, 0);
   ssSetInputPortIsNotDerivPort(S, 0, 1);
   ssSetInputPortIsNotDerivPort(S, 1, 1);
   ssSetInputPortIsNotDerivPort(S, 2, 1);
@@ -3118,6 +3177,31 @@ static void XILoutputTID01(SimStruct *S, int tid)
                         {
                           if (xilReadData(S, simDataMemUnitPtr, num_elements,
                                           MEM_UNIT_UINT8_TYPE) !=
+                              XILHOSTAPPSVC_SUCCESS) {
+                            return;
+                          }            /* if */
+                        }
+                      }
+                    }
+                  }
+
+                  {
+                    /* DataInterface: output, 3 */
+                    void * dataInterfacePtr = (void *) ssGetOutputPortSignal(S,
+                      2);
+
+                    {
+                      uint8_T * simDataMemUnitPtr;
+
+                      /* DataInterface: output, 3 */
+                      simDataMemUnitPtr = ( uint8_T *) dataInterfacePtr;
+
+                      {
+                        size_t num_elements = 4;
+
+                        {
+                          if (xilReadData(S, simDataMemUnitPtr, num_elements,
+                                          MEM_UNIT_DOUBLE_TYPE) !=
                               XILHOSTAPPSVC_SUCCESS) {
                             return;
                           }            /* if */

@@ -21,8 +21,15 @@
 %  Voraussetzung: mcu.slx laedt params.m via PreLoadFcn (Bus-Objekte im .sldd),
 %  d.h. Ts_inner liegt im Base-Workspace, wenn das Modell geladen ist.
 
-function configure_mcu_codegen(mdl)
+function configure_mcu_codegen(mdl, target)
+% target = 'host' (Default, SITL/x86, Verhalten wie bisher, Config 'ert_cpp_sitl')
+%        | 'arm'  (Teensy 4.1 / Cortex-M7: ProdHWDeviceType ARM Cortex-M +
+%          LittleEndian -> entfernt x86-SSE2-Intrinsics; double bleibt 64-bit;
+%          Config 'ert_cpp_arm'). Gemeinsame Optionen (C++ class MCU,
+%          SingleTasking, DISCRETE Ts_inner, GenCodeOnly) gelten fuer beide.
 if nargin < 1, mdl = 'mcu'; end
+if nargin < 2, target = 'host'; end
+target = validatestring(target, {'host','arm'});
 load_system(mdl);
 
 % --- Sicherstellen, dass die Basisrate bekannt ist (PreLoadFcn -> params.m) ---
@@ -32,7 +39,8 @@ if ~evalin('base','exist(''Ts_inner'',''var'')')
 end
 
 cs = getActiveConfigSet(mdl);
-cs = copy(cs); cs.Name = 'ert_cpp_sitl';
+cs = copy(cs);
+if strcmp(target,'arm'), cs.Name = 'ert_cpp_arm'; else, cs.Name = 'ert_cpp_sitl'; end
 
 % --- Zielsprache / Target ---
 set_param(cs,'SystemTargetFile','ert.tlc');
@@ -57,9 +65,23 @@ set_param(cs,'ArrayLayout','Column-major');              % Default, explizit ges
 % --- Reproduzierbarkeit host<->target: keine schnellen, unsauberen Optimierungen ---
 % (Auf HW zusaetzlich Compiler ohne -ffast-math, FPU round-to-nearest.)
 
+% --- Ziel-Hardware ---------------------------------------------------------
+if strcmp(target,'arm')
+    % Teensy 4.1: i.MX RT1062, Cortex-M7, little-endian, HW-DP-FPU -> double 64b.
+    % ProdHWDeviceType treibt rtwtypes.h + entfernt die x86-SSE2-Intrinsics
+    % (<emmintrin.h>). Wortbreiten aus dem ARM-Preset (char8/short16/int32/
+    % long32/longlong64/float32/double64/ptr32). ProdEqTarget=on -> Target==Prod.
+    set_param(cs,'ProdEqTarget','on');
+    set_param(cs,'ProdHWDeviceType','ARM Compatible->ARM Cortex-M');
+    set_param(cs,'ProdEndianess','LittleEndian');
+    set_param(cs,'ProdLongLongMode','on');               % 64-bit long long verfuegbar
+else
+    % host: Default-Device (MATLAB-Host x86-64) beibehalten -> SITL unveraendert.
+end
+
 attachConfigSet(mdl, cs, true);
 setActiveConfigSet(mdl, cs.Name);
-fprintf('ConfigSet "%s" an %s gehaengt und aktiv.\n', cs.Name, mdl);
+fprintf('ConfigSet "%s" (target=%s) an %s gehaengt und aktiv.\n', cs.Name, target, mdl);
 
 % --- [M3] Klassennamen deterministisch auf 'MCU' pinnen -------------------
 % Default waere der Modellname ('mcu'). Code-Mapping holen (oder anlegen) und
