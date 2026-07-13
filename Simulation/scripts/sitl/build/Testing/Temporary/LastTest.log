@@ -1,10 +1,10 @@
-Start testing: Jul 13 14:40 Mitteleuropäische Sommerzeit
+Start testing: Jul 13 16:33 Mitteleuropäische Sommerzeit
 ----------------------------------------------------------
-1/28 Testing: QuatGolden.Dcm2Quat_MatchesGolden
-1/28 Test: QuatGolden.Dcm2Quat_MatchesGolden
+1/30 Testing: QuatGolden.Dcm2Quat_MatchesGolden
+1/30 Test: QuatGolden.Dcm2Quat_MatchesGolden
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_quat_golden.exe" "--gtest_filter=QuatGolden.Dcm2Quat_MatchesGolden" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"QuatGolden.Dcm2Quat_MatchesGolden" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatGolden.Dcm2Quat_MatchesGolden" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -21,18 +21,18 @@ Note: Google Test filter = QuatGolden.Dcm2Quat_MatchesGolden
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.02 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"QuatGolden.Dcm2Quat_MatchesGolden" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatGolden.Dcm2Quat_MatchesGolden" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "QuatGolden.Dcm2Quat_MatchesGolden" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-2/28 Testing: QuatGolden.Quat2Dcm_MatchesGolden
-2/28 Test: QuatGolden.Quat2Dcm_MatchesGolden
+2/30 Testing: QuatGolden.Quat2Dcm_MatchesGolden
+2/30 Test: QuatGolden.Quat2Dcm_MatchesGolden
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_quat_golden.exe" "--gtest_filter=QuatGolden.Quat2Dcm_MatchesGolden" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"QuatGolden.Quat2Dcm_MatchesGolden" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatGolden.Quat2Dcm_MatchesGolden" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -49,18 +49,18 @@ Note: Google Test filter = QuatGolden.Quat2Dcm_MatchesGolden
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.02 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"QuatGolden.Quat2Dcm_MatchesGolden" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatGolden.Quat2Dcm_MatchesGolden" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "QuatGolden.Quat2Dcm_MatchesGolden" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-3/28 Testing: QuatGolden.QuatMul_MatchesGolden
-3/28 Test: QuatGolden.QuatMul_MatchesGolden
+3/30 Testing: QuatGolden.QuatMul_MatchesGolden
+3/30 Test: QuatGolden.QuatMul_MatchesGolden
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_quat_golden.exe" "--gtest_filter=QuatGolden.QuatMul_MatchesGolden" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"QuatGolden.QuatMul_MatchesGolden" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatGolden.QuatMul_MatchesGolden" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -77,18 +77,18 @@ Note: Google Test filter = QuatGolden.QuatMul_MatchesGolden
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.02 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"QuatGolden.QuatMul_MatchesGolden" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatGolden.QuatMul_MatchesGolden" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "QuatGolden.QuatMul_MatchesGolden" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-4/28 Testing: QuatGolden.QuatConj_MatchesGolden
-4/28 Test: QuatGolden.QuatConj_MatchesGolden
+4/30 Testing: QuatGolden.QuatConj_MatchesGolden
+4/30 Test: QuatGolden.QuatConj_MatchesGolden
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_quat_golden.exe" "--gtest_filter=QuatGolden.QuatConj_MatchesGolden" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"QuatGolden.QuatConj_MatchesGolden" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatGolden.QuatConj_MatchesGolden" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -108,15 +108,15 @@ Note: Google Test filter = QuatGolden.QuatConj_MatchesGolden
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"QuatGolden.QuatConj_MatchesGolden" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatGolden.QuatConj_MatchesGolden" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "QuatGolden.QuatConj_MatchesGolden" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-5/28 Testing: QuatGolden.QuatRotate_MatchesGolden
-5/28 Test: QuatGolden.QuatRotate_MatchesGolden
+5/30 Testing: QuatGolden.QuatRotate_MatchesGolden
+5/30 Test: QuatGolden.QuatRotate_MatchesGolden
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_quat_golden.exe" "--gtest_filter=QuatGolden.QuatRotate_MatchesGolden" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"QuatGolden.QuatRotate_MatchesGolden" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatGolden.QuatRotate_MatchesGolden" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -136,15 +136,15 @@ Note: Google Test filter = QuatGolden.QuatRotate_MatchesGolden
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"QuatGolden.QuatRotate_MatchesGolden" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatGolden.QuatRotate_MatchesGolden" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "QuatGolden.QuatRotate_MatchesGolden" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-6/28 Testing: QuatProps.RoundTripsAndIdentities
-6/28 Test: QuatProps.RoundTripsAndIdentities
+6/30 Testing: QuatProps.RoundTripsAndIdentities
+6/30 Test: QuatProps.RoundTripsAndIdentities
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_quat_golden.exe" "--gtest_filter=QuatProps.RoundTripsAndIdentities" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"QuatProps.RoundTripsAndIdentities" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatProps.RoundTripsAndIdentities" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -154,25 +154,25 @@ Note: Google Test filter = QuatProps.RoundTripsAndIdentities
 [----------] 1 test from QuatProps
 [ RUN      ] QuatProps.RoundTripsAndIdentities
   props: RTq=5.0e-16 RTR=8.9e-16 |q|=3.3e-16 id=0.0e+00 inv=4.5e-16 assoc=4.4e-16 rot=2.2e-15 len=1.8e-15 dcm=0.0e+00
-[       OK ] QuatProps.RoundTripsAndIdentities (13 ms)
-[----------] 1 test from QuatProps (13 ms total)
+[       OK ] QuatProps.RoundTripsAndIdentities (14 ms)
+[----------] 1 test from QuatProps (14 ms total)
 
 [----------] Global test environment tear-down
-[==========] 1 test from 1 test suite ran. (13 ms total)
+[==========] 1 test from 1 test suite ran. (14 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.03 sec
+Test time =   0.04 sec
 ----------------------------------------------------------
 Test Passed.
-"QuatProps.RoundTripsAndIdentities" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"QuatProps.RoundTripsAndIdentities" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "QuatProps.RoundTripsAndIdentities" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-7/28 Testing: Overspeed.S1_NoOverspeed
-7/28 Test: Overspeed.S1_NoOverspeed
+7/30 Testing: Overspeed.S1_NoOverspeed
+7/30 Test: Overspeed.S1_NoOverspeed
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Overspeed.S1_NoOverspeed" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Overspeed.S1_NoOverspeed" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S1_NoOverspeed" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -191,15 +191,15 @@ Note: Google Test filter = Overspeed.S1_NoOverspeed
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Overspeed.S1_NoOverspeed" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S1_NoOverspeed" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Overspeed.S1_NoOverspeed" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-8/28 Testing: Overspeed.S2_Nminus1_NoLatch
-8/28 Test: Overspeed.S2_Nminus1_NoLatch
+8/30 Testing: Overspeed.S2_Nminus1_NoLatch
+8/30 Test: Overspeed.S2_Nminus1_NoLatch
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Overspeed.S2_Nminus1_NoLatch" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Overspeed.S2_Nminus1_NoLatch" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S2_Nminus1_NoLatch" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -218,15 +218,15 @@ Note: Google Test filter = Overspeed.S2_Nminus1_NoLatch
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Overspeed.S2_Nminus1_NoLatch" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S2_Nminus1_NoLatch" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Overspeed.S2_Nminus1_NoLatch" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-9/28 Testing: Overspeed.S3_TripAtNth_Holds
-9/28 Test: Overspeed.S3_TripAtNth_Holds
+9/30 Testing: Overspeed.S3_TripAtNth_Holds
+9/30 Test: Overspeed.S3_TripAtNth_Holds
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Overspeed.S3_TripAtNth_Holds" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Overspeed.S3_TripAtNth_Holds" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S3_TripAtNth_Holds" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -242,18 +242,18 @@ Note: Google Test filter = Overspeed.S3_TripAtNth_Holds
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.01 sec
+Test time =   0.02 sec
 ----------------------------------------------------------
 Test Passed.
-"Overspeed.S3_TripAtNth_Holds" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S3_TripAtNth_Holds" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Overspeed.S3_TripAtNth_Holds" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-10/28 Testing: Overspeed.S4_AckDuringOverspeed_NoRearm
-10/28 Test: Overspeed.S4_AckDuringOverspeed_NoRearm
+10/30 Testing: Overspeed.S4_AckDuringOverspeed_NoRearm
+10/30 Test: Overspeed.S4_AckDuringOverspeed_NoRearm
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Overspeed.S4_AckDuringOverspeed_NoRearm" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Overspeed.S4_AckDuringOverspeed_NoRearm" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S4_AckDuringOverspeed_NoRearm" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -269,18 +269,18 @@ Note: Google Test filter = Overspeed.S4_AckDuringOverspeed_NoRearm
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.01 sec
+Test time =   0.02 sec
 ----------------------------------------------------------
 Test Passed.
-"Overspeed.S4_AckDuringOverspeed_NoRearm" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S4_AckDuringOverspeed_NoRearm" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Overspeed.S4_AckDuringOverspeed_NoRearm" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-11/28 Testing: Overspeed.S5_AckEdge_Rearms
-11/28 Test: Overspeed.S5_AckEdge_Rearms
+11/30 Testing: Overspeed.S5_AckEdge_Rearms
+11/30 Test: Overspeed.S5_AckEdge_Rearms
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Overspeed.S5_AckEdge_Rearms" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Overspeed.S5_AckEdge_Rearms" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S5_AckEdge_Rearms" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -299,15 +299,15 @@ Note: Google Test filter = Overspeed.S5_AckEdge_Rearms
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Overspeed.S5_AckEdge_Rearms" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S5_AckEdge_Rearms" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Overspeed.S5_AckEdge_Rearms" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-12/28 Testing: Overspeed.S6_HeldAck_NoAutoRearm
-12/28 Test: Overspeed.S6_HeldAck_NoAutoRearm
+12/30 Testing: Overspeed.S6_HeldAck_NoAutoRearm
+12/30 Test: Overspeed.S6_HeldAck_NoAutoRearm
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Overspeed.S6_HeldAck_NoAutoRearm" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Overspeed.S6_HeldAck_NoAutoRearm" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S6_HeldAck_NoAutoRearm" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -326,15 +326,15 @@ Note: Google Test filter = Overspeed.S6_HeldAck_NoAutoRearm
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Overspeed.S6_HeldAck_NoAutoRearm" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S6_HeldAck_NoAutoRearm" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Overspeed.S6_HeldAck_NoAutoRearm" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-13/28 Testing: Overspeed.S7_HardKill_Immediate
-13/28 Test: Overspeed.S7_HardKill_Immediate
+13/30 Testing: Overspeed.S7_HardKill_Immediate
+13/30 Test: Overspeed.S7_HardKill_Immediate
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Overspeed.S7_HardKill_Immediate" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Overspeed.S7_HardKill_Immediate" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S7_HardKill_Immediate" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -353,15 +353,15 @@ Note: Google Test filter = Overspeed.S7_HardKill_Immediate
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Overspeed.S7_HardKill_Immediate" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S7_HardKill_Immediate" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Overspeed.S7_HardKill_Immediate" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-14/28 Testing: Overspeed.S8_KillDominatesLand
-14/28 Test: Overspeed.S8_KillDominatesLand
+14/30 Testing: Overspeed.S8_KillDominatesLand
+14/30 Test: Overspeed.S8_KillDominatesLand
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Overspeed.S8_KillDominatesLand" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Overspeed.S8_KillDominatesLand" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S8_KillDominatesLand" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -380,15 +380,15 @@ Note: Google Test filter = Overspeed.S8_KillDominatesLand
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Overspeed.S8_KillDominatesLand" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Overspeed.S8_KillDominatesLand" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Overspeed.S8_KillDominatesLand" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-15/28 Testing: Battery.B1_ColdStart_NoFalseTrip
-15/28 Test: Battery.B1_ColdStart_NoFalseTrip
+15/30 Testing: Battery.B1_ColdStart_NoFalseTrip
+15/30 Test: Battery.B1_ColdStart_NoFalseTrip
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Battery.B1_ColdStart_NoFalseTrip" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Battery.B1_ColdStart_NoFalseTrip" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B1_ColdStart_NoFalseTrip" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -407,15 +407,15 @@ Note: Google Test filter = Battery.B1_ColdStart_NoFalseTrip
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Battery.B1_ColdStart_NoFalseTrip" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B1_ColdStart_NoFalseTrip" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Battery.B1_ColdStart_NoFalseTrip" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-16/28 Testing: Battery.B2_Ramp_Escalation
-16/28 Test: Battery.B2_Ramp_Escalation
+16/30 Testing: Battery.B2_Ramp_Escalation
+16/30 Test: Battery.B2_Ramp_Escalation
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Battery.B2_Ramp_Escalation" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Battery.B2_Ramp_Escalation" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B2_Ramp_Escalation" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -434,15 +434,15 @@ Note: Google Test filter = Battery.B2_Ramp_Escalation
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Battery.B2_Ramp_Escalation" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B2_Ramp_Escalation" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Battery.B2_Ramp_Escalation" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-17/28 Testing: Battery.B3_Hysteresis_NoChatter
-17/28 Test: Battery.B3_Hysteresis_NoChatter
+17/30 Testing: Battery.B3_Hysteresis_NoChatter
+17/30 Test: Battery.B3_Hysteresis_NoChatter
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Battery.B3_Hysteresis_NoChatter" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Battery.B3_Hysteresis_NoChatter" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B3_Hysteresis_NoChatter" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -461,15 +461,15 @@ Note: Google Test filter = Battery.B3_Hysteresis_NoChatter
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Battery.B3_Hysteresis_NoChatter" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B3_Hysteresis_NoChatter" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Battery.B3_Hysteresis_NoChatter" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-18/28 Testing: Battery.B4_FloorLatch_Sticky
-18/28 Test: Battery.B4_FloorLatch_Sticky
+18/30 Testing: Battery.B4_FloorLatch_Sticky
+18/30 Test: Battery.B4_FloorLatch_Sticky
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Battery.B4_FloorLatch_Sticky" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Battery.B4_FloorLatch_Sticky" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B4_FloorLatch_Sticky" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -488,15 +488,15 @@ Note: Google Test filter = Battery.B4_FloorLatch_Sticky
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Battery.B4_FloorLatch_Sticky" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B4_FloorLatch_Sticky" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Battery.B4_FloorLatch_Sticky" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-19/28 Testing: Battery.B5_EMA_FiltersShortSag
-19/28 Test: Battery.B5_EMA_FiltersShortSag
+19/30 Testing: Battery.B5_EMA_FiltersShortSag
+19/30 Test: Battery.B5_EMA_FiltersShortSag
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Battery.B5_EMA_FiltersShortSag" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Battery.B5_EMA_FiltersShortSag" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B5_EMA_FiltersShortSag" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -515,15 +515,15 @@ Note: Google Test filter = Battery.B5_EMA_FiltersShortSag
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Battery.B5_EMA_FiltersShortSag" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B5_EMA_FiltersShortSag" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Battery.B5_EMA_FiltersShortSag" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-20/28 Testing: Battery.B6_CountRange
-20/28 Test: Battery.B6_CountRange
+20/30 Testing: Battery.B6_CountRange
+20/30 Test: Battery.B6_CountRange
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_safety.exe" "--gtest_filter=Battery.B6_CountRange" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"Battery.B6_CountRange" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B6_CountRange" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -542,15 +542,15 @@ Note: Google Test filter = Battery.B6_CountRange
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"Battery.B6_CountRange" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"Battery.B6_CountRange" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "Battery.B6_CountRange" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-21/28 Testing: LinkCodec.WireBitExact
-21/28 Test: LinkCodec.WireBitExact
+21/30 Testing: LinkCodec.WireBitExact
+21/30 Test: LinkCodec.WireBitExact
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_link_codec.exe" "--gtest_filter=LinkCodec.WireBitExact" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"LinkCodec.WireBitExact" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"LinkCodec.WireBitExact" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -569,15 +569,15 @@ Note: Google Test filter = LinkCodec.WireBitExact
 Test time =   0.02 sec
 ----------------------------------------------------------
 Test Passed.
-"LinkCodec.WireBitExact" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"LinkCodec.WireBitExact" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "LinkCodec.WireBitExact" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-22/28 Testing: LinkCodec.DecodeMatchesRx
-22/28 Test: LinkCodec.DecodeMatchesRx
+22/30 Testing: LinkCodec.DecodeMatchesRx
+22/30 Test: LinkCodec.DecodeMatchesRx
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_link_codec.exe" "--gtest_filter=LinkCodec.DecodeMatchesRx" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"LinkCodec.DecodeMatchesRx" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"LinkCodec.DecodeMatchesRx" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -586,25 +586,25 @@ Note: Google Test filter = LinkCodec.DecodeMatchesRx
 [----------] Global test environment set-up.
 [----------] 1 test from LinkCodec
 [ RUN      ] LinkCodec.DecodeMatchesRx
-[       OK ] LinkCodec.DecodeMatchesRx (5 ms)
-[----------] 1 test from LinkCodec (5 ms total)
+[       OK ] LinkCodec.DecodeMatchesRx (4 ms)
+[----------] 1 test from LinkCodec (4 ms total)
 
 [----------] Global test environment tear-down
-[==========] 1 test from 1 test suite ran. (5 ms total)
+[==========] 1 test from 1 test suite ran. (4 ms total)
 [  PASSED  ] 1 test.
 <end of output>
 Test time =   0.02 sec
 ----------------------------------------------------------
 Test Passed.
-"LinkCodec.DecodeMatchesRx" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"LinkCodec.DecodeMatchesRx" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "LinkCodec.DecodeMatchesRx" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-23/28 Testing: LinkCodec.HeaderRoundTrip
-23/28 Test: LinkCodec.HeaderRoundTrip
+23/30 Testing: LinkCodec.HeaderRoundTrip
+23/30 Test: LinkCodec.HeaderRoundTrip
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_link_codec.exe" "--gtest_filter=LinkCodec.HeaderRoundTrip" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"LinkCodec.HeaderRoundTrip" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"LinkCodec.HeaderRoundTrip" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -613,25 +613,25 @@ Note: Google Test filter = LinkCodec.HeaderRoundTrip
 [----------] Global test environment set-up.
 [----------] 1 test from LinkCodec
 [ RUN      ] LinkCodec.HeaderRoundTrip
-[       OK ] LinkCodec.HeaderRoundTrip (5 ms)
-[----------] 1 test from LinkCodec (5 ms total)
+[       OK ] LinkCodec.HeaderRoundTrip (6 ms)
+[----------] 1 test from LinkCodec (6 ms total)
 
 [----------] Global test environment tear-down
-[==========] 1 test from 1 test suite ran. (5 ms total)
+[==========] 1 test from 1 test suite ran. (6 ms total)
 [  PASSED  ] 1 test.
 <end of output>
 Test time =   0.02 sec
 ----------------------------------------------------------
 Test Passed.
-"LinkCodec.HeaderRoundTrip" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"LinkCodec.HeaderRoundTrip" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "LinkCodec.HeaderRoundTrip" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-24/28 Testing: GcsFrame.ParseMatchesGolden
-24/28 Test: GcsFrame.ParseMatchesGolden
+24/30 Testing: GcsFrame.ParseMatchesGolden
+24/30 Test: GcsFrame.ParseMatchesGolden
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_gcs_frame.exe" "--gtest_filter=GcsFrame.ParseMatchesGolden" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"GcsFrame.ParseMatchesGolden" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"GcsFrame.ParseMatchesGolden" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -640,8 +640,8 @@ Note: Google Test filter = GcsFrame.ParseMatchesGolden
 [----------] Global test environment set-up.
 [----------] 1 test from GcsFrame
 [ RUN      ] GcsFrame.ParseMatchesGolden
-[       OK ] GcsFrame.ParseMatchesGolden (2 ms)
-[----------] 1 test from GcsFrame (2 ms total)
+[       OK ] GcsFrame.ParseMatchesGolden (1 ms)
+[----------] 1 test from GcsFrame (1 ms total)
 
 [----------] Global test environment tear-down
 [==========] 1 test from 1 test suite ran. (2 ms total)
@@ -650,15 +650,15 @@ Note: Google Test filter = GcsFrame.ParseMatchesGolden
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"GcsFrame.ParseMatchesGolden" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"GcsFrame.ParseMatchesGolden" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "GcsFrame.ParseMatchesGolden" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-25/28 Testing: GcsFrame.RejectsCorruption
-25/28 Test: GcsFrame.RejectsCorruption
+25/30 Testing: GcsFrame.RejectsCorruption
+25/30 Test: GcsFrame.RejectsCorruption
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_gcs_frame.exe" "--gtest_filter=GcsFrame.RejectsCorruption" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"GcsFrame.RejectsCorruption" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"GcsFrame.RejectsCorruption" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -674,18 +674,18 @@ Note: Google Test filter = GcsFrame.RejectsCorruption
 [==========] 1 test from 1 test suite ran. (2 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.02 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"GcsFrame.RejectsCorruption" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"GcsFrame.RejectsCorruption" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "GcsFrame.RejectsCorruption" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-26/28 Testing: McuGolden.RotorCmdMatchesGolden
-26/28 Test: McuGolden.RotorCmdMatchesGolden
+26/30 Testing: McuGolden.RotorCmdMatchesGolden
+26/30 Test: McuGolden.RotorCmdMatchesGolden
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_mcu_model.exe" "--gtest_filter=McuGolden.RotorCmdMatchesGolden" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"McuGolden.RotorCmdMatchesGolden" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"McuGolden.RotorCmdMatchesGolden" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -694,25 +694,25 @@ Note: Google Test filter = McuGolden.RotorCmdMatchesGolden
 [----------] Global test environment set-up.
 [----------] 1 test from McuGolden
 [ RUN      ] McuGolden.RotorCmdMatchesGolden
-[       OK ] McuGolden.RotorCmdMatchesGolden (81 ms)
-[----------] 1 test from McuGolden (81 ms total)
+[       OK ] McuGolden.RotorCmdMatchesGolden (74 ms)
+[----------] 1 test from McuGolden (74 ms total)
 
 [----------] Global test environment tear-down
-[==========] 1 test from 1 test suite ran. (81 ms total)
+[==========] 1 test from 1 test suite ran. (74 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.10 sec
+Test time =   0.09 sec
 ----------------------------------------------------------
 Test Passed.
-"McuGolden.RotorCmdMatchesGolden" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"McuGolden.RotorCmdMatchesGolden" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "McuGolden.RotorCmdMatchesGolden" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-27/28 Testing: McuGolden.DeterministicAcrossFreshInstances
-27/28 Test: McuGolden.DeterministicAcrossFreshInstances
+27/30 Testing: McuGolden.DeterministicAcrossFreshInstances
+27/30 Test: McuGolden.DeterministicAcrossFreshInstances
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_mcu_model.exe" "--gtest_filter=McuGolden.DeterministicAcrossFreshInstances" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"McuGolden.DeterministicAcrossFreshInstances" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"McuGolden.DeterministicAcrossFreshInstances" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -721,25 +721,25 @@ Note: Google Test filter = McuGolden.DeterministicAcrossFreshInstances
 [----------] Global test environment set-up.
 [----------] 1 test from McuGolden
 [ RUN      ] McuGolden.DeterministicAcrossFreshInstances
-[       OK ] McuGolden.DeterministicAcrossFreshInstances (88 ms)
-[----------] 1 test from McuGolden (88 ms total)
+[       OK ] McuGolden.DeterministicAcrossFreshInstances (92 ms)
+[----------] 1 test from McuGolden (92 ms total)
 
 [----------] Global test environment tear-down
-[==========] 1 test from 1 test suite ran. (88 ms total)
+[==========] 1 test from 1 test suite ran. (92 ms total)
 [  PASSED  ] 1 test.
 <end of output>
 Test time =   0.10 sec
 ----------------------------------------------------------
 Test Passed.
-"McuGolden.DeterministicAcrossFreshInstances" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"McuGolden.DeterministicAcrossFreshInstances" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "McuGolden.DeterministicAcrossFreshInstances" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-28/28 Testing: McuFailsafe.Estop2KillsThrottleAndRotor
-28/28 Test: McuFailsafe.Estop2KillsThrottleAndRotor
+28/30 Testing: McuFailsafe.Estop2KillsThrottleAndRotor
+28/30 Test: McuFailsafe.Estop2KillsThrottleAndRotor
 Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_mcu_model.exe" "--gtest_filter=McuFailsafe.Estop2KillsThrottleAndRotor" "--gtest_also_run_disabled_tests"
 Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
-"McuFailsafe.Estop2KillsThrottleAndRotor" start time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"McuFailsafe.Estop2KillsThrottleAndRotor" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 Output:
 ----------------------------------------------------------
 Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
@@ -758,8 +758,62 @@ Note: Google Test filter = McuFailsafe.Estop2KillsThrottleAndRotor
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"McuFailsafe.Estop2KillsThrottleAndRotor" end time: Jul 13 14:40 Mitteleuropäische Sommerzeit
+"McuFailsafe.Estop2KillsThrottleAndRotor" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
 "McuFailsafe.Estop2KillsThrottleAndRotor" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Jul 13 14:40 Mitteleuropäische Sommerzeit
+29/30 Testing: McuOverspeed.HighGyroKillsThenButtonReleases
+29/30 Test: McuOverspeed.HighGyroKillsThenButtonReleases
+Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_mcu_model.exe" "--gtest_filter=McuOverspeed.HighGyroKillsThenButtonReleases" "--gtest_also_run_disabled_tests"
+Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
+"McuOverspeed.HighGyroKillsThenButtonReleases" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
+Output:
+----------------------------------------------------------
+Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
+Note: Google Test filter = McuOverspeed.HighGyroKillsThenButtonReleases
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from McuOverspeed
+[ RUN      ] McuOverspeed.HighGyroKillsThenButtonReleases
+[       OK ] McuOverspeed.HighGyroKillsThenButtonReleases (0 ms)
+[----------] 1 test from McuOverspeed (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"McuOverspeed.HighGyroKillsThenButtonReleases" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
+"McuOverspeed.HighGyroKillsThenButtonReleases" time elapsed: 00:00:00
+----------------------------------------------------------
+
+30/30 Testing: McuBattery.RampEscalatesLed
+30/30 Test: McuBattery.RampEscalatesLed
+Command: "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_mcu_model.exe" "--gtest_filter=McuBattery.RampEscalatesLed" "--gtest_also_run_disabled_tests"
+Directory: C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build
+"McuBattery.RampEscalatesLed" start time: Jul 13 16:33 Mitteleuropäische Sommerzeit
+Output:
+----------------------------------------------------------
+Running main() from C:\Users\Nick\thesis_doctoral\MAS Versuchsaufbau\Drohnen\DROMA\Simulation\scripts\sitl\build\_deps\googletest-src\googletest\src\gtest_main.cc
+Note: Google Test filter = McuBattery.RampEscalatesLed
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from McuBattery
+[ RUN      ] McuBattery.RampEscalatesLed
+[       OK ] McuBattery.RampEscalatesLed (10 ms)
+[----------] 1 test from McuBattery (10 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (10 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"McuBattery.RampEscalatesLed" end time: Jul 13 16:33 Mitteleuropäische Sommerzeit
+"McuBattery.RampEscalatesLed" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jul 13 16:33 Mitteleuropäische Sommerzeit

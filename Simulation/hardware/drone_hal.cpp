@@ -52,6 +52,7 @@ static constexpr uint8_t PIN_BCD[4]    = {17, 16, 39, 38}; // BCD 1/2/4/8, INPUT
 static constexpr uint8_t PIN_NRF_CE    = 14;
 static constexpr uint8_t PIN_NRF_CSN   = 0;
 static constexpr uint8_t PIN_NRF_IRQ   = 9;            // optional (hier gepollt)
+static constexpr uint8_t PIN_BTN       = 21;           // Taster: active-low (INPUT_PULLUP) -> btn_ack (Latch-Reset)
 
 // ------------------------------ Konstanten -----------------------------------
 static constexpr double  G        = 9.80665;
@@ -175,14 +176,14 @@ static void selftest_report(const MCU::ExtY_mcu_T& y) {
     if (++n < 100) return; n = 0;
     double V = g_U.batt_count * 0.016673728813559323;        // Volt wie Modell (k HW-kal. 15.74/944)
     Serial.printf("id=%u gyro[% .3f % .3f % .3f] acc[% .2f % .2f % .2f] "
-                  "batt=%.0f(%.2fV) bias[% .3f % .3f % .3f] link=%lums estop=%u "
+                  "batt=%.0f(%.2fV) bias[% .3f % .3f % .3f] link=%lums estop=%u btn=%u "
                   "thr[%.0f %.0f %.0f %.0f] tickmax=%luus\n",
         g_own_id,
         g_U.Bus_IMU_k.imu_gyro[0], g_U.Bus_IMU_k.imu_gyro[1], g_U.Bus_IMU_k.imu_gyro[2],
         g_U.Bus_IMU_k.imu_acc[0],  g_U.Bus_IMU_k.imu_acc[1],  g_U.Bus_IMU_k.imu_acc[2],
         g_U.batt_count, V,
         g_gyro_bias[0], g_gyro_bias[1], g_gyro_bias[2],
-        (unsigned long)(millis() - g_t_last_rx), g_U.Bus_Cmd_l.estop,
+        (unsigned long)(millis() - g_t_last_rx), g_U.Bus_Cmd_l.estop, (unsigned)g_U.btn_ack,
         y.throttle[0], y.throttle[1], y.throttle[2], y.throttle[3],
         (unsigned long)g_tick_dt_max);
 }
@@ -198,6 +199,7 @@ void setup() {
     for (int i=0;i<4;++i) pinMode(PIN_PWM[i], OUTPUT);
     pinMode(PIN_LED, OUTPUT); pinMode(PIN_STAT_100, OUTPUT);
     for (int i=0;i<4;++i) pinMode(PIN_BCD[i], INPUT_PULLUP);
+    pinMode(PIN_BTN, INPUT_PULLUP);                          // Taster gegen GND, gedrueckt = LOW
 
     // ESC/OneShot125-PWM: count 512..1024 == 125..250 us
     analogWriteResolution(12);
@@ -292,6 +294,10 @@ void loop() {
 
     // 3) batt_count: rohe 12-bit counts (Volt-Umrechnung macht S6 im Modell)
     g_U.batt_count = (double)analogRead(PIN_BATT_V);
+
+    // 3b) btn_ack: Taster active-low (gedrueckt=LOW). Im Modell mit Bus_Cmd.ack
+    //     ge-OR-t -> loest den safety_overspeed-Latch (nur bei ~over_inst & estop!=2).
+    g_U.btn_ack = (digitalRead(PIN_BTN) == LOW);
 
     // 4) Ein step()
     g_mcu.setExternalInputs(&g_U);

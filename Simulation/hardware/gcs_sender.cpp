@@ -45,6 +45,11 @@ static void forward_frame(const uint8_t frame[gcs::SIZE]) {
     uint8_t buf[pkt::SIZE];
     pkt::pack(cmd, id, g_seq[id]++, buf);       // seq pro Drohne, dann inkrementieren
     g_radio.write(buf, pkt::SIZE);              // Auto-Ack AUS -> kehrt nach TX zurueck
+
+    // Bring-up-Heartbeat: LED toggelt nur bei gueltigen (Sync+CRC-ok) Frames von
+    // Simulink -> blinkt = USB+Parse ok (Problem ggf. RF); dunkel = USB/Format-Problem.
+    static uint16_t n = 0; static bool led = false;
+    if ((++n % 5) == 0) { led = !led; digitalWrite(LED_BUILTIN, led); }
 }
 
 // --- USB-Serial: byteweiser Sync-Hunt (resynct nach jeder Stoerung) ----------
@@ -71,6 +76,7 @@ static void serial_pump() {
 
 void setup() {
     Serial.begin(1000000);                       // USB-CDC: Rate egal, aber definiert
+    pinMode(LED_BUILTIN, OUTPUT);                 // Heartbeat (Pin 13, frei — SPI1 nutzt SCK27)
 
     // Teensy: SPI1-Pins explizit + SPI1.begin() VOR RF24, sonst haengt begin(&SPI1).
     SPI1.setMOSI(26); SPI1.setMISO(1); SPI1.setSCK(27);

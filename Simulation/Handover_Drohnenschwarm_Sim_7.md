@@ -299,8 +299,29 @@ nicht `led`). Die „25/50/75 %-Pins"-Suche war gegenstandslos.
      HAL sendet weiter rohe `analogRead`-counts (passt zum Inport), Telemetrie-
      Print auf neues k. Offen: Selbsttest reflashen → Report muss **15.74 V** zeigen.
 - **log_mcu_golden robust:** kommentiert die GS-`Serial`-Blöcke (die der Nutzer für
-  §3d in `main` einbaute) für die headless-Sim in-memory aus (Disk unberührt),
+  §3d in `main`/`quadcop` einbaute) für die headless-Sim in-memory aus (Disk unberührt),
   sonst „Serial Configuration: No ports selected".
+- **✅ Taster-Re-Arm `btn_ack` (Session 8).** `safety_overspeed` löst den Kill-Latch
+  über `ack` (steigende Flanke), definiert als `Bus_Cmd.ack OR btn_ack`. Der
+  physische Teensy-Taster war in `mcu.slx` eine **Konstante** → auf HW re-armte nur
+  der Uplink. Jetzt: „push button drone"-Konstante → **Inport `btn_ack`** (boolean,
+  ExtU-4. Eingang), generierter Code `ack = Bus_Cmd_l.ack || btn_ack`. HAL liest
+  **Pin 21** `INPUT_PULLUP`, active-low (`btn_ack = digitalRead(21)==LOW`), Report
+  zeigt `btn=`. Plant `quadcop.slx`: Constant1 (boolean false) speist den Port fürs
+  Golden. ⚠️ Modellname `quadcop` kollidiert mit der Params-Var `quadcop` → Simulink
+  warnt („shadowed by a variable"), nur Warnung.
+- **✅ Safety im generierten Code getestet (Session 8).** `safety_overspeed`/
+  `safety_battery` waren als **Algorithmus** unit-getestet (`test_safety.cpp` S1–S9,
+  B1–B6, gegen `safety_helpers_ref.cpp`), aber das Golden speist nur benigne
+  Eingänge → im **generierten** `mcu.cpp` liefen Trip/Eskalation nie. Zwei
+  Integrationstests ergänzt (treiben ExtU direkt): `McuOverspeed` (‖gyro‖=9>8.5 →
+  rotor/throttle=0; Latch hält ohne Flanke; `btn_ack`-Flanke → Freigabe) und
+  `McuBattery` (Rampe → led 0→1→2 an 14.0/13.4 V, HW-kal. k). **Gate B 30/30**.
+- **Regen-Runbook headless (Session 8):** `regen_full.m` (Scratchpad) mit
+  `onCleanup`-Guard, der Modelle vor Exit `Dirty=off` setzt + `bdclose('all')` →
+  **keine Disk-Kollision** mehr, wenn die interaktive MATLAB-Session gleichzeitig
+  offen ist (sonst „file changed on disk"/Save-Dialog-Absturz). Nach Inport-
+  Änderung: `IN_NAMES` in `log_mcu_golden.m` mitziehen, sonst Zähler-Assert.
 
 **Firmware-Build-Hinweis:** `drone_hal.cpp` braucht auf dem Include-Pfad die
 ARM-`mcu.h` (`hardware\mcu_arm\mcu_ert_rtw\`) **und** die SSOT `mcu_packet.hpp`

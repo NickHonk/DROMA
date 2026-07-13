@@ -121,3 +121,71 @@ TEST(McuFailsafe, Estop2KillsThrottleAndRotor) {
         EXPECT_EQ(0.0, y.rotor_cmd[i]) << "rotor_cmd[" << i << "] nicht gekillt bei estop=2";
     }
 }
+
+// Overspeed-Latch im generierten Code: ||gyro|| > omega_max(8.5) fuer > debounce_N(4)
+// Ticks -> Kill (rotor/throttle=0). Latch HAELT ohne ack-Flanke. Taster (btn_ack)
+// steigende Flanke bei ~overspeed & estop!=2 -> Re-Arm (Rotoren wieder frei).
+// Deckt die generierte ack-OR (Bus_Cmd.ack || btn_ack) + safety_overspeed integriert ab.
+TEST(McuOverspeed, HighGyroKillsThenButtonReleases) {
+    MCU obj; obj.initialize();
+    MCU::ExtU_mcu_T u{};
+    u.Bus_IMU_k.imu_acc[2] = 9.81;                  // Schwerkraft -> Estimator level
+    u.Bus_Cmd_l.F_des = 9.4666;                     // ~Hover -> ohne Kill rotor_cmd>0
+    u.Bus_Cmd_l.q_des[0] = 1.0;
+    u.Bus_Cmd_l.q_ref[0] = 1.0;
+    u.Bus_Cmd_l.q_ext[0] = 1.0;
+    u.Bus_Cmd_l.estop = 0;                          // KEIN Hard-Kill (isolier Overspeed)
+    u.batt_count = 944.0;                           // ~15.74 V -> Batterie NORMAL
+    u.btn_ack = false;
+
+    // Phase 1: Overspeed -> Kill-Latch.
+    u.Bus_IMU_k.imu_gyro[0] = 9.0;                  // ||.||=9 > 8.5
+    for (int k = 0; k < 10; ++k) { obj.setExternalInputs(&u); obj.step(); }
+    {
+        const auto& y = obj.getExternalOutputs();
+        for (int i = 0; i < 4; ++i) {
+            EXPECT_EQ(0.0, y.rotor_cmd[i]) << "rotor_cmd[" << i << "] nicht gekillt bei Overspeed";
+            EXPECT_EQ(0.0, y.throttle[i])  << "throttle["  << i << "] nicht gekillt bei Overspeed";
+        }
+    }
+
+    // Phase 2a: gyro zurueck auf 0, aber KEIN Taster -> Latch muss halten.
+    u.Bus_IMU_k.imu_gyro[0] = 0.0;
+    for (int k = 0; k < 10; ++k) { obj.setExternalInputs(&u); obj.step(); }
+    {
+        const auto& y = obj.getExternalOutputs();
+        double s = 0.0; for (int i = 0; i < 4; ++i) s += std::abs(y.rotor_cmd[i]);
+        EXPECT_EQ(0.0, s) << "Latch darf ohne ack-Flanke NICHT selbst freigeben";
+    }
+
+    // Phase 2b: btn_ack steigende Flanke (~overspeed, estop!=2) -> Re-Arm.
+    u.btn_ack = true;
+    for (int k = 0; k < 10; ++k) { obj.setExternalInputs(&u); obj.step(); }
+    {
+        const auto& y = obj.getExternalOutputs();
+        double s = 0.0; for (int i = 0; i < 4; ++i) s += std::abs(y.rotor_cmd[i]);
+        EXPECT_GT(s, 0.0) << "nach Taster-Flanke muessen die Rotoren wieder frei sein";
+    }
+}
+
+// Batterie-FSM im generierten Code: fallende Spannung -> led 0(NORMAL)->1(WARN,<=14.0)
+// ->2(CRIT,<=13.4). Treibt batt_count = round(V/k) mit HW-kalibriertem k und laesst
+// den EMA-Tiefpass je Stufe auskonvergieren (grosszuegige Tickzahl).
+TEST(McuBattery, RampEscalatesLed) {
+    MCU obj; obj.initialize();
+    MCU::ExtU_mcu_T u{};
+    u.Bus_IMU_k.imu_acc[2] = 9.81;
+    u.Bus_Cmd_l.q_des[0] = 1.0;
+    u.Bus_Cmd_l.q_ref[0] = 1.0;
+    u.Bus_Cmd_l.q_ext[0] = 1.0;
+    u.Bus_Cmd_l.estop = 0;
+    const double k = 0.016673728813559323;          // HW-kal. (== mcu_data.cpp)
+    auto settle = [&](double volts, int n) -> int {
+        u.batt_count = std::round(volts / k);
+        for (int i = 0; i < n; ++i) { obj.setExternalInputs(&u); obj.step(); }
+        return (int)obj.getExternalOutputs().led;
+    };
+    EXPECT_EQ(0, settle(15.5, 30000)) << "led sollte NORMAL sein bei 15.5 V";
+    EXPECT_EQ(1, settle(13.7, 30000)) << "led sollte WARN sein bei 13.7 V (<=14.0, >13.4)";
+    EXPECT_EQ(2, settle(13.0, 30000)) << "led sollte CRIT sein bei 13.0 V (<=13.4)";
+}

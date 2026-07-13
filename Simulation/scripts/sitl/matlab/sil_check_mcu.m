@@ -12,10 +12,10 @@
 %  bei Bedarf selbst.
 function sil_check_mcu(harness, mcuBlock)
 if nargin < 1 
-    harness  = 'main'; 
+    harness  = 'quadcop';
 end
 if nargin < 2 
-    mcuBlock = 'main/running on the quadrocopter MCU'; 
+    mcuBlock = 'quadcop/running on the quadrocopter MCU';
 end
 load_system(harness);
 Ts_inner = evalin('base','Ts_inner');
@@ -38,7 +38,7 @@ for oIdx = 1:numel(ph.Outport)
     % DataLogging gehoert an das Output-Port-Handle (das das Signal erzeugt),
     % NICHT an die Linie. Der MCU-Outport IST die Quelle -> direkt hier setzen.
     if get_param(ph.Outport(oIdx),'Line') == -1
-        warning('MCU-Ausgang "%s" unverdrahtet in main — wird nicht geloggt.', ...
+        warning('MCU-Ausgang "%s" unverdrahtet in quadcop — wird nicht geloggt.', ...
                 outNames{oIdx});
         continue;
     end
@@ -63,7 +63,7 @@ rS = grab(S,'rotor_cmd',Ts_inner,T_STOP);  lS = grab(S,'led',Ts_inner,T_STOP);
 tS = grab(S,'throttle',Ts_inner,T_STOP);
 
 if isempty(rN) || isempty(rS)
-    error('rotor_cmd nicht geloggt — MCU-Ausgang in main verdrahtet?');
+    error('rotor_cmd nicht geloggt — MCU-Ausgang in quadcop verdrahtet?');
 end
 w = max(abs(rN(:)-rS(:)));
 fprintf('\n[SIL vs Normal] rotor_cmd max|d| = %.3e  ueber %d Ticks x %d Rotoren.\n', ...
@@ -74,7 +74,7 @@ if ~isempty(tN) && ~isempty(tS)
 end
 led_ok = true;
 if isempty(lN) || isempty(lS)
-    fprintf(['[SIL vs Normal] led      = uebersprungen (Ausgang in main ' ...
+    fprintf(['[SIL vs Normal] led      = uebersprungen (Ausgang in quadcop ' ...
              'unverdrahtet). Fuer Gate B Terminator an led haengen.\n']);
 else
     nl = sum(lN(:) ~= lS(:)); led_ok = (nl == 0);

@@ -69,6 +69,9 @@ inline void wire_inputs(MCU::ExtU_mcu_T& u, const NamedCsv& g, std::size_t r) {
     u.Bus_Cmd_l.estop = static_cast<uint8_T>(g.get(r, "Bus_Cmd.estop.1"));
     u.Bus_Cmd_l.ack   = (g.get(r, "Bus_Cmd.ack.1") != 0.0);
     u.batt_count      = g.get(r, "batt_count.1");
+    // btn_ack (Teensy-Taster, active-low) -> ge-OR-t mit Bus_Cmd.ack im Modell.
+    // has()-Guard: aeltere Golden ohne die Spalte fallen auf false zurueck.
+    u.btn_ack         = g.has("btn_ack.1") ? (g.get(r, "btn_ack.1") != 0.0) : false;
 }
 
 // --- ExtY rotor_cmd vs Golden -> groesste Abweichung ------------------------

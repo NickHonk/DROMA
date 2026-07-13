@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.268
+// Model version                  : 1.274
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Mon Jul 13 12:31:53 2026
+// C/C++ source code generated on : Mon Jul 13 16:27:31 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -138,7 +138,7 @@ void MCU::step()
   real_T S_tmp[9];
   real_T S_tmp_0[9];
   real_T rtb_F_cmd_0[4];
-  real_T rtb_Add[3];
+  real_T rtb_Subtract[3];
   real_T rtb_tau_ref[3];
   real_T rtb_tau_ref_0[3];
   real_T theta[3];
@@ -167,27 +167,27 @@ void MCU::step()
   int32_T rtb_q_des_idx_0_tmp;
   int_T idx;
   boolean_T over_inst;
+  boolean_T rtb_LogicalOperator;
   static const int8_T b_b[3]{ 0, 0, 1 };
 
-  // Sum: '<Root>/Add' incorporates:
+  // Logic: '<Root>/Logical Operator' incorporates:
+  //   Inport: '<Root>/Bus_Cmd'
+  //   Inport: '<Root>/btn_ack'
+
+  rtb_LogicalOperator = (mcu_U.Bus_Cmd_l.ack || mcu_U.btn_ack);
+
+  // MATLAB Function: '<Root>/MATLAB Function' incorporates:
   //   Constant: '<Root>/Constant1'
+  //   Inport: '<Root>/Bus_Cmd'
   //   Inport: '<Root>/Bus_IMU'
   //   Sum: '<Root>/Subtract'
 
-  rtb_Add[0] = (mcu_U.Bus_IMU_k.imu_gyro[0] - 0.17453292519943295) +
-    mcu_ConstB.Gain1[0];
-  rtb_Add[1] = (mcu_U.Bus_IMU_k.imu_gyro[1] - -0.17453292519943295) +
-    mcu_ConstB.Gain1[1];
-  rtb_Add[2] = (mcu_U.Bus_IMU_k.imu_gyro[2] - 0.17453292519943295) +
-    mcu_ConstB.Gain1[2];
-
-  // MATLAB Function: '<Root>/MATLAB Function' incorporates:
-  //   Inport: '<Root>/Bus_Cmd'
-  //   Logic: '<Root>/Logical Operator'
-  //   Sum: '<Root>/Add'
-
-  over_inst = (std::sqrt((rtb_Add[0] * rtb_Add[0] + rtb_Add[1] * rtb_Add[1]) +
-    rtb_Add[2] * rtb_Add[2]) > 8.5);
+  over_inst = (std::sqrt(((mcu_U.Bus_IMU_k.imu_gyro[0] - 0.17453292519943295) *
+    (mcu_U.Bus_IMU_k.imu_gyro[0] - 0.17453292519943295) +
+    (mcu_U.Bus_IMU_k.imu_gyro[1] - -0.17453292519943295) *
+    (mcu_U.Bus_IMU_k.imu_gyro[1] - -0.17453292519943295)) +
+    (mcu_U.Bus_IMU_k.imu_gyro[2] - 0.17453292519943295) *
+    (mcu_U.Bus_IMU_k.imu_gyro[2] - 0.17453292519943295)) > 8.5);
   if (over_inst) {
     if (mcu_DW.cnt < 4) {
       mcu_DW.cnt = static_cast<uint16_T>(mcu_DW.cnt + 1);
@@ -199,13 +199,13 @@ void MCU::step()
   mcu_DW.latched = (((mcu_DW.cnt >= 4) && (!mcu_DW.latched)) || mcu_DW.latched);
   mcu_DW.latched = (((mcu_U.Bus_Cmd_l.estop == 2) && (!mcu_DW.latched)) ||
                     mcu_DW.latched);
-  if (mcu_DW.latched && (mcu_U.Bus_Cmd_l.ack && (!mcu_DW.ack_prev)) &&
+  if (mcu_DW.latched && (rtb_LogicalOperator && (!mcu_DW.ack_prev)) &&
       (!over_inst) && (mcu_U.Bus_Cmd_l.estop != 2)) {
     mcu_DW.latched = false;
     mcu_DW.cnt = 0U;
   }
 
-  mcu_DW.ack_prev = mcu_U.Bus_Cmd_l.ack;
+  mcu_DW.ack_prev = rtb_LogicalOperator;
 
   // MATLAB Function: '<S3>/MATLAB Function' incorporates:
   //   Constant: '<Root>/Constant1'
@@ -245,9 +245,9 @@ void MCU::step()
     S_tmp[2] = (R_tmp_3 + R_tmp_4) * 2.0;
     S_tmp[5] = (q_err_idx_1 - rtb_q_ref_idx_3) * 2.0;
     S_tmp[8] = (R_tmp_1 - q_err_idx_2) + q_err_idx_3;
-    rtb_Add[0] = mcu_U.Bus_IMU_k.imu_acc[0] / na;
-    rtb_Add[1] = mcu_U.Bus_IMU_k.imu_acc[1] / na;
-    rtb_Add[2] = mcu_U.Bus_IMU_k.imu_acc[2] / na;
+    rtb_Subtract[0] = mcu_U.Bus_IMU_k.imu_acc[0] / na;
+    rtb_Subtract[1] = mcu_U.Bus_IMU_k.imu_acc[1] / na;
+    rtb_Subtract[2] = mcu_U.Bus_IMU_k.imu_acc[2] / na;
     na = 0.0;
     rtb_q_des_idx_1 = 0.0;
     rtb_q_des_idx_2 = 0.0;
@@ -260,9 +260,10 @@ void MCU::step()
         (rtb_q_des_idx_0_tmp);
     }
 
-    theta[0] = rtb_Add[1] * rtb_q_des_idx_2 - rtb_q_des_idx_1 * rtb_Add[2];
-    theta[1] = na * rtb_Add[2] - rtb_Add[0] * rtb_q_des_idx_2;
-    theta[2] = rtb_Add[0] * rtb_q_des_idx_1 - na * rtb_Add[1];
+    theta[0] = rtb_Subtract[1] * rtb_q_des_idx_2 - rtb_q_des_idx_1 *
+      rtb_Subtract[2];
+    theta[1] = na * rtb_Subtract[2] - rtb_Subtract[0] * rtb_q_des_idx_2;
+    theta[2] = rtb_Subtract[0] * rtb_q_des_idx_1 - na * rtb_Subtract[1];
   } else {
     theta[0] = 0.0;
     theta[1] = 0.0;
@@ -297,13 +298,13 @@ void MCU::step()
     rtb_tau_ref[2] = 0.0;
   }
 
-  rtb_Add[0] = mcu_U.Bus_IMU_k.imu_gyro[0] - 0.17453292519943295;
+  rtb_Subtract[0] = mcu_U.Bus_IMU_k.imu_gyro[0] - 0.17453292519943295;
   theta[0] = ((25.0 * rtb_tau_ref[0] + theta[0]) + (mcu_U.Bus_IMU_k.imu_gyro[0]
     - 0.17453292519943295)) * 0.001;
-  rtb_Add[1] = mcu_U.Bus_IMU_k.imu_gyro[1] - -0.17453292519943295;
+  rtb_Subtract[1] = mcu_U.Bus_IMU_k.imu_gyro[1] - -0.17453292519943295;
   theta[1] = ((25.0 * rtb_tau_ref[1] + theta[1]) + (mcu_U.Bus_IMU_k.imu_gyro[1]
     - -0.17453292519943295)) * 0.001;
-  rtb_Add[2] = mcu_U.Bus_IMU_k.imu_gyro[2] - 0.17453292519943295;
+  rtb_Subtract[2] = mcu_U.Bus_IMU_k.imu_gyro[2] - 0.17453292519943295;
   theta[2] = ((25.0 * rtb_tau_ref[2] + theta[2]) + (mcu_U.Bus_IMU_k.imu_gyro[2]
     - 0.17453292519943295)) * 0.001;
   nE = mcu_norm(theta);
@@ -352,8 +353,8 @@ void MCU::step()
   mcu_DW.q[3] /= R_tmp_1;
 
   // RateTransition: '<Root>/Rate Transition'
-  over_inst = ((&mcu_M)->Timing.TaskCounters.TID[1] == 0);
-  if (over_inst) {
+  rtb_LogicalOperator = ((&mcu_M)->Timing.TaskCounters.TID[1] == 0);
+  if (rtb_LogicalOperator) {
     // RateTransition: '<Root>/Rate Transition'
     mcu_B.RateTransition = mcu_DW.RateTransition_Buffer0;
   }
@@ -530,7 +531,7 @@ void MCU::step()
   q_err_idx_1 = 0.0;
   q_err_idx_2 = 0.0;
   for (idx = 0; idx < 3; idx++) {
-    theta[idx] = rtb_Add[idx] - ((S_tmp_0[idx + 3] * nE + S_tmp_0[idx] *
+    theta[idx] = rtb_Subtract[idx] - ((S_tmp_0[idx + 3] * nE + S_tmp_0[idx] *
       rtb_q_ref_idx_3) + S_tmp_0[idx + 6] * R_tmp_2);
     rtb_tau_ref_0[idx] = rtb_tau_ref[idx] - ((mcu_ConstP.Constant_Value_m[idx +
       3] * rtb_q_des_idx_1 + mcu_ConstP.Constant_Value_m[idx] * na) +
@@ -658,7 +659,7 @@ void MCU::step()
   }
 
   // End of Switch: '<Root>/Switch'
-  if (over_inst) {
+  if (rtb_LogicalOperator) {
     // MATLAB Function: '<Root>/MATLAB Function1' incorporates:
     //   Inport: '<Root>/batt_count'
 

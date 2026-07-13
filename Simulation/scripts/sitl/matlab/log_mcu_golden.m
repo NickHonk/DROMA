@@ -17,12 +17,12 @@
 %      generierte step() langsame Eingaenge zwischen Updates).
 %
 %  === ANPASSEN ===============================================================
-TOP_MODEL = 'main';
-MCU_BLOCK = 'main/running on the quadrocopter MCU';
+TOP_MODEL = 'quadcop';
+MCU_BLOCK = 'quadcop/running on the quadrocopter MCU';
 T_STOP    = 5.0;                  % [s] Simulationsdauer
 % Portnamen in EXAKTER Blockport-Reihenfolge (== ExtU/ExtY-Feldnamen).
-% Bestaetigt: rein Bus_IMU, Bus_Cmd, batt_count ; raus rotor_cmd, led.
-IN_NAMES  = {'Bus_IMU','Bus_Cmd','batt_count'};
+% Bestaetigt: rein Bus_IMU, Bus_Cmd, batt_count, btn_ack ; raus rotor_cmd, led.
+IN_NAMES  = {'Bus_IMU','Bus_Cmd','batt_count','btn_ack'};
 OUT_NAMES = {'rotor_cmd','led','throttle'};  % led=Batterie-FSM-state (uint8); throttle[4]=[0,100] (OneShot125-Vorstufe).
 OUT_CSV   = fullfile(fileparts(mfilename('fullpath')),'..','data','golden_mcu_io.csv');
 % ============================================================================
@@ -107,8 +107,8 @@ function tags = add_port_logging(portHandles, names, tags)
     for p = 1:numel(portHandles)
         ln = get_param(portHandles(p),'Line');
         if ln == -1
-            error(['MCU-Port "%s" ist in main unverdrahtet — kein Signal zum ' ...
-                   'Loggen. Falls es der led-Ausgang ist: in main einen ' ...
+            error(['MCU-Port "%s" ist in quadcop unverdrahtet — kein Signal zum ' ...
+                   'Loggen. Falls es der led-Ausgang ist: in quadcop einen ' ...
                    'Terminator/Scope an den led-Outport haengen, damit eine ' ...
                    'Linie existiert.'], names{p});
         end

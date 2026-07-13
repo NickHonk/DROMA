@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.268
+// Model version                  : 1.274
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Mon Jul 13 12:31:53 2026
+// C/C++ source code generated on : Mon Jul 13 16:27:31 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -45,11 +45,6 @@ class MCU final
     boolean_T ack_prev;                // '<Root>/MATLAB Function'
   };
 
-  // Invariant block signals (default storage)
-  struct ConstB_mcu_T {
-    real_T Gain1[3];                   // '<Root>/Gain1'
-  };
-
   // Constant parameters (default storage)
   struct ConstP_mcu_T {
     // Expression: quadcop.p_from_omega_sq
@@ -78,6 +73,7 @@ class MCU final
     Bus_IMU Bus_IMU_k;                 // '<Root>/Bus_IMU'
     Bus_Cmd Bus_Cmd_l;                 // '<Root>/Bus_Cmd'
     real_T batt_count;                 // '<Root>/batt_count'
+    boolean_T btn_ack;                 // '<Root>/btn_ack'
   };
 
   // External outputs (root outports fed by signals with default storage)
@@ -169,8 +165,6 @@ class MCU final
   // Real-Time Model
   RT_MODEL_mcu_T mcu_M;
 };
-
-extern const MCU::ConstB_mcu_T mcu_ConstB;// constant block i/o
 
 // Constant parameters (default storage)
 extern const MCU::ConstP_mcu_T mcu_ConstP;

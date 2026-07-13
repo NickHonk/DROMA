@@ -6,7 +6,7 @@ sitl = fullfile(proj_root,'scripts','sitl');
 
 fprintf('== openProject ==\n');
 openProject(fullfile(proj_root,'DROMA.prj'));
-load_system('main');                 % PreLoadFcn -> params.m -> Ts_inner/quadcop in base
+load_system('quadcop');              % PreLoadFcn -> params.m -> Ts_inner/quadcop in base
 assert(evalin('base','exist(''Ts_inner'',''var'')'), 'Ts_inner fehlt (PreLoadFcn?).');
 quadcop = evalin('base','quadcop');
 

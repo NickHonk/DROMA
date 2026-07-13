@@ -3,11 +3,11 @@ function run_mcu_arm_codegen(proj_root)
 %   GenCodeOnly (Kompilat spaeter via Teensy/PlatformIO-Toolchain, NICHT aus
 %   MATLAB). Output -> hardware\mcu_arm\  (eigener CodeGen-/Cache-Ordner), damit
 %   das SITL-zertifizierte scripts\sitl\mcu_ert_rtw\ (x86, Gate B) unberuehrt bleibt.
-%   Funktion, damit lokale Vars den 'clear' in params.m (main-PreLoadFcn) ueberleben.
+%   Funktion, damit lokale Vars den 'clear' in params.m (quadcop-PreLoadFcn) ueberleben.
 armdir = fullfile(proj_root,'hardware','mcu_arm');
 
 openProject(fullfile(proj_root,'DROMA.prj'));
-load_system('main');                 % PreLoadFcn -> params.m -> Ts_inner/quadcop
+load_system('quadcop');              % PreLoadFcn -> params.m -> Ts_inner/quadcop
 assert(evalin('base','exist(''Ts_inner'',''var'')'), 'Ts_inner fehlt (PreLoadFcn?).');
 
 if ~isfolder(armdir), mkdir(armdir); end
