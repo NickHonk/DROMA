@@ -28,14 +28,15 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
    `gen_lib_codegen.m` neu gelaufen (Leaf-Signatur), `prune_mcu_configs` (9 Dups
    raus, `mcu.slx` 756→312 KB).
 5. **🔴 Verbleibend: Drohne + Sende-Teensy neu flashen** — der ARM-Code trug beide
-   Bugs. Gegentest: still am Boden muss `thr` **symmetrisch** sein (vorher
-   `[5 19 5 17]`). Dazu Batt-`k` an Pin 41 nachmessen (§1). Arduino-Toolchain
-   ist auf dieser Maschine eingerichtet + verifiziert (§3h).
+   Bugs. **HW-Testplan T1–T6 in §3h.** Firmware ist Prüfstand-Modus
+   (`HAL_SELFTEST` hart aktiv, Z.43) ⇒ Motoren drehen nicht, `thr` per Serial
+   ablesbar. Arduino-Toolchain eingerichtet + verifiziert (§3h).
 6. **Gate A abgeschafft** (§3h): `run_gate_a.m` gelöscht, `sil_check_mcu.m` nur
    noch Diagnose. **Gate B (30/30) ist die alleinige Zertifizierung.**
-7. **SSOT-PoC grün** (§3h): `mcu/MATLAB Function` ruft jetzt
-   `scripts\functions\safety_overspeed.m` auf — generierter Code **byte-identisch**,
-   `persistent` überlebt. Ausrollen auf die übrigen Blöcke steht aus.
+7. **✅ SSOT ausgerollt** (§3h): **alle 11** Function-Blöcke sind jetzt Wrapper auf
+   `scripts\functions\*.m`; `traj_gen`/`pos_ctrl` neu extrahiert. Generierter Code
+   byte-identisch, Golden unverändert, Gate B 30/30. **Blöcke nie wieder inline
+   editieren.**
 8. **⚠️ Falle:** `openProject` (in `run_mcu_recert`/`run_mcu_arm_codegen`) hat
    `mcu.slx` mit einer alten Version überschrieben → headless ohne `openProject`
    arbeiten (§3h).
@@ -563,19 +564,47 @@ cmake --build C:\dsb --config Release && ctest -C Release
 - ⚠️ Der eingecheckte `scripts\sitl\build\` hat einen **Fremd-Cache**
   (`C:/Users/Nick/thesis_doctoral/…`) → nicht verwenden, neu konfigurieren.
 
-#### 🔴 OFFEN (Session 10 zuerst)
-1. **Drohne + Sende-Teensy neu flashen** — der ARM-Code trug **beide** Bugs.
-   HW-Gegentest: still am Boden ⇒ `thr` muss **symmetrisch** sein (vorher
-   `[5 19 5 17]`). Das ist der eigentliche Nachweis des Bias-Fixes auf HW.
-2. **Batt-`k` an Pin 41 nachmessen** (§1) — Pin-Belegung ist geklärt (41=Spannung),
-   aber `k=0.0166737` stammt aus einer Messung an Pin 40.
-3. **⚠️ Overspeed-Marge bewerten (neu, Session 9).** Der Bias frisst 77 % der
+#### 🔬 HW-TESTPLAN (Session 10) — Bench, Drohne am Boden
+
+**⚠️ Die gebaute Firmware ist PRÜFSTAND-Firmware.** `drone_hal.cpp` **Z.43**
+`#define HAL_SELFTEST` ist **hart aktiv** (nicht auskommentiert!). Folge:
+- `esc_arm()` entfällt, und der Tick schreibt **`analogWrite(PIN_PWM[i], ESC_MIN)`**
+  statt `esc_write_all(y.throttle)` ⇒ **Motoren drehen NIE**, egal was `thr` sagt.
+- `selftest_report()` druckt ~10 Hz über Serial: `id, gyro[3], acc[3], batt(V),
+  bias[3], link(ms), estop, btn, thr[4], tickmax`.
+⇒ **Für alle Tests unten ideal und sicher** (`thr` ist ablesbar, ohne dass sich
+etwas dreht). **Für den Flug MUSS Z.43 auskommentiert und neu geflasht werden.**
+*(Nebenbefund: `build_sketches.sh --compile` baut `drone_hal` und
+`drone_hal -DHAL_SELFTEST` zu byte-identischen `.hex` — kein Bug, das Define
+steht schon im Code. Das `-D` dort ist redundant. Teensy kennt übrigens kein
+`compiler.cpp.extra_flags`; die Defines hängen an `build.flags.defs`.)*
+
+**Flashen:** `hardware\build\drone_hal\drone_hal.ino` in der IDE (Board Teensy 4.1),
+oder `./build_sketches.sh --upload-drone COM<N>`. Sende-Teensy: `--upload-sender`.
+Vorher Serial-Monitor auf dem Ziel schließen (sonst hängt der Loader).
+
+| # | Test | Vorgehen | Erwartung |
+|---|---|---|---|
+| **T1** | **Gyro-Bias-Fix** ⭐ *der eigentliche Nachweis von §3h* | Drohne **still** am Boden, Link steht (`estop=0`), `F_des` moderat | `thr[a b c d]` **symmetrisch** (alle 4 ≈ gleich). **Vorher: `[5 19 5 17]`.** Asymmetrie ⇒ Fix wirkt nicht |
+| **T2** | **Failsafe** *(offen seit §3b-Re-Zert #2)* | Sender-Teensy abziehen / GCS stoppen → Watchdog 100 ms | `estop=2`, `thr[0 0 0 0]` **exakt** |
+| **T3** | **Batt-`k` an Pin 41** *(§1)* | Netzteil an, `batt=<counts>(<V>)` im Report gegen Multimeter | `k = V_gemessen / counts`. Weicht es von **0.0166737** ab → `init_battery_manag.m` korrigieren, Golden+Codegen neu, Gate B |
+| **T4** | **Batt-Report** *(offen seit §3e)* | 4S-Akku (>12 V!) | Report zeigt ~**15.74 V** (nicht 944) |
+| **T5** | **Re-Arm ohne Interlock** *(neu, §3h)* | Boot → `estop=2` → Link → Taster Pin 21 | Latch löst **unabhängig von `F_des`** (früher blockiert bei >10 % Hover). `thr` wird frei |
+| **T6** | **Gyro/Bias-Plausibilität** | Report `bias[…]` nach dem 3-s-Startup | ≈ echter Sensor-Bias; `gyro[…]` ≈ 0 im Stillstand |
+
+⚠️ **`batt_land` ist PERMANENT:** bei `Vf ≤ 12.0 V` latcht der Notabstieg bis
+Power-Cycle (§3e). Am Netzteil **stets > 12 V** halten.
+
+#### 🔴 OFFEN — Analyse (nicht Bench)
+1. **⚠️ Overspeed-Marge bewerten (neu, Session 9).** Der Bias frisst 77 % der
    Marge zwischen `omega_max`=8.5 und FSR=8.7266 (effektiv ~0.05 rad/s). Jetzt,
    wo die Sim den Bias VOR der Saturation modelliert, ist das messbar. Optionen:
    `omega_max` senken, Gyro auf **FS_SEL=2 (±1000 dps)** stellen (halbiert die
    Auflösung, verdoppelt den Headroom), oder belassen und per Sim-Kampagne
    belegen, dass die Entprellung (`debounce_N=4`) trägt. Vorher **keine**
    aggressiven Flüge nahe der Rate-Grenze.
+2. **Sättigungs-Coverage** (§3h Befund 3): über `F_des` nicht erreichbar, nur über
+   τ/Attitude-Fehler.
 #### ❌ Gate A ABGESCHAFFT (Session 9) — Gate B ist die alleinige Zertifizierung
 `run_gate_a.m` **gelöscht**; `sil_check_mcu.m` bleibt nur als Diagnose-Werkzeug
 (Header sagt es jetzt explizit). Begründung:
@@ -619,18 +648,35 @@ Mechanismus ist also real, er hat nur noch keinen Code erwischt. Verschärfend:
 `.slx` ist **binär** → Code-Änderungen sind im git-Diff unsichtbar (in Session 9
 hat `openProject` genau so unbemerkt Blockcode zurückgerollt).
 
-**PoC an `mcu/MATLAB Function`:** Block hält jetzt nur noch einen Wrapper
+**PoC an `mcu/MATLAB Function`:** Block hält nur noch einen Wrapper
 `safety_overspeed_sl(...)`, der `scripts\functions\safety_overspeed.m` aufruft.
 - Name MUSS abweichen (`…_sl`), sonst schattet er die externe Funktion → Rekursion.
+- Argument-/Ausgangsnamen MÜSSEN gleich bleiben, sonst verliert Simulink die
+  Port-/Parameter-Zuordnung (z.B. `safety` ist ein Parameter, kein Inport).
 - **Generierter `mcu.cpp` ist BYTE-IDENTISCH** zur Inline-Variante (einziger Diff:
   „Model version" + Zeitstempel im Header-Kommentar) ⇒ Wrapper ist transparent.
 - **`persistent`-State überlebt** (`mcu_DW.latched` 9×, `ack_prev` 2× im Code).
 - Coder findet die externe Funktion über den Projekt-/`addpath`-Pfad.
-- **Gate B 30/30** danach.
-→ Muster ist tragfähig. **Offen:** Ausrollen auf die übrigen 6 Blöcke mit `.m`
-(`safety_battery`, `mahony_filter`, `geo_attitude_ctrl`, `link_tx`, `link_rx`) und
-die 4 ohne `.m` extrahieren. Der Audit liegt als `audit_fcn_drift.m` (Scratchpad,
-noch nicht im Repo).
+
+**✅ AUSGEROLLT auf ALLE Blöcke (Session 9): 11 Wrapper, 0 inline.**
+| Modell | Block | Funktion |
+|---|---|---|
+| `mcu` | MATLAB Function / 1 | `safety_overspeed`, `safety_battery` |
+| `mcu` | Mahony filter, geo attitude ctrl, hard descent | `mahony_filter`, `geo_attitude_ctrl`, `safety_landcmd` |
+| `link` | MATLAB Function2 / 3 | `link_tx`, `link_rx` |
+| `gcu` | MATLAB Function, Positionsregler, soft/hard landing | **`traj_gen`\***, **`pos_ctrl`\***, `gcs_supervisor` |
+| `quadcop` | MATLAB Function1 | `pack_gcs_frame` |
+
+\* **neu extrahiert** nach `scripts\functions\` (existierten vorher NUR inline).
+Korrektur zum ersten Audit: es waren nur **2** Funktionen ohne `.m`, nicht 4 —
+`safety_landcmd`/`gcs_supervisor` hatten längst eine SSOT, der erste Parser
+scheiterte nur an ihren mehrzeiligen `...`-Signaturen.
+**Verifiziert:** alle 4 berührten Modelle kompilieren; Golden **unverändert**
+(`imu_gyro` mean identisch `[-0.00095, -0.00184, -0.00177]`); Host+ARM neu,
+je `0.94666`/`0.1745` = 0; **Gate B 30/30**; alle 5 Sketches kompilieren
+(`drone_hal` FLASH 54916).
+Ab jetzt gilt: **`scripts\functions\*.m` ist die SSOT** — Blöcke nie wieder inline
+editieren (der Wrapper ruft nur auf). Damit ist Modell-Code endlich git-diffbar.
 
 #### ⚠️ FALLE: `openProject` überschreibt `mcu.slx`
 `run_mcu_recert.m` / `run_mcu_arm_codegen.m` rufen `openProject`. Dessen
