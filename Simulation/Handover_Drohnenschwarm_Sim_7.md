@@ -35,9 +35,11 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
    ⚠️ Firmware ist **Prüfstand-Modus** (`drone_hal.cpp` Z.43 `#define HAL_SELFTEST`
    hart aktiv) ⇒ Motoren drehen nie. **Für den Flug Z.43 auskommentieren + neu
    flashen.**
-6. **🆕 `models\bench.slx`** (§3h): Prüfstand-Harness = `quadcop` ohne
+6. **✅ `models\bench.slx`** (§3h): Prüfstand-Harness = `quadcop` ohne
    Drohnen-Simulation, `FixedStep=Ts_gcs` (100 Hz statt 1 kHz), Accelerator.
-   Löst die missed Ticks. **Noch nicht auf HW gefahren.**
+   **Auf HW verifiziert: `missed ticks = 0`** (vorher 3700/6.76 s), **`link=8 ms`**
+   (12,5× unter dem Watchdog). Ab jetzt: `quadcop.slx` = Simulation,
+   `bench.slx` = Versuchsstand.
 6. **Gate A abgeschafft** (§3h): `run_gate_a.m` gelöscht, `sil_check_mcu.m` nur
    noch Diagnose. **Gate B (30/30) ist die alleinige Zertifizierung.**
 7. **✅ SSOT ausgerollt** (§3h): **alle 11** Function-Blöcke sind jetzt Wrapper auf
@@ -641,18 +643,66 @@ per `save_system` (Serial-Kette bleibt 1:1), **18 statt 27** Top-Level-Blöcke:
   sein `Bus_Cmd` geht vorerst auf `gcu_cmd_unused` (Terminator) — der Uplink kommt
   wie gehabt aus den Test-Konstanten (so war es auch in `quadcop`!).
 
-**Für Motive später:** `dummy_Bus_Mocap` durch die Motive-Quelle ersetzen und
-`gcu`-`Bus_Cmd` statt des `Bus Creator` auf `pack_gcs_frame_sl` legen. `gcu` ist
-dafür **schon vorbereitet**: `gcu/Switch`+`Switch1` haben `Criteria = u2 > 0` mit
-`u2 = Constant9 = 1` ⇒ es gewinnt **immer der Luenberger-Observer** aus
-`mocap_pos`; `Bus_State` (Strecken-Wahrheit) wird bereits ignoriert und ist im
-Stand nur eine Attrappe (`dummy_Bus_State`).
+#### ✅ Motive/OptiTrack angebunden (Session 9)
+**Plugin:** `DROMA\Motive\OptiTrack_MATLAB_Plugin_1.1.0\` (entpackt, **nicht im
+Repo** — Third-Party + DLLs, `Motive/` ist untracked). Es ist ein **MATLAB**-
+Plugin (`natnet.m` + `NatNetML.dll`, .NET), **kein** Simulink-Blockset.
+
+**Neu:**
+| Datei | Rolle |
+|---|---|
+| `scripts\motive\MotiveMocap.m` | `matlab.System`-Quelle: NatNet → `mocap_pos(3)`, `mocap_quat(4)`, `valid` |
+| `scripts\motive\setup_motive_path.m` | Pfade + schreibt `assemblypath.txt` |
+| `init_sensors.m` | neu: `mocap.host_ip`, `.client_ip`, `.streaming_id` |
+| `bench.slx` | `Motive` (MATLAB System) → `Bus_Mocap_from_Motive` → `gcu` IN1; `mocap_valid` (Display) |
+
+**Gelockte Konventionen (je EINE Stelle — Lehre aus §3h!):**
+- **Quaternion:** NatNet liefert `qx,qy,qz,qw` = **scalar-last**; das Projekt ist
+  **scalar-first** `[w x y z]`. Umsortierung **einmalig in `MotiveMocap`**
+  (`[qw;qx;qy;qz]`). **Downstream NICHT nochmal drehen.**
+- **⚠️ Up-Axis:** Motive **MUSS auf Z-Up** streamen (Motive → Settings →
+  Streaming → *Up Axis = Z*). `MotiveMocap` transformiert **bewusst NICHT** —
+  eine zweite Korrekturstelle wäre exakt der Doppel-Kompensations-Fehler aus §3h.
+  Steht Motive auf Y-Up, ist die Pose falsch (fällt im Plausibilitätscheck auf).
+- **Einheit:** NatNet liefert **Meter** (das OptiSample skaliert nur für die
+  mm-Anzeige mit 1000). Kein Skalieren.
+
+**Fallstricke (gelöst):**
+- `natnet.setAssemblyPath` öffnet ein **`uigetfile`-Fenster** → hätte Simulink
+  blockiert. `getLastAssemblyPath` liest `<plugin>\Matlab\assemblypath.txt`;
+  die wird von `setup_motive_path` vorab geschrieben ⇒ kein Dialog.
+  Verifiziert: `NatNetML 4.1.9210.17151` lädt.
+- `matlab.System` braucht einen **expliziten** Name-Value-Konstruktor
+  (`setProperties`), sonst „No matching constructor found for superclass".
+- `.NET` ist nicht codegen-fähig ⇒ Block auf **Interpreted execution**.
+- **Robust ohne Motive:** kein Absturz, `valid=false` + ZOH-Pose ⇒ der Prüfstand
+  bleibt ohne Motive testbar. Verifiziert (Smoke-Test 0.5 s: `ReachedStopTime`).
+
+**⚠️ Regelkreis noch OFFEN (bewusst):** Der Uplink kommt weiterhin aus den
+**Test-Konstanten**; `gcu`-`Bus_Cmd` hängt noch am `gcu_cmd_unused`-Terminator.
+Erst Mocap prüfen (`mocap_valid=1`, Pose plausibel), **dann** `gcu`-`Bus_Cmd`
+statt des `Bus Creator` auf `pack_gcs_frame_sl` legen.
+`gcu` ist dafür **schon vorbereitet**: `gcu/Switch`+`Switch1` haben
+`Criteria = u2 > 0` mit `u2 = Constant9 = 1` ⇒ es gewinnt **immer der
+Luenberger-Observer** aus `mocap_pos`; `Bus_State` wird bereits ignoriert und ist
+im Stand nur eine Attrappe (`dummy_Bus_State`).
+
+**Inbetriebnahme:** `setup_motive_path()` (einmal pro Session, oder ins
+`DROMA.prj`-StartupFcn), Motive-Streaming an, Rigid-Body-ID → `mocap.streaming_id`,
+dann `bench.slx` starten und `mocap_valid` beobachten.
 
 **Arbeitsteilung ab jetzt:** `quadcop.slx` = reine Simulation (1 kHz, Golden/Gate B),
 `bench.slx` = Versuchsstand (100 Hz, Uplink). Beide teilen `gcu`/`pack_gcs_frame`
 als SSOT.
-⚠️ **`bench.slx` ist noch NICHT auf HW gefahren** — Echtzeit (missed Ticks) und
-Uplink sind vom Nutzer zu bestätigen.
+
+**✅ AUF HW VERIFIZIERT (Session 9):**
+- **`missed ticks = 0`** (vorher 3700 in 6.76 s ⇒ ~45 % Echtzeit). Der Prüfstand
+  läuft jetzt echtzeitfähig.
+- **`link = 8 ms` (Mittelwert)** — passt zum 10-ms-Sendeintervall und liegt
+  **12,5× unter** dem 100-ms-Watchdog. Uplink gesund.
+⇒ Die Diagnose ist damit bestätigt: es war die **Basisrate**, nicht die Blockzahl.
+Der §3d-Zwang zu „Simulation Pacing 1.0×" entfällt für `bench.slx` — bei 100 Hz
+gibt es keinen Frame-Burst mehr (Pacing bleibt für `quadcop.slx` relevant).
 
 #### 🔴 OFFEN — Analyse (nicht Bench)
 1. **⚠️ Overspeed-Marge bewerten (neu, Session 9).** Der Bias frisst 77 % der

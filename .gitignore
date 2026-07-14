@@ -7,30 +7,56 @@
 #   Arduino: bash hardware/build_sketches.sh --compile
 # ============================================================================
 
+# ACHTUNG (Session 9): Patterns MIT '/' sind relativ zu DIESER Datei (Repo-Wurzel
+# = DROMA\). Das Projekt liegt aber unter DROMA\Simulation\ -> ohne den
+# 'Simulation/'-Praefix greift KEINE Regel. Genau das war der Fall: der komplette
+# Codegen-Output wurde jahrelang mitcommittet (~45 Dateien/Commit).
+# Pruefen mit:  git check-ignore -v <pfad>
+
 # --- CMake-Build (Exes + CMakeCache mit Absolutpfaden -> immer maschinenspezifisch)
-scripts/sitl/build/
+Simulation/scripts/sitl/build/
 
 # --- Arduino-Sketch-Assembly (build_sketches.sh)
-hardware/build/
+Simulation/hardware/build/
 
 # --- Simulink-Codegen-Cache (Absolutpfad-Referenzen, autogeneriert)
 slprj/
 **/slprj/
 *.slxc
-scripts/sitl/mcu.zip
+Simulation/scripts/sitl/mcu.zip
+Simulation/hardware/mcu_arm/mcu.zip
 
 # --- Generierter Modell-Code (run_mcu_recert / run_mcu_arm_codegen)
-scripts/sitl/mcu_ert_rtw/
-hardware/mcu_arm/
+Simulation/scripts/sitl/mcu_ert_rtw/
+Simulation/hardware/mcu_arm/
 
 # --- Standalone-Leaf-Codegen (gen_lib_codegen.m)
-scripts/sitl/codegen/
+Simulation/scripts/sitl/codegen/
+
+# --- OptiTrack/Motive: Third-Party-Plugin (DLLs), Kalibrierungen, Lizenz.
+#     natnet.m/NatNetML.dll kommen aus dem OptiTrack-Download, nicht von uns.
+#     Wiederherstellung: OptiTrack_MATLAB_Plugin_*.zip nach Motive\ entpacken,
+#     dann in MATLAB  setup_motive_path()  (legt assemblypath.txt an).
+# FUEHRENDER SLASH IST PFLICHT: ohne ihn matcht das Pattern JEDEN 'Motive'-Ordner
+# im Baum — und Git ist auf Windows case-insensitive, d.h. 'Motive/' haette auch
+# Simulation/scripts/motive/ (MotiveMocap.m!) verschluckt. '/Motive/' = nur hier.
+/Motive/
 
 # --- MATLAB-Nebenprodukte
 *.asv
 *.m~
 *.autosave
+*.mexw64
 
 # HINWEIS: Test-Fixtures BLEIBEN getrackt (bewusst, kein MATLAB noetig zum Testen):
-#   scripts/sitl/data/*.csv        (Golden-Vektoren)
-#   scripts/sitl/include/throttle_poly.hpp  (generiert, aber klein + Test-Input)
+#   Simulation/scripts/sitl/data/*.csv                  (Golden-Vektoren)
+#   Simulation/scripts/sitl/include/throttle_poly.hpp   (generiert, aber klein + Test-Input)
+#
+# ⚠️ .gitignore wirkt NICHT auf bereits GETRACKTE Dateien. Die oben gelisteten
+# Ordner sind derzeit im Index. Zum Aufraeumen einmalig (loescht nichts auf Disk):
+#   git rm -r --cached Simulation/scripts/sitl/mcu_ert_rtw Simulation/hardware/mcu_arm \
+#                      Simulation/scripts/sitl/codegen Simulation/scripts/sitl/build \
+#                      Simulation/hardware/build Simulation/scripts/sitl/mcu.zip
+# Danach committen. Auf einem frischen Klon regenerieren (Reihenfolge egal):
+#   run_mcu_recert(root); run_mcu_arm_codegen(root); gen_lib_codegen.m;
+#   cmake ...; bash hardware/build_sketches.sh --compile

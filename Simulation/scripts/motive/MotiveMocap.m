@@ -165,4 +165,18 @@ classdef MotiveMocap < matlab.System
                                         'SampleTime', obj.SampleTimeSec);
         end
     end
+
+    methods (Static, Access = protected)
+        % Der NatNet-Client ist .NET (NatNetML.dll) und NICHT codegen-faehig
+        % (schon try/catch scheitert: "Try and catch are not supported for code
+        % generation"). Deshalb wird der Modus HIER erzwungen statt nur am Block
+        % gesetzt — so kann er nicht versehentlich auf 'Code generation'
+        % zurueckfallen (und die Option wird im Blockdialog ausgeblendet).
+        function simMode = getSimulateUsingImpl()
+            simMode = 'Interpreted execution';
+        end
+        function isVisible = showSimulateUsingImpl()
+            isVisible = false;
+        end
+    end
 end

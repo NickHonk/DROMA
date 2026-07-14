@@ -72,6 +72,23 @@ imu.acc_zeta   = 0.707;
 mocap.pos_noise = 1e-3; % RMS
 mocap.att_noise = 0.5*pi/180; % RMS
 mocap.Ts_mocap  = Ts_mocap; % Sample-Periode (= 1/f_base)
-mocap.t_delay   = 0.008; % optional Transportverzoegerung 
+mocap.t_delay   = 0.008; % optional Transportverzoegerung
 mocap.dropout_p = 0.01; % Wahrscheinlichkeit ausfall pro Sample
+
+% --- Reales Mocap (OptiTrack/Motive via NatNet) -----------------------------
+% Nur fuer den Pruefstand bench.slx (Block "Motive" = MotiveMocap). In der
+% reinen Simulation (quadcop.slx) ungenutzt — dort modelliert sensors.slx die
+% Mocap mit den Rauschwerten oben.
+% Ein Rechner (Motive + MATLAB): beide IPs 127.0.0.1. Sonst host_ip = Motive-
+% Rechner, client_ip = dieser Rechner.
+mocap.host_ip      = '127.0.0.1';
+mocap.client_ip    = '127.0.0.1';
+% Streaming-ID des Drohnen-Rigid-Body in Motive (Assets-Pane). MUSS zur
+% Drohne passen, die geflogen wird.
+mocap.streaming_id = 1;
+% ⚠️ Motive MUSS auf **Z-Up** streamen (Settings -> Streaming -> Up Axis = Z);
+% das Projekt ist z-up (Handover §1). MotiveMocap transformiert BEWUSST NICHT —
+% eine zweite Korrekturstelle waere genau der Fehler aus §3h (doppelte
+% Kompensation). NatNet liefert Meter und Quaternionen SCALAR-LAST; die
+% Umsortierung auf scalar-first [w x y z] passiert einmalig in MotiveMocap.
 end
