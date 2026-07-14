@@ -27,10 +27,17 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
    entfernte `Overspeed.S10`. Golden + Codegen sind damit **zertifiziert**.
    `gen_lib_codegen.m` neu gelaufen (Leaf-Signatur), `prune_mcu_configs` (9 Dups
    raus, `mcu.slx` 756→312 KB).
-5. **🔴 Verbleibend: Drohne + Sende-Teensy neu flashen** — der ARM-Code trug beide
-   Bugs. **HW-Testplan T1–T6 in §3h.** Firmware ist Prüfstand-Modus
-   (`HAL_SELFTEST` hart aktiv, Z.43) ⇒ Motoren drehen nicht, `thr` per Serial
-   ablesbar. Arduino-Toolchain eingerichtet + verifiziert (§3h).
+5. **✅ HW-Tests T1–T6 alle GRÜN (§3h)** — der Bias-Fix ist auf Hardware bewiesen:
+   `thr[11 12 12 11]` **symmetrisch** statt `[5 19 5 17]`, und der Wert deckt sich
+   mit dem Sim-Sweep ⇒ **Sim == HW**. Failsafe/Re-Arm/Batt/Timing ebenfalls grün.
+   Realer Gyro-Bias ist **6× kleiner** als die Sim-Annahme ⇒ Overspeed-Marge real
+   entspannt (13 % statt 77 %).
+   ⚠️ Firmware ist **Prüfstand-Modus** (`drone_hal.cpp` Z.43 `#define HAL_SELFTEST`
+   hart aktiv) ⇒ Motoren drehen nie. **Für den Flug Z.43 auskommentieren + neu
+   flashen.**
+6. **🆕 `models\bench.slx`** (§3h): Prüfstand-Harness = `quadcop` ohne
+   Drohnen-Simulation, `FixedStep=Ts_gcs` (100 Hz statt 1 kHz), Accelerator.
+   Löst die missed Ticks. **Noch nicht auf HW gefahren.**
 6. **Gate A abgeschafft** (§3h): `run_gate_a.m` gelöscht, `sil_check_mcu.m` nur
    noch Diagnose. **Gate B (30/30) ist die alleinige Zertifizierung.**
 7. **✅ SSOT ausgerollt** (§3h): **alle 11** Function-Blöcke sind jetzt Wrapper auf
@@ -583,17 +590,69 @@ steht schon im Code. Das `-D` dort ist redundant. Teensy kennt übrigens kein
 oder `./build_sketches.sh --upload-drone COM<N>`. Sende-Teensy: `--upload-sender`.
 Vorher Serial-Monitor auf dem Ziel schließen (sonst hängt der Loader).
 
-| # | Test | Vorgehen | Erwartung |
-|---|---|---|---|
-| **T1** | **Gyro-Bias-Fix** ⭐ *der eigentliche Nachweis von §3h* | Drohne **still** am Boden, Link steht (`estop=0`), `F_des` moderat | `thr[a b c d]` **symmetrisch** (alle 4 ≈ gleich). **Vorher: `[5 19 5 17]`.** Asymmetrie ⇒ Fix wirkt nicht |
-| **T2** | **Failsafe** *(offen seit §3b-Re-Zert #2)* | Sender-Teensy abziehen / GCS stoppen → Watchdog 100 ms | `estop=2`, `thr[0 0 0 0]` **exakt** |
-| **T3** | **Batt-`k` an Pin 41** *(§1)* | Netzteil an, `batt=<counts>(<V>)` im Report gegen Multimeter | `k = V_gemessen / counts`. Weicht es von **0.0166737** ab → `init_battery_manag.m` korrigieren, Golden+Codegen neu, Gate B |
-| **T4** | **Batt-Report** *(offen seit §3e)* | 4S-Akku (>12 V!) | Report zeigt ~**15.74 V** (nicht 944) |
-| **T5** | **Re-Arm ohne Interlock** *(neu, §3h)* | Boot → `estop=2` → Link → Taster Pin 21 | Latch löst **unabhängig von `F_des`** (früher blockiert bei >10 % Hover). `thr` wird frei |
-| **T6** | **Gyro/Bias-Plausibilität** | Report `bias[…]` nach dem 3-s-Startup | ≈ echter Sensor-Bias; `gyro[…]` ≈ 0 im Stillstand |
+| # | Test | Ergebnis |
+|---|---|---|
+| **T1** ⭐ | **Gyro-Bias-Fix** — der Nachweis von §3h | ✅ **PASS.** `thr[11 12 12 11]` bei `F_des=1.893 N` — **symmetrisch** (Spreizung 1 statt 14). Vorher `[5 19 5 17]`. Deckt sich mit dem Sim-Sweep (2.0 N → 11.66 %) ⇒ **Sim == HW** wiederhergestellt |
+| **T2** | **Failsafe** *(offen seit §3b-Re-Zert #2)* | ✅ **PASS.** `link=8417ms → estop=2, thr[0 0 0 0]` exakt |
+| **T3** | **Batt-`k` an Pin 41** | ✅ **PASS** (Nutzer verifiziert) |
+| **T4** | **Batt-Report** *(offen seit §3e)* | ✅ **PASS.** `batt=902(15.04V)` — plausibel für 4S, konsistent (`902·0.0166737=15.04`), nicht 0/944 |
+| **T5** | **Re-Arm ohne Interlock** *(neu, §3h)* | ✅ **PASS.** `btn=0→thr[0 0 0 0]`, `btn=1→thr[11 12 12 11]` bei **20 % Hover** — mit dem alten Interlock (10 %) hätte der Taster NICHT gelöst |
+| **T6** | **Gyro/Bias-Plausibilität** | ✅ **PASS.** `bias[0.027 0.015 -0.029]`, `gyro≈0` still. Timing `tickmax=461µs, overruns=0/1000` |
+
+**⭐ Damit ist der Session-9-Befund auf Hardware bewiesen** — die doppelte
+Bias-Subtraktion war die Ursache der Motor-Asymmetrie, nicht die Schieflage.
+
+**Zwei Messwerte, die Annahmen korrigieren:**
+1. **Realer Gyro-Bias ist 6× kleiner als die Sim-Annahme:** gemessen
+   `[1.5, 0.8, -1.7] °/s` vs. Modell `[10, -10, 10] °/s` (Datenblatt-Worst-Case).
+   ⇒ **Overspeed-Marge real viel besser**: 0.029 rad/s = **13 %** der 0.2266-Marge
+   (statt 77 %), effektive Obergrenze ≈ 8.698 statt 8.552 rad/s. Der offene Punkt
+   „Overspeed-Marge" entschärft sich damit deutlich; die Sim rechnet konservativ,
+   was für Robustheit gut ist. `imu.gyro_bias` **bewusst NICHT** auf den Messwert
+   gesenkt (Worst-Case behalten).
+2. **Die 6°-Schieflage ist real**, aber harmlos: `acc[-0.03 -1.07 9.44]` →
+   `atan(1.07/9.44) ≈ 6.5°` um X. Erklärt (wie §3e rechnet) nur ~0.23°
+   stationären Fehler — und **nicht** die `thr`-Asymmetrie.
 
 ⚠️ **`batt_land` ist PERMANENT:** bei `Vf ≤ 12.0 V` latcht der Notabstieg bis
 Power-Cycle (§3e). Am Netzteil **stets > 12 V** halten.
+
+#### 🆕 `bench.slx` — Prüfstand-Harness (Session 9)
+**Problem:** `quadcop.slx` schafft nur ~45 % Echtzeit (3700 missed Ticks in 6.76 s
+am `Real-Time Synchronization`). Ursache ist **die Basisrate, nicht die Blockzahl**:
+`quadcop` hat `FixedStep = Ts_inner` = **1 ms** (Plant/MCU brauchen das) ⇒ 1000
+Ticks/s inkl. Plant+Sensoren+MCU+Link. **Deshalb sind Variant Subsystems hier die
+falsche Wahl** — sie schalten Blöcke um, aber **nicht den Solver-Step**.
+Zusatzeffekt: `Serial Send` hat keine eigene SampleTime und **erbt die Basisrate**
+⇒ in `quadcop` bis zu **1000 Frames/s** an den Sende-Teensy (daher der §3d-Zwang
+zu „Pacing 1.0×, sonst Frame-Burst → Watchdog killt").
+
+**Lösung:** `models\bench.slx` = **`quadcop` minus Drohnen-Simulation**, abgeleitet
+per `save_system` (Serial-Kette bleibt 1:1), **18 statt 27** Top-Level-Blöcke:
+- **`FixedStep = Ts_gcs` (10 ms)** ⇒ 10× weniger Ticks, `Serial Send` erbt
+  100 Hz ⇒ **100 Frames/s**. Die Drohne rechnet ihre 1 kHz selbst auf dem Teensy.
+- `SimulationMode = accelerator`, `StopTime = inf`.
+- **Entfernt:** `simulation of the plant/sensors/link`, `running on the quadrocopter
+  MCU`, `Rate Transition`(1), `batt_count`, `Constant`/`Constant1`, beide `Terminator`.
+- **Behalten:** Test-Konstanten → `Bus Creator` → `MATLAB Function1`
+  (`pack_gcs_frame_sl`) + `quadcop_id` → `Serial Send` (COM4, 115200) +
+  `Serial Configuration`, `Real-Time Synchronization`.
+- `gcu` bleibt **Model-Referenz** (SSOT, kein Drift), läuft mit Dummy-Bussen mit;
+  sein `Bus_Cmd` geht vorerst auf `gcu_cmd_unused` (Terminator) — der Uplink kommt
+  wie gehabt aus den Test-Konstanten (so war es auch in `quadcop`!).
+
+**Für Motive später:** `dummy_Bus_Mocap` durch die Motive-Quelle ersetzen und
+`gcu`-`Bus_Cmd` statt des `Bus Creator` auf `pack_gcs_frame_sl` legen. `gcu` ist
+dafür **schon vorbereitet**: `gcu/Switch`+`Switch1` haben `Criteria = u2 > 0` mit
+`u2 = Constant9 = 1` ⇒ es gewinnt **immer der Luenberger-Observer** aus
+`mocap_pos`; `Bus_State` (Strecken-Wahrheit) wird bereits ignoriert und ist im
+Stand nur eine Attrappe (`dummy_Bus_State`).
+
+**Arbeitsteilung ab jetzt:** `quadcop.slx` = reine Simulation (1 kHz, Golden/Gate B),
+`bench.slx` = Versuchsstand (100 Hz, Uplink). Beide teilen `gcu`/`pack_gcs_frame`
+als SSOT.
+⚠️ **`bench.slx` ist noch NICHT auf HW gefahren** — Echtzeit (missed Ticks) und
+Uplink sind vom Nutzer zu bestätigen.
 
 #### 🔴 OFFEN — Analyse (nicht Bench)
 1. **⚠️ Overspeed-Marge bewerten (neu, Session 9).** Der Bias frisst 77 % der
