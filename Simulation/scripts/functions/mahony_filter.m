@@ -1,24 +1,27 @@
-function [q_hat, Omega_hat] = mahony_filter(imu_gyro, imu_acc, q_ext, ka, kE, Ts, q_init, b_ground)
+function [q_hat, Omega_hat] = mahony_filter(imu_gyro, imu_acc, q_ext, ka, kE, Ts, q_init)
 %#codegen
 % MAHONY_FILTER  Expliziter Komplementaerfilter auf SO(3), zeitdiskret.
 %   Mahony/Hamel/Pflimlin (TAC 2008)). km = 0 (kein Magnetometer)
 %
 %     - Accel misst spezifische Kraft; im Hover [0;0;-g] -> Richtung
-%       v0 = [0;0;-1]. 
+%       v0 = [0;0;-1].
+%
+%   GYRO-BIAS (Session 9): imu_gyro ist BEREITS bias-korrigiert. Die Kompensation
+%   sitzt ausschliesslich in der HAL (drone_hal.cpp Z.281, 3-s-Startup-Mittelung);
+%   in der Sim bildet sensors.slx diese HAL-Stufe nach (Abzug von imu.gyro_bias_hat
+%   hinter dem Gyro-Block). Der fruehere Eingang b_ground ist deshalb ENTFALLEN —
+%   er hat auf HW ein zweites Mal (und mit einem fiktiven Wert) abgezogen.
+%   NICHT wieder einfuehren: die Firmware darf keine Bias-Logik enthalten.
 %
 %   EIN-/AUSGAENGE:
-%     imu_gyro [rad/s] (3x1)  : gemessene Koerperdrehrate (mit Bias+Rauschen)
+%     imu_gyro [rad/s] (3x1)  : gemessene Koerperdrehrate, BIAS-KORRIGIERT (HAL)
 %     imu_acc  [m/s^2] (3x1)  : gemessene spezifische Kraft (Koerper)
-%     q_ext    (4x1)          : externe Mocap-Lage 
-%     ka, kE, kb (Skalar)     : Tilt-, Externreferenz-, Bias-Gain
-%     Ts       [s]            : Abtastperiode 
-%     q_init   (4x1)          : Startlage 
-%     b_init   (3x1)          : Startbias
-%     b_clamp  (Skalar)       : Maximalwert des Bias
+%     q_ext    (4x1)          : externe Mocap-Lage
+%     ka, kE   (Skalar)       : Tilt-, Externreferenz-Gain
+%     Ts       [s]            : Abtastperiode
+%     q_init   (4x1)          : Startlage
 %     q_hat    (4x1)          : geschaetzte Lage
-%     Omega_hat(3x1)          : bias-korrigierte Drehrate (fuer Lageregler)
-%     b_hat    (3x1)          : geschaetzter Gyro-Bias (Diagnose)
-%     e_acc    (3x1)          : Innovationsterm zur Diagnose
+%     Omega_hat(3x1)          : Drehrate fuer den Lageregler
 
 persistent q
 if isempty(q)
@@ -52,7 +55,7 @@ end
 omega_mes = ka * e_acc + kE * e_ext;
 
 % --- 5) Korrigierte Drehrate + Quaternion-Propagation ---
-omega = imu_gyro - b_ground + omega_mes; % Eingang der Kinematik
+omega = imu_gyro + omega_mes; % Eingang der Kinematik (imu_gyro ist HAL-bias-korrigiert)
 theta = omega * Ts;
 ang   = norm(theta);
 if ang > 1e-9
@@ -66,7 +69,7 @@ q = q / norm(q); % auf SO(3) halten
 
 % --- 6) Ausgaenge ---
 q_hat     = q;
-Omega_hat = imu_gyro - b_ground; % Bias-korrigiert
+Omega_hat = imu_gyro; % bereits HAL-bias-korrigiert
 end
 
 

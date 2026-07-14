@@ -4,6 +4,8 @@
 //                         boolean_T ack, boolean_T *kill,
 //                         unsigned char *fault_src, double dbg[3]);
 //   void safety_overspeed_init(void);
+// ACHTUNG: nach jeder Signatur-Aenderung MUSS gen_lib_codegen.m neu laufen,
+// sonst passt der generierte Prototyp nicht mehr zu diesem Shim.
 // Die Schwellen (omega_max/debounce_N/use_norm) sind via coder.Constant
 // EINKOMPILIERT -> der OverspeedParams-Zeiger wird hier ignoriert. Deshalb ist
 // use_norm fix (per-Achse); Szenario S9 (norm-Modus) wird im Test ausgeblendet.
@@ -18,12 +20,12 @@ void overspeed_reset(void) {
 }
 
 void overspeed_step(const double gyro_corr[3], uint8_t estop, bool ack,
-                    double F_des, const OverspeedParams* /*p (einkompiliert, ignoriert)*/,
+                    const OverspeedParams* /*p (einkompiliert, ignoriert)*/,
                     bool* kill, uint8_t* fault_src, double dbg[3]) {
     boolean_T k;
     unsigned char fs;
     safety_overspeed(gyro_corr, static_cast<unsigned char>(estop),
-                     static_cast<boolean_T>(ack), F_des, &k, &fs, dbg);
+                     static_cast<boolean_T>(ack), &k, &fs, dbg);
     *kill      = (k != 0);
     *fault_src = fs;
 }

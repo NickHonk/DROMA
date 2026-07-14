@@ -4,7 +4,7 @@
 #define THROTTLE_POLY_HPP
 namespace mcuref {
 static constexpr int    P_THROTTLE_N   = 3;
-static constexpr double P_THROTTLE[3] = { -2.9813898214245487e-13, 1.2315874872894876e-05, 8.4040477510594869 };
+static constexpr double P_THROTTLE[3] = { -2.9813898214245336e-13, 1.2315874872894866e-05, 8.4040477510595064 };
 static constexpr double THROTTLE_MIN = 0.0, THROTTLE_MAX = 100.0;
 }  // namespace mcuref
 #endif

@@ -5,7 +5,7 @@
  * File: safety_overspeed_data.h
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 14-Jul-2026 09:29:01
+ * C/C++ source code generated on  : 14-Jul-2026 11:44:22
  */
 
 #ifndef SAFETY_OVERSPEED_DATA_H

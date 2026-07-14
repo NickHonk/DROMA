@@ -17,8 +17,30 @@ imu.Ts = Ts_inner; % Update-Periode des IMU-Blocks (Sekunden)
 imu.location = [-0.014; -0.015; 0.045];
  
 % --- Gyroskop ---
-% Messbias (ZERO-Initialtoleranz +-20 deg/s, vor Kalibrierung); repraesentativ:
+% GYRO-BIAS: roher Sensor-Bias, wie er im MPU-Register steht (vor Kalibrierung).
+% Messbias (ZERO-Initialtoleranz +-20 deg/s); repraesentativ:
 imu.gyro_bias  = deg2rad([10; -10; 10]);   % rad/s   (Spec-Grenze +-0.349 rad/s)
+
+% Bias-Schaetzung der HAL == was drone_hal.cpp (Z.281) im 3-s-Startup mittelt und
+% vom Rohwert abzieht, BEVOR imu_gyro die MCU erreicht.
+%
+% WO DAS WIRKT (Session 9, gelockt — Reihenfolge ist sicherheitsrelevant):
+%   sensors.slx 'Three-axis Gyroscope' praegt gyro_bias auf und SAETTIGT DANACH
+%   bei +-gyro_FSR (der Bias liegt VOR der Saturation, wie auf echter HW).
+%   Erst dahinter zieht der HAL-Nachbau (Sum 'HAL gyro bias' -> Bus Creator)
+%   gyro_bias_hat ab. mcu.slx zieht NICHTS mehr ab (kein Constant1/Subtract,
+%   kein Mahony-b_ground) — sonst waere es die doppelte Subtraktion von §3h,
+%   die auf HW 10 deg/s Schein-Drehrate erzeugte.
+%
+% WARUM NICHT einfach gyro_bias=0: dann saehe die Saturation den Bias nicht.
+% Die ist hier knapp — FSR 8.727 vs safety.omega_max 8.5 rad/s = 0.227 Marge,
+% davon frisst |bias|=0.175 rund 77 %. Mit gyro_bias=0 waere die Sim also
+% OPTIMISTISCHER als die Hardware (Overspeed-Detektion).
+%
+% gyro_bias_hat == gyro_bias  <=>  perfekte Kalibrierung (Default).
+% Fuer den Kalibrier-RESTFEHLER hier abweichen lassen, z.B.
+%   imu.gyro_bias_hat = imu.gyro_bias + deg2rad([0.05; -0.03; 0.04]);
+imu.gyro_bias_hat = imu.gyro_bias;         % rad/s   (HAL-Schaetzung)
 imu.gyro_ASD   = deg2rad(0.005);           % rad/s/sqrt(Hz)  (Amplituden-Spektraldichte)
 imu.gyro_PSD   = imu.gyro_ASD^2;           % (rad/s)^2/Hz    -> Band-Limited White Noise "Noise power"
 % Skalenfaktor-Toleranz +-3 %, Kreuzachsen-Empfindlichkeit +-2 % -> 3x3-Matrix

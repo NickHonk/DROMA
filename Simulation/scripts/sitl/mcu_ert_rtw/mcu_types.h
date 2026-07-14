@@ -7,12 +7,12 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.276
+// Model version                  : 1.281
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Tue Jul 14 09:45:28 2026
+// C/C++ source code generated on : Tue Jul 14 12:04:56 2026
 //
 // Target selection: ert.tlc
-// Embedded hardware selection: ARM Compatible->ARM Cortex-M
+// Embedded hardware selection: Intel->x86-64 (Windows64)
 // Code generation objectives: Unspecified
 // Validation result: Not run
 //
@@ -47,16 +47,14 @@ struct Bus_Cmd
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_hwJ2RzfczGMa75g45KRiCB_
-#define DEFINED_TYPEDEF_FOR_struct_hwJ2RzfczGMa75g45KRiCB_
+#ifndef DEFINED_TYPEDEF_FOR_struct_4erI0l3lmpoQqO9pUOl4m_
+#define DEFINED_TYPEDEF_FOR_struct_4erI0l3lmpoQqO9pUOl4m_
 
-struct struct_hwJ2RzfczGMa75g45KRiCB
+struct struct_4erI0l3lmpoQqO9pUOl4m
 {
   real_T omega_max;
   uint16_T debounce_N;
   boolean_T use_norm;
-  real_T rearm_idle_frac;
-  real_T F_rearm_idle;
   real_T batt_pin;
   real_T adc_bits;
   real_T batt_k;

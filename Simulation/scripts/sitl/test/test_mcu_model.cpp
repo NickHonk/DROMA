@@ -122,11 +122,12 @@ TEST(McuFailsafe, Estop2KillsThrottleAndRotor) {
     }
 }
 
-// Overspeed-Latch + Arming-Idle-Interlock im generierten Code: ||gyro||>omega_max(8.5)
-// fuer > debounce_N(4) Ticks -> Kill (rotor/throttle=0). Latch HAELT ohne ack-Flanke.
-// Taster-Flanke bei HOVER-Schub -> Interlock BLOCKT Re-Arm; erst bei Idle-Schub loest er.
-// Deckt die generierte ack-OR (Bus_Cmd.ack || btn_ack) + safety_overspeed + F_des-Interlock ab.
-TEST(McuOverspeed, KillHoldsAndReArmsOnlyAtIdleThrust) {
+// Overspeed-Latch im generierten Code: ||gyro||>omega_max(8.5) fuer > debounce_N(4)
+// Ticks -> Kill (rotor/throttle=0). Latch HAELT ohne ack-Flanke; eine Taster-Flanke
+// re-armt — UNABHAENGIG vom befohlenen Schub (der Arming-Idle-Interlock wurde in
+// Session 9 verworfen, siehe safety_overspeed.m). Deckt die generierte ack-OR
+// (Bus_Cmd.ack || btn_ack) + safety_overspeed ab.
+TEST(McuOverspeed, KillHoldsAndReArmsOnAckEdge) {
     MCU obj; obj.initialize();
     MCU::ExtU_mcu_T u{};
     u.Bus_IMU_k.imu_acc[2] = 9.81;                  // Schwerkraft -> Estimator level
@@ -136,7 +137,7 @@ TEST(McuOverspeed, KillHoldsAndReArmsOnlyAtIdleThrust) {
     u.Bus_Cmd_l.estop = 0;                          // KEIN Hard-Kill (isolier Overspeed)
     u.batt_count = 944.0;                           // ~15.74 V -> Batterie NORMAL
     u.btn_ack = false;
-    const double F_HOVER = 9.4666;                  // ~m*g >> F_rearm_idle(=0.1*m*g)
+    const double F_HOVER = 9.4666;                  // ~m*g
 
     // Phase 1: Overspeed bei Hover-Schub -> Kill-Latch.
     u.Bus_Cmd_l.F_des = F_HOVER;
@@ -159,25 +160,26 @@ TEST(McuOverspeed, KillHoldsAndReArmsOnlyAtIdleThrust) {
         EXPECT_EQ(0.0, s) << "Latch darf ohne ack-Flanke NICHT selbst freigeben";
     }
 
-    // Phase 2b: Taster-Flanke, aber HOVER-Schub -> Idle-Interlock BLOCKT Re-Arm.
+    // Phase 2b: Taster-Flanke bei HOVER-Schub -> Re-Arm geht durch. Regression fuer
+    // die Session-9-Entscheidung: KEIN F_des-Interlock mehr (frueher blockiert).
     u.btn_ack = true;
     for (int k = 0; k < 10; ++k) { obj.setExternalInputs(&u); obj.step(); }
     {
         const auto& y = obj.getExternalOutputs();
         double s = 0.0; for (int i = 0; i < 4; ++i) s += y.throttle[i];
-        EXPECT_EQ(0.0, s) << "Interlock muss Re-Arm bei Hover-Schub blockieren";
+        EXPECT_GT(s, 0.0) << "ack-Flanke muss re-armen, auch bei Hover-Schub "
+                             "(Idle-Interlock ist entfallen)";
     }
 
-    // Phase 2c: Schub auf Idle, neue Taster-Flanke -> Re-Arm (armed idle ~8.4% throttle).
-    u.btn_ack = false;                              // Flanke zuruecksetzen
-    for (int k = 0; k < 3; ++k) { obj.setExternalInputs(&u); obj.step(); }
-    u.Bus_Cmd_l.F_des = 0.0;                         // Idle-Schub <= F_rearm_idle
-    u.btn_ack = true;                                // neue steigende Flanke
+    // Phase 2c: gehaltenes ack erzeugt keine neue Flanke -> ein frischer Overspeed
+    // muss trotzdem latchen (ack-Pegel darf den Trip nicht sofort wieder loeschen).
+    u.Bus_IMU_k.imu_gyro[0] = 9.0;                  // erneut Overspeed, ack bleibt HIGH
     for (int k = 0; k < 10; ++k) { obj.setExternalInputs(&u); obj.step(); }
     {
         const auto& y = obj.getExternalOutputs();
-        double s = 0.0; for (int i = 0; i < 4; ++i) s += y.throttle[i];
-        EXPECT_GT(s, 0.0) << "nach Re-Arm bei Idle-Schub muss throttle wieder frei sein";
+        for (int i = 0; i < 4; ++i)
+            EXPECT_EQ(0.0, y.throttle[i])
+                << "gehaltenes ack darf einen frischen Trip nicht loeschen";
     }
 }
 

@@ -11,19 +11,18 @@
 
 // ------------------------------------------------------------ Overspeed
 namespace {
-OverspeedParams OSP{10.0, 4, false, 1.0};   // F_rearm_idle=1.0 N (Idle-Interlock)
+OverspeedParams OSP{10.0, 4, false};
 
 struct OsOut { std::vector<int> k, src; };
-// Treibt die Sequenz (g: Nx3, estop: N, ack: N) -> kill/src pro Sample. F_des
-// konstant (Default 0 = Idle -> Re-Arm nicht blockiert; S10 testet die Sperre).
+// Treibt die Sequenz (g: Nx3, estop: N, ack: N) -> kill/src pro Sample.
 OsOut drive(const std::vector<std::array<double,3>>& g,
             const std::vector<uint8_t>& estop,
             const std::vector<uint8_t>& ack,
-            const OverspeedParams& p, double F_des = 0.0) {
+            const OverspeedParams& p) {
     OsOut o; std::size_t n = g.size();
     for (std::size_t i=0;i<n;++i){
         bool kill; uint8_t src; double dbg[3];
-        overspeed_step(g[i].data(), estop[i], ack[i]!=0, F_des, &p, &kill,&src,dbg);
+        overspeed_step(g[i].data(), estop[i], ack[i]!=0, &p, &kill,&src,dbg);
         o.k.push_back(kill?1:0); o.src.push_back(src);
     }
     return o;
@@ -100,7 +99,7 @@ TEST(Overspeed, S8_KillDominatesLand) {
 // die Safety-Leafs mit Laufzeit-Params generieren (siehe README/gen_lib_codegen.m).
 #ifndef SAFETY_CODEGEN_CONST_PARAMS
 TEST(Overspeed, S9_NormVsPerAxis) {
-    OverspeedParams sN{10.0,4,true,1.0};
+    OverspeedParams sN{10.0,4,true};
     overspeed_reset();
     auto o1 = drive(rep({7.5,7.5,0},4), std::vector<uint8_t>(4,0), std::vector<uint8_t>(4,0), sN); // ||.||=10.6
     EXPECT_EQ(o1.k[3],1);
@@ -110,24 +109,8 @@ TEST(Overspeed, S9_NormVsPerAxis) {
 }
 #endif  // SAFETY_CODEGEN_CONST_PARAMS
 
-// S10: Arming-Idle-Interlock. Nach Overspeed-Trip blockiert eine ack-Flanke bei
-// HOHEM Schub (F_des > F_rearm_idle) den Re-Arm; erst bei Idle-Schub loest er.
-// Robust in ref (F_rearm_idle=1.0) UND codegen (einkompiliert ~0.1*m*g): 5>Schwelle,
-// 0.5<Schwelle in beiden Faellen.
-TEST(Overspeed, S10_IdleInterlock_BlocksRearmAtHighThrust) {
-    overspeed_reset();
-    bool kill; uint8_t src; double dbg[3];
-    const double gHi[3] = {20,0,0}, gLo[3] = {0,0,0};
-    for (int i = 0; i < 4; ++i)                              // Trip (N Samples > omega_max)
-        overspeed_step(gHi, 0, false, 0.0, &OSP, &kill, &src, dbg);
-    EXPECT_TRUE(kill);
-    overspeed_step(gLo, 0, true, 5.0, &OSP, &kill, &src, dbg);   // ack-Flanke @ hoher Schub
-    EXPECT_TRUE(kill) << "Interlock muss Re-Arm bei hohem Schub blockieren";
-    overspeed_step(gLo, 0, false, 0.0, &OSP, &kill, &src, dbg);  // ack loslassen (neue Flanke)
-    EXPECT_TRUE(kill);
-    overspeed_step(gLo, 0, true, 0.5, &OSP, &kill, &src, dbg);   // ack-Flanke @ Idle-Schub
-    EXPECT_FALSE(kill) << "Re-Arm muss bei Idle-Schub durchgehen";
-}
+// (S10 war der Arming-Idle-Interlock-Test — Feature in Session 9 verworfen,
+//  Begruendung im Schlusskommentar von safety_overspeed.m.)
 
 // ------------------------------------------------------------ Battery
 namespace {

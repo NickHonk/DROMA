@@ -5,7 +5,7 @@
  * File: _coder_quatRotate_info.c
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 14-Jul-2026 09:28:55
+ * C/C++ source code generated on  : 14-Jul-2026 11:44:20
  */
 
 /* Include Files */
@@ -25,21 +25,20 @@ static const mxArray *c_emlrtMexFcnResolvedFunctionsI(void)
 {
   const mxArray *nameCaptureInfo;
   const char_T *data[4] = {
-      "789cc593cb4ec2401486a706883141d9b877e9cac4851b77844bd404500aba708c0ced90"
-      "8ecc05e642f0297c0c17be8c2fe0bb682985b6c9a444229ecde93f7f"
-      "e77c674e668073dd72000087208aab5294cb4b5d59e63d908eacef58721c455048ed8bfd"
-      "b765f604d778ae23c111c3ab9dbe608423ae7baf130c245682ceb0bf",
-      "704684e21e61d84d8a76a8583361ad446885dfb5007b63d7302003b5ee9026c56a1e03cb"
-      "790b39f3c846761ed9ff62dee497bcb8fe410e2ff6a706e9aed048e3"
-      "347fb025bf64e5478e2fcc90e235ef734bded8ca4bfb8f8da7da25ec2b2c156c136f0c75"
-      "801551cfbef0b49088c256d53db9ff718d172864464364605d8a8063",
-      "0eebdd4eab0a5dc20c459a080e9527c9442b3832dc0b17145c8ff38c2d7879f33cdaf07c"
-      "b6f75406fb8b5c2b7f39bbe49d7ebc1777c98be3bf78734bbd4defe7"
-      "b18557c9f88d1b63508376c8f45cdef51fdaf58b17dc4cf4719bc3c9eb0358f45fd7ff06"
-      "8f20696a",
+      "789cc593df4ac33014c653994384e9407c0dc10b6fbc52d60d14b6e9fee0851116db339a"
+      "ad49b62619f32186375ef848be84efe2bab65b5b081d0ee7b939fdf2"
+      "25e77772489175d7b4104227288a9b72942bb1aec6f9006523ef5b869cc4212a65ce25fe"
+      "7b9c1dc115cc55243861b03ee90a4639e1aaf73601148014fe0cdc95",
+      "33a43ef428836e5ab442c51a296b2d422bfcae79e08cbb9aa1c0939b0efdb458cf6360b8"
+      "6fa9601ef9c8cf23bf2fe14d7ec94bea1f17f0127faa89ea08451464"
+      "f9831df965233f725ca15f7dd8f0be76e411232feb3fd75f6ad7b82f2190b843c6a000db"
+      "c2d10cb892d80e84c781cf96a6763c2915e12eb63bede62dee52a67d",
+      "a2a8e0583a019d2c770f3577c205893743bc6031a7688ea75bdecbf41f55d0d12a8fcebe"
+      "ad7df23e16d6e73e7949fc176f6ea8b7edbb3c37f0aa39bf7eaf35a9"
+      "fb6d3abd0c1efb4f2dfb6a048d541f0f059ca23e9041ff75fd1f22c26659",
       ""};
   nameCaptureInfo = NULL;
-  emlrtNameCaptureMxArrayR2016a(&data[0], 1632U, &nameCaptureInfo);
+  emlrtNameCaptureMxArrayR2016a(&data[0], 1624U, &nameCaptureInfo);
   return nameCaptureInfo;
 }
 
@@ -87,17 +86,18 @@ mxArray *emlrtMexFcnProperties(void)
   emlrtSetField(xEntryPoints, 0, "NumberOfOutputs",
                 emlrtMxCreateDoubleScalar(1.0));
   emlrtSetField(xEntryPoints, 0, "ConstantInputs", xInputs);
-  emlrtSetField(xEntryPoints, 0, "ResolvedFilePath",
-                emlrtMxCreateString("C:\\Users\\Nick\\thesis_doctoral\\MAS "
-                                    "Versuchsaufbau\\Drohnen\\DROMA\\Simulation"
-                                    "\\scripts\\functions\\quatRotate.m"));
+  emlrtSetField(
+      xEntryPoints, 0, "ResolvedFilePath",
+      emlrtMxCreateString("C:"
+                          "\\Users\\Rakete\\Documents\\Drohnenversuchsstand\\DR"
+                          "OMA\\Simulation\\scripts\\functions\\quatRotate.m"));
   emlrtSetField(xEntryPoints, 0, "TimeStamp",
-                emlrtMxCreateDoubleScalar(740169.6034606481));
+                emlrtMxCreateDoubleScalar(740177.43567129632));
   emlrtSetField(xEntryPoints, 0, "Visible", emlrtMxCreateLogicalScalar(true));
   xResult =
       emlrtCreateStructMatrix(1, 1, 7, (const char_T **)&propFieldName[0]);
   emlrtSetField(xResult, 0, "Version",
-                emlrtMxCreateString("25.2.0.2998904 (R2025b)"));
+                emlrtMxCreateString("25.2.0.3177638 (R2025b) Update 5"));
   emlrtSetField(xResult, 0, "ResolvedFunctions",
                 (mxArray *)c_emlrtMexFcnResolvedFunctionsI());
   emlrtSetField(xResult, 0, "Checksum",

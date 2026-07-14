@@ -5,7 +5,7 @@
  * File: quatRotate.c
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 14-Jul-2026 09:28:55
+ * C/C++ source code generated on  : 14-Jul-2026 11:44:20
  */
 
 /* Include Files */

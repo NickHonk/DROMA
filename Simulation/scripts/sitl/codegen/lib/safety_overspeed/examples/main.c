@@ -5,7 +5,7 @@
  * File: main.c
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 14-Jul-2026 09:29:01
+ * C/C++ source code generated on  : 14-Jul-2026 11:44:22
  */
 
 /*************************************************************************/
@@ -126,8 +126,8 @@ void main_safety_overspeed(void)
   /* Initialize function input argument 'gyro_corr'. */
   /* Call the entry-point 'safety_overspeed'. */
   argInit_3x1_real_T(dv);
-  safety_overspeed(dv, argInit_uint8_T(), argInit_boolean_T(), argInit_real_T(),
-                   &kill, &fault_src, dbg);
+  safety_overspeed(dv, argInit_uint8_T(), argInit_boolean_T(), &kill,
+                   &fault_src, dbg);
 }
 
 /*

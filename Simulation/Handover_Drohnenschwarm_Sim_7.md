@@ -9,6 +9,34 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
 
 ---
 
+## 0a. TL;DR Session 9 (zuletzt) — Re-Arm/F_des-Sweep → Gyro-Bias-Bug
+
+1. **⛔ Sim≠HW-Bug gefunden + gefixt: doppelte Gyro-Bias-Subtraktion.** Die HAL
+   zieht den echten Bias ab, `mcu.slx` zog zusätzlich den *fiktiven* Sim-Bias ab
+   → auf HW **10 °/s Schein-Drehrate je Achse**. **Erklärt `thr[5 19 5 17]` neu —
+   es war NICHT die 6°-Schieflage.** Fix (strukturell): Bias-Logik **komplett aus
+   `mcu.slx` entfernt** (`Constant1`, `Subtract`, Mahony-`b_ground`); `sensors.slx`
+   prägt den Bias auf (**sättigt mit**) und der neue Sum `HAL gyro bias` zieht ihn
+   dahinter ab. ⚠️ Dabei aufgefallen: der Bias frisst **77 % der Overspeed-Marge**
+   (FSR 8.7266 vs 8.5) → offener Punkt 3. Details **§3h**.
+2. **❌ Arming-Idle-Interlock verworfen** (Messdaten in §3h + Schlusskommentar
+   `safety_overspeed.m`): Re-Arm ist ohnehin nicht motorfrei (8.404 % throttle),
+   und der lokale Taster hing an der GCS. Code + `mcu.slx` zurückgebaut.
+3. **Golden + Codegen (Host & ARM) neu**, beide frei von `0.94666`/`0.1745`.
+4. **✅ Gate B 30/30 GRÜN** (MSVC 2022 BuildTools nachinstalliert). 31→30 = der
+   entfernte `Overspeed.S10`. Golden + Codegen sind damit **zertifiziert**.
+   `gen_lib_codegen.m` neu gelaufen (Leaf-Signatur), `prune_mcu_configs` (9 Dups
+   raus, `mcu.slx` 756→312 KB).
+5. **🔴 Verbleibend: Drohne + Sende-Teensy neu flashen** — der ARM-Code trug beide
+   Bugs. Gegentest: still am Boden muss `thr` **symmetrisch** sein (vorher
+   `[5 19 5 17]`). Dazu Batt-Pin/`k` an Pin 41 nachmessen (§1) und Gate A
+   interaktiv (§3h).
+6. **⚠️ Falle:** `openProject` (in `run_mcu_recert`/`run_mcu_arm_codegen`/`run_gate_a`)
+   hat `mcu.slx` mit einer alten Version überschrieben → headless ohne
+   `openProject` arbeiten (§3h).
+
+---
+
 ## 0. TL;DR — was diese Session geändert hat
 
 1. **`mcu.slx`-Änderung (Nutzer):** neuer Root-Outport **`throttle[4]`** =
@@ -66,17 +94,38 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
   65.5 LSB/dps), Acc **AFS_SEL=1** (±4 g, 8192 LSB/g). Achsdrehung Body←Sensor
   **`R_bs`: `[x_b;y_b;z_b]=[y_s;-x_s;z_s]`** (= Rz(−90°)) — **in der HAL**
   (`sensors.slx` gibt Body-Frame aus). Reihenfolge HAL: raw→SI→`R_bs`→Gyro-Bias→Bus_IMU.
-- **Gyro-Bias:** 3 s Startup-Mittelung (Drohne still), abziehen. Mahony-Kᵢ ist
-  **deaktiviert** → das ist die einzige Drift-Absicherung.
+- **Gyro-Bias — Kompensation gehört AUSSCHLIESSLICH in die HAL (Session 9 gelockt,
+  strukturell erzwungen).** Die HAL mittelt 3 s im Startup und zieht den **echten**
+  Bias ab (`drone_hal.cpp` Z.281); an der MCU-Grenze ist `imu_gyro` **bias-frei**.
+  **`mcu.slx` enthält KEINE Bias-Logik mehr** — `Constant1`, `Subtract` und der
+  Mahony-Eingang `b_ground` sind **gelöscht** (`mahony_filter` hat jetzt 7 Args).
+  Damit *kann* die Doppel-Subtraktion aus §3h nicht zurückkehren.
+  Die Sim bildet die HAL-Stufe nach: `sensors.slx` prägt `imu.gyro_bias` auf
+  (→ **sättigt mit**, wie auf HW) und der Sum-Block **`sensors/HAL gyro bias`**
+  zieht `imu.gyro_bias_hat` hinter dem Gyro-Block wieder ab
+  (`gyro_bias_hat == gyro_bias` ⇔ perfekte Kalibrierung; abweichen lassen für
+  Restfehler-Tests). Mahony-Kᵢ ist **deaktiviert** → die HAL-Mittelung ist die
+  einzige Drift-Absicherung.
+  ⚠️ **Bias vor der Saturation ⇒ er frisst Overspeed-Marge:** FSR 8.7266 vs
+  `omega_max` 8.5 = **0.2266** Marge, davon `|bias|` = 0.1745 ≈ **77 %**. Real
+  messbare Obergrenze ≈ 8.552 rad/s ⇒ effektive Marge **~0.05 rad/s**. Deshalb
+  darf `gyro_bias` NICHT einfach 0 gesetzt werden — die Sim wäre sonst
+  optimistischer als die HW. Bewertung offen (§3h).
 - **Hebelarm** `r=[-0.014;-0.015;0.045]` m: **Option 1 gewählt — keine Kompensation**
   (weder Sim noch HAL noch `mcu.slx`). `sensors.slx` modelliert ihn; HW reproduziert
   ihn physikalisch → Sim=HW automatisch. Acc **hebelarm-roh** durch die HAL.
   (Falls je aggressiver geflogen wird: Option 2 = Zentripetal-Kompensation
   `f−ω×(ω×r)` aus `imu_gyro` **innerhalb `mcu.slx`**, dann Re-Cert.)
-- **Batterie:** `batt_count = (double)analogRead(40)` (A16=SPANNUNG, Wiring-Ist),
-  **12 bit**, **rohe counts** → Modell rechnet `Vf = k·batt_count`, `k=0.0166737`
-  (HW-kal.). Strom (Pin41/A17) = nur Telemetrie, **nicht** ins Modell. Umrouting
+- **Batterie:** **12 bit**, **rohe counts** → Modell rechnet `Vf = k·batt_count`,
+  `k=0.0166737` (HW-kal.). Strom = nur Telemetrie, **nicht** ins Modell. Umrouting
   34/35→40/41 war nötig (34/35 haben keinen ADC).
+  **Pin-Belegung (Nutzer bestätigt, Session 9): Pin 41 = SPANNUNG (A17),
+  Pin 40 = Strom (A16, nur Telemetrie).** `drone_hal.cpp` steht korrekt auf
+  `PIN_BATT_V=41`. Die §3e-Notiz unten (Session 8, „Pin 40 = Spannung") ist damit
+  **überholt**. ⚠️ **Offen:** `k=0.0166737` stammt aus einer Messung an **Pin 40**
+  (944 counts ↔ 15.74 V). Weicht der Teiler an Pin 41 ab, sind Warn/Crit/Floor
+  (14.0/13.4/12.0 V) verschoben → **`k` beim nächsten HW-Test verifizieren**
+  (counts↔Volt an Pin 41), `init_battery_manag.m` ggf. korrigieren.
 - **ESC = OneShot125.** `analogWriteFrequency(pin,1000)` + `analogWriteResolution(12)`
   → count 512..1024 = 125..250 µs. Mapping **`count = 512 + throttle*5.12`**
   (`throttle` bereits [0,100] geclampt). Pins/Richtung: **M1=33 CCW, M2=2 CW,
@@ -159,7 +208,8 @@ Codec isoliert).
 + Determinismus auf 9 Kanäle). Automations-Helfer: `run_mcu_recert.m` (Regen+
 Poly-Dump+Golden), `run_gate_a.m` (Gate A).
 
-**Gate-Status:**
+**Gate-Status:** *(Stand Session 9: **30/30** — siehe §3h; die Zahlen unten sind
+der historische Session-8-Stand.)*
 - **Gate B (Host-Golden, MATLAB-frei, tick-exakt): 25/25 GRÜN.** Das ist die
   maßgebliche Zertifizierung (throttle-Golden-Diff ≤1e-9, Invariante ≤1e-9,
   Determinismus 9 Kanäle, + Codec-Tests).
@@ -265,6 +315,9 @@ nicht `led`). Die „25/50/75 %-Pins"-Suche war gegenstandslos.
 - **Acc (kleiner Offset):** z ≈ +9.2 (z-up korrekt), aber |a| ≈ 9.27 (~5 % niedrig)
   + y-Offset ~−1.0 → leichte Schräglage/Accel-Offset. Für Bench ok; Accel-Kalib
   (Bias/Scale) bei Bedarf separat.
+  ⚠️ **Session 9 — die „6°-Schieflage" erklärt die Motor-Asymmetrie NICHT.** Siehe
+  §3h: die Asymmetrie `thr[5 19 5 17]` ist die doppelte Gyro-Bias-Subtraktion.
+  Nach dem Fix ist `throttle` bei Hover **symmetrisch** (`[23.42 ×4]`).
 - **Batt (noch nicht prüfbar):** `batt=0(0.00V)` — nur USB, kein Flug-Akku am PM06.
   Erst mit angestecktem 4S-Akku verifizierbar.
 - **✅ FAILSAFE-BUG GEFIXT (§3b-Re-Zert #2):** Der in §3b neue `throttle`-Outport
@@ -341,16 +394,11 @@ nicht `led`). Die „25/50/75 %-Pins"-Suche war gegenstandslos.
   throttle springt HOCH). Bleibt bis **Power-Cycle** aktiv, auch wenn Spannung sich
   erholt (per Design gegen Sink↔Schweben-Grenzzyklus). Beim Testen mit Netzteil also
   stets > 12 V halten, sonst latcht der Notabstieg und nur Neustart löst ihn.
-- **✅ Arming-Idle-Interlock (Session 8).** Re-Arm des Kill-Latch (ack-Flanke)
-  wirkt nur noch, wenn der befohlene Schub `F_des <= safety.F_rearm_idle` (=0.1·m·g
-  = 0.9467 N). Verhindert Sprung-auf-Hover im Löse-Tick ("Schub runter zum Armen",
-  Standard-Flightcontroller). Umsetzung: `safety_overspeed(gyro,estop,ack,F_des,safety)`
-  (F_des NEU, aus `Bus_Cmd.F_des` im Block verdrahtet → **kein** neuer ExtU-Eingang,
-  HAL unverändert). Param in `init_safety(quadcop)` (`rearm_idle_frac=0.1`, `F_rearm_idle`).
-  Generierter Code Z.203: `… && (Bus_Cmd_l.F_des <= 0.94666…)`. Tests: `Overspeed.S10`
-  (Standalone-Codegen via Shim) + `McuOverspeed.KillHoldsAndReArmsOnlyAtIdleThrust`
-  (volles Modell) → **Gate B 31/31**. **Bedienung:** nach jedem Kill zum Re-Armen
-  erst GCS-`F_des` auf ≤10% Hover runter, dann Taster/`ack`.
+- **❌ Arming-Idle-Interlock (Session 8) — in Session 9 VERWORFEN, siehe §3h.**
+  War: Re-Arm nur bei `F_des <= safety.F_rearm_idle` (=0.1·m·g = 0.9467 N).
+  Zurückgebaut, weil er das Re-Armen nicht motorfrei machte (throttle springt
+  ohnehin auf 8.404 %) und den lokalen Taster von der GCS abhängig machte.
+  Re-Arm hängt wieder allein an `ack-Flanke & ~over_inst & estop≠2`.
 - **Standalone-Safety-Leaves (`gen_lib_codegen.m`):** Build-Dir nutzt
   `SAFETY_IMPL=codegen` → `test_safety` läuft gegen den generierten Standalone-
   `safety_overspeed` (Shim), NICHT die Referenz. Nach Signatur-Änderung MUSS
@@ -380,6 +428,164 @@ weiter 25/25).
 **Offen für Deployment:** Kompilat via Teensy/PlatformIO-Toolchain (nicht aus
 MATLAB); `-ffast-math` aus, FPU round-to-nearest im Firmware-Compiler setzen.
 Der ARM-Code (`hardware\mcu_arm\mcu_ert_rtw\`) sitzt neben `drone_hal.cpp`.
+
+### 3h. Session 9 — Re-Arm/F_des-Sweep → Gyro-Bias-Bug gefunden
+
+**Auslöser:** Commit `b4073ea` („Need to investigate if it useful as implemented")
++ F_des-Sweep. Der Sweep hat den Interlock beantwortet **und** einen Sim≠HW-Bug
+freigelegt. Alles gegen `mcu.slx` in MATLAB gefahren (kein Compiler, s.u.).
+
+#### ⛔ BEFUND 1 (kritisch): doppelte Gyro-Bias-Subtraktion — GEFIXT
+`mcu.slx` rechnete `gyro_corr = imu_gyro − imu.gyro_bias` (`Constant1`), und der
+Mahony zog `b_ground` (**dieselbe** Konstante, Inport 4) intern nochmal ab. Der
+Block-Header sagt es selbst: *„imu_gyro … (mit Bias+Rauschen)"* — das Modell
+erwartet **rohes** Gyro. `drone_hal.cpp` Z.281 sendet aber **bias-korrigiertes**.
+
+| | liefert `imu_gyro` | `mcu` zieht ab | `gyro_corr` |
+|---|---|---|---|
+| Sim | `sensors.slx` addiert `imu.gyro_bias` | `imu.gyro_bias` | wahr ✓ |
+| HW | HAL zieht **echten** Bias ab | `imu.gyro_bias` (fiktiv!) | wahr **− [10,−10,10]°/s** ✗ |
+
+`imu.gyro_bias = deg2rad([10;-10;10])` ist ein *fiktiver* Sensor-Modellwert
+(„repräsentativ, vor Kalibrierung") — auf HW permanente Schein-Drehrate ⇒
+Störmoment `tau = kΩ·bias ≈ [0.023,−0.018,0.038] N·m` + verfälschter Mahony.
+**Gate B konnte das per Konstruktion nicht sehen** (in der Sim heben sich beide auf).
+
+Verifikation (`mcu.slx`, level, `F_des=0`, armed):
+
+| `imu_gyro` | `throttle` [%] | `rotor_cmd` |
+|---|---|---|
+| `0` (was der HAL sendet) | `[1.78, 15.87, 1.80, 13.83]` | `[729, 784, 728, 667]` |
+| `imu.gyro_bias` (roh) | `[8.404 ×4]`, Abw. **0.0e+00** | `[0,0,0,0]` |
+
+- **Erklärt `thr[5 19 5 17]` neu:** die Sim reproduziert das Muster (1,3 niedrig /
+  2,4 hoch) bei **perfekt levelem** Sensor → **nicht** die 6°-Schieflage.
+- **Nebenbefund:** dabei wird `ω²` negativ (Kanal 1,3) → `rotor_cmd=sqrt(|ω²|)=728`
+  (Sim: Rotor dreht) vs. `throttle=1.78 %` (HW: Motor fast aus) — die Ausgänge
+  widersprechen sich. Genau der in §3b als ungetestet geflaggte Sign-Pfad.
+- **Zwischenschritt (verworfen):** erst nur `imu.gyro_bias = zeros(3,1)` — beide
+  Enden auf 0, kein Modell-Eingriff. Funktionierte, war aber **fragil** (Logik
+  blieb scharf, sobald jemand den Parameter ≠0 setzt) **und optimistischer als die
+  HW** (s.u.). Auf Nutzer-Vorschlag ersetzt durch den strukturellen Umbau.
+- **✅ Fix (final, strukturell):** Bias-Logik **aus der Firmware entfernt**,
+  HAL-Nachbau in die Sim:
+  - `mcu.slx`: `Constant1` **gelöscht**, `Subtract` **gelöscht**
+    (`Bus Selector <imu_gyro>` → `MATLAB Function` IN1 direkt), Mahony-Inport
+    `b_ground` **gelöscht**; `mahony_filter.m` (SSOT) jetzt 7 Args
+    (`omega = imu_gyro + omega_mes`, `Omega_hat = imu_gyro`).
+  - `sensors.slx`: neuer Sum **`HAL gyro bias`** (+−) + Constant `gyro_bias_hat`
+    zwischen Gyroskop und `Bus Creator` (mit Annotation).
+  - `init_sensors.m`: `imu.gyro_bias = deg2rad([10;-10;10])` (**roher Sensor-Bias,
+    zurück**), neu `imu.gyro_bias_hat = imu.gyro_bias` (HAL-Schätzung).
+- **⚠️ WARUM nicht einfach `gyro_bias = 0`** (der entscheidende Grund): Im
+  Aerospace-Gyro-Block wirkt der Bias **VOR der Saturation** — Kette:
+  `ω→ZOH→×M ─┐ Measurement bias ─┼→Sum4(+++)→Dynamics→Sum1(+Rauschen)→**Saturation**→out`.
+  Mit `gyro_bias=0` sähe die Saturation den Bias nie. Sie ist aber knapp
+  (FSR 8.7266 vs `omega_max` 8.5 ⇒ 0.2266 Marge; `|bias|`=0.1745 ⇒ **77 %**).
+  Real: Sensor sättigt inkl. Bias, HAL zieht danach ab ⇒ Obergrenze ≈ 8.552,
+  **effektive Marge ~0.05 rad/s**. Der Umbau bildet das ab; `=0` hätte die Sim
+  **optimistischer als die Hardware** gemacht.
+- **Verifiziert (Gate B 30/30 nach dem Umbau):**
+  - Golden: `imu_gyro` mean = `[-0.00095, -0.00184, -0.00177]` statt `±0.1745`
+    ⇒ HAL-Nachbau zieht den aufgeprägten Bias sauber ab, MCU-Grenze bias-frei.
+  - Host **und** ARM: `0.1745`/`0.94666` je **0×**; `over_inst` rechnet direkt auf
+    `imu_gyro`; ARM: 0 x86-Intrinsics, „ARM Cortex-M".
+  - Frühere Messung (vor dem Fix): `imu_gyro=0` → `throttle=[8.404 ×4]` exakt,
+    `rotor_cmd=[0,0,0,0]`, Abw. `0.0e+00`; Hover → `[23.4194 ×4]` **symmetrisch**.
+
+#### ❌ BEFUND 2: Arming-Idle-Interlock verworfen (Entscheidung Nutzer)
+F_des-Sweep gegen `mcu.slx` (bias-korrekt, level):
+- Schwelle **bit-exakt**: Re-Arm bis `0.946665` N, blockiert ab `0.946666` N (`<=`).
+- **Aber `throttle` im Löse-Tick ist nicht 0, sondern `polyval(P,0)=8.404 %`** —
+  OneShot125 ~555 counts/135 µs, **über** der Anlaufschwelle (~5–10 %): die Props
+  laufen beim Re-Armen ohnehin an. „Schub runter zum Armen" ist nicht motorfrei.
+- Gewinn nur **9.94 % statt 23.43 %** throttle (13.5 Prozentpunkte).
+- Preis: der Taster (Pin 21) — die einzige **lokale** Freigabe — war wirkungslos,
+  solange die GCS >10 % Hover sendet, **ohne Rückmeldung am Gerät**.
+→ Zurückgebaut in `safety_overspeed.m` (Begründung im Schlusskommentar — **nicht
+ohne neue Argumente wieder einbauen**), `init_safety.m`, `safety_helpers.h`,
+`safety_helpers_ref.cpp`, `codegen_shim_overspeed.cpp`, `gen_lib_codegen.m`,
+`test_safety.cpp` (S10 raus), `test_mcu_model.cpp` (jetzt
+`McuOverspeed.KillHoldsAndReArmsOnAckEdge` + „gehaltenes ack löscht frischen Trip
+nicht"), `mcu.slx` (Block 4→3 Inports, `<F_des>`-Linie gelöst).
+Generierter Code Z.199 jetzt ohne `F_des`-Term. **Bedien-Hinweis §3e („erst F_des
+≤10 % runter") ist damit hinfällig.**
+
+#### ⚠️ BEFUND 3: throttle-Sättigung über `F_des` NICHT erreichbar
+Bis `F_des=60 N` (6,3× Hover) nur **87,6 %** throttle; rechnerisch bräuchte es
+~83 N (8,8× Hover). Die §3b-Coverage-Lücke (Sättigung) lässt sich **nur über
+τ/Attitude-Fehler** schließen — ein F_des-Sweep genügt nicht.
+
+#### Stand / was verifiziert ist
+- `mcu.slx`: 3 Inports, `Constant1=[0 0 0]`, kompiliert, **persistent** geprüft.
+- **Golden neu** (`golden_mcu_io.csv`, 5001×40). Ersatz-Check ohne Compiler:
+  `mcu.slx` standalone mit den Golden-Eingängen replayt → **max|d| = 3.07e-11**
+  (Gate-B-Toleranz 1e-9) ⇒ Aufzeichnung/ZOH/Spalten konsistent.
+  Golden ggü. HEAD stark geändert (`rotor_cmd` bis 185): erwartet — `imu_gyro`
+  trägt den Bias nicht mehr, und die alte Kompensation war um `(M−I)·b` ohnehin
+  ungenau (Bias lief durch `imu.gyro_M`) ⇒ Trajektorien-Divergenz über 5 s.
+- **Codegen neu, Host + ARM**, beide verifiziert frei von `0.94666` und `0.1745`;
+  ARM zusätzlich: 0 x86-Intrinsics, „ARM Cortex-M". Config zurück auf `host`.
+- `throttle_poly.hpp`: nur ULP-Drift (`…5487e-13`→`…5336e-13`) — `polyfit` ist
+  nicht bit-stabil über Maschinen; 1e-9-Toleranz trägt es.
+
+#### ✅ Gate B: 30/30 GRÜN (zertifiziert)
+MSVC 2022 **BuildTools** nachinstalliert (`vswhere` →
+`C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools`), MATLAB-`mex`
+darauf gesetzt. Damit ist der Fix **verifiziert**, nicht nur plausibel:
+- `McuGolden.RotorCmdMatchesGolden` grün ⇒ **generierter Code == neuer Golden**
+  (throttle-Diff ≤1e-9 + Polyval-Invariante).
+- `McuOverspeed.KillHoldsAndReArmsOnAckEdge` grün (neue Re-Arm-Semantik).
+- **31→30** ist erwartet: genau der entfernte `Overspeed.S10`.
+  `test_safety` zeigt S1–S8 (S9 bei `SAFETY_IMPL=codegen` bauartbedingt aus,
+  S10 entfernt) ⇒ läuft wirklich gegen den generierten Shim.
+- `gen_lib_codegen.m` neu gelaufen → Leaf-Signatur jetzt
+  `safety_overspeed(gyro_corr, estop, ack, kill, fault_src, dbg)`.
+- `prune_mcu_configs('mcu')`: 9 Dups entfernt (`ert_cpp_sitl1..5`,
+  `ert_cpp_arm1..4`), behalten `Configuration/Reference/ert_cpp_sitl/ert_cpp_arm`,
+  aktiv `ert_cpp_sitl`. **`mcu.slx` 756 KB → 312 KB.** Gate B danach erneut 30/30.
+
+**Build-Rezept (Session 9, reproduziert):**
+```
+cmake -S <sitl> -B C:\dsb -G "Visual Studio 17 2022" -A x64 ^
+  -DQUAT_IMPL=codegen -DSAFETY_IMPL=codegen -DCODEGEN_ROOT=<sitl>/codegen ^
+  -DMATLAB_ROOT="C:/Program Files/MATLAB/R2025b" -DGOLDEN_TOL=1e-9
+cmake --build C:\dsb --config Release && ctest -C Release
+```
+- ⚠️ **Build-Dir KURZ halten** (`C:\dsb`): MSBuilds FileTracker bricht bei langen
+  Pfaden mit `FTK1011`/`MSB8029` ab (MAX_PATH, kein Temp-Verzeichnis).
+- ⚠️ Der eingecheckte `scripts\sitl\build\` hat einen **Fremd-Cache**
+  (`C:/Users/Nick/thesis_doctoral/…`) → nicht verwenden, neu konfigurieren.
+
+#### 🔴 OFFEN (Session 10 zuerst)
+1. **Drohne + Sende-Teensy neu flashen** — der ARM-Code trug **beide** Bugs.
+   HW-Gegentest: still am Boden ⇒ `thr` muss **symmetrisch** sein (vorher
+   `[5 19 5 17]`). Das ist der eigentliche Nachweis des Bias-Fixes auf HW.
+2. **Batt-`k` an Pin 41 nachmessen** (§1) — Pin-Belegung ist geklärt (41=Spannung),
+   aber `k=0.0166737` stammt aus einer Messung an Pin 40.
+3. **⚠️ Overspeed-Marge bewerten (neu, Session 9).** Der Bias frisst 77 % der
+   Marge zwischen `omega_max`=8.5 und FSR=8.7266 (effektiv ~0.05 rad/s). Jetzt,
+   wo die Sim den Bias VOR der Saturation modelliert, ist das messbar. Optionen:
+   `omega_max` senken, Gyro auf **FS_SEL=2 (±1000 dps)** stellen (halbiert die
+   Auflösung, verdoppelt den Headroom), oder belassen und per Sim-Kampagne
+   belegen, dass die Entprellung (`debounce_N=4`) trägt. Vorher **keine**
+   aggressiven Flüge nahe der Rate-Grenze.
+3. **Gate A (SIL) interaktiv.** Headless scheitert **weiterhin** an
+   `Errors occurred while building "rtwshared"` — **auch mit MSVC**. Damit ist
+   die Session-8-Vermutung bestätigt: es ist das **`-batch`-SIL-Setup**, nicht die
+   Toolchain. Gate B ist ohnehin die maßgebliche Zertifizierung (Gate A ist laut
+   `sil_check_mcu.m`-Header nur ein grober Konfidenz-Check).
+
+#### ⚠️ FALLE: `openProject` überschreibt `mcu.slx`
+`run_mcu_recert.m` / `run_mcu_arm_codegen.m` rufen `openProject`. Dessen
+„unsaved changes"-Tracking (`LoadedFileViewer`) hat beim Exit eine **alte**
+In-Memory-Version über die frisch gespeicherte `mcu.slx` geschrieben (Modell
+war danach inkonsistent: alter 5-Arg-Blockcode, aber `F_des`-Linie schon weg →
+kompilierte nicht). **Headless ohne `openProject` arbeiten:** `params.m` via
+`evalin('base', "run('…params.m')")` (in einer Funktion landet `run` sonst im
+lokalen Scope → Codegen findet `Ts_inner`/`controller.kR` nicht), dann
+`load_system('mcu')`, generieren, `save_system('mcu','','OverwriteIfChangedOnDisk',true)`.
+Nach jedem Lauf **Blockcode + Inport-Zahl gegenprüfen** (frisch laden!).
 
 ### 3g. Danach
 HIL, dann Schwarm (kein onboard-EKF — aus Roadmap gestrichen, Teil 5).

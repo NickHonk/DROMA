@@ -5,7 +5,7 @@
  * File: _coder_quat2dcm_local_api.c
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 14-Jul-2026 09:28:42
+ * C/C++ source code generated on  : 14-Jul-2026 11:44:14
  */
 
 /* Include Files */
@@ -115,8 +115,13 @@ static const mxArray *emlrt_marshallOut(real_T u[9])
   static const int32_T iv1[2] = {3, 3};
   const mxArray *m;
   const mxArray *y;
+  void *existingData;
   y = NULL;
   m = emlrtCreateNumericArray(2, (const void *)&iv[0], mxDOUBLE_CLASS, mxREAL);
+  existingData = emlrtMxGetData((mxArray *)m);
+  if (existingData != (void *)&u[0]) {
+    emlrtFreeMex(existingData);
+  }
   emlrtMxSetData((mxArray *)m, &u[0]);
   emlrtSetDimensions((mxArray *)m, &iv1[0], 2);
   emlrtAssign(&y, m);

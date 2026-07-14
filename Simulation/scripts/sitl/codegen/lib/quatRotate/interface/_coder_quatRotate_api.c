@@ -5,7 +5,7 @@
  * File: _coder_quatRotate_api.c
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 14-Jul-2026 09:28:55
+ * C/C++ source code generated on  : 14-Jul-2026 11:44:20
  */
 
 /* Include Files */
@@ -158,8 +158,13 @@ static const mxArray *emlrt_marshallOut(real_T u[3])
   static const int32_T i1 = 3;
   const mxArray *m;
   const mxArray *y;
+  void *existingData;
   y = NULL;
   m = emlrtCreateNumericArray(1, (const void *)&i, mxDOUBLE_CLASS, mxREAL);
+  existingData = emlrtMxGetData((mxArray *)m);
+  if (existingData != (void *)&u[0]) {
+    emlrtFreeMex(existingData);
+  }
   emlrtMxSetData((mxArray *)m, &u[0]);
   emlrtSetDimensions((mxArray *)m, &i1, 1);
   emlrtAssign(&y, m);

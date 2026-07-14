@@ -1,7 +1,8 @@
-function safety = init_safety(quadcop)
-%INIT_SAFETY  Parameter fuer safety_overspeed (Onboard-Kill-Latch + Idle-Interlock).
+function safety = init_safety(quadcop) %#ok<INUSD>
+%INIT_SAFETY  Parameter fuer safety_overspeed (Onboard-Kill-Latch).
 arguments (Input)
-    quadcop struct % fuer Hover-Schub m*g (Idle-Interlock-Schwelle)
+    quadcop struct % derzeit ungenutzt (war Hover-Schub fuer den verworfenen
+                   % Idle-Interlock); Signatur bleibt fuer die Aufrufer stabil.
 end
 arguments (Output)
     safety struct % holding parameters for the safety function
@@ -17,9 +18,6 @@ safety.debounce_N = uint16(4);
 %                 true  = Euklidische Norm ||Omega||.
 safety.use_norm = true;
 
-% Arming-Idle-Interlock: Re-Arm (ack-Flanke) loest den Kill-Latch nur, wenn der
-% befohlene Schub F_des <= F_rearm_idle ("Schub runter zum Armen"). Verhindert
-% den throttle-Sprung-auf-Hover im Loesetick. Default 10 % Hover.
-safety.rearm_idle_frac = 0.1;
-safety.F_rearm_idle    = safety.rearm_idle_frac * quadcop.m * quadcop.g; % [N]
+% HINWEIS: rearm_idle_frac/F_rearm_idle (Arming-Idle-Interlock) sind in
+% Session 9 entfallen — Begruendung im Schlusskommentar von safety_overspeed.m.
 end

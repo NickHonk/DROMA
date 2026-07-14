@@ -5,7 +5,7 @@
  * File: safety_overspeed.c
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 14-Jul-2026 09:29:01
+ * C/C++ source code generated on  : 14-Jul-2026 11:44:22
  */
 
 /* Include Files */
@@ -31,11 +31,6 @@ static unsigned char src;
  *  Aktion downstream: rotors_cmd = 0  (Override NACH Mixer / VOR
  * Motor-PT1+ESC). KILL dominiert LAND; KILL latcht; Re-Arm NIE in der Luft.
  *
- *  ARMING-IDLE-INTERLOCK: Re-Arm wirkt zusaetzlich NUR, wenn der befohlene
- * Schub F_des <= safety.F_rearm_idle ("Schub runter zum Armen"). Verhindert
- * einen Sprung-auf-Hover beim Latch-Loesen (z.B. Re-Arm waehrend die GCS Hover
- * sendet).
- *
  *  Warum eine Funktion fuer beide KILL-Quellen: Overspeed und Hard-Kill teilen
  *  denselben Latch, dieselbe Aktion (rotors_cmd=0) und dieselbe Re-Arm-Semantik
  *  (ack loescht). Eine gemeinsame Funktion haelt die Re-Arm-Bedingung an EINER
@@ -46,9 +41,8 @@ static unsigned char src;
  *    gyro_corr : 3x1  bias-korrigierte Drehrate [rad/s]  (MESSUNG, nicht
  * Schaetzer!) estop : uint8  0 normal / 1 soft-land / 2 hard-kill (aus Bus_Cmd,
  * Uplink) ack : bool   Quittung, bereits ge-OR-t (Teensy-Taster-Flanke |
- * Bus_Cmd.ack) F_des : double  befohlener Gesamtschub [N] (aus Bus_Cmd) fuer
- * den Idle-Interlock safety : struct  .omega_max [rad/s], .debounce_N (>=1),
- * .use_norm (bool), .F_rearm_idle [N] (Idle-Schwelle fuer Re-Arm)
+ * Bus_Cmd.ack) safety : struct  .omega_max [rad/s], .debounce_N (>=1),
+ * .use_norm (bool)
  *
  *  Ausgaenge
  *    kill : bool   latched -> nachgelagerter Switch zwingt rotors_cmd=0
@@ -61,20 +55,20 @@ static unsigned char src;
  * re-armt. Die Boden-Bedingung ("nie in der Luft") wird prozedural durch den
  * physischen Teensy-Taster garantiert (Bediener hebt die Drohne auf, drueckt) —
  * onboard existiert keine Pos/Vel-Schaetzung fuer ein Logik-Interlock (sitzt
- * GCS-seitig). Optionaler Idle-Interlock siehe Hinweis am Dateiende.
+ * GCS-seitig). Zum verworfenen Arming-Idle-Interlock siehe Hinweis am
+ * Dateiende.
  *
  * Arguments    : const double gyro_corr[3]
  *                unsigned char estop
  *                boolean_T ack
- *                double F_des
  *                boolean_T *kill
  *                unsigned char *fault_src
  *                double dbg[3]
  * Return Type  : void
  */
 void safety_overspeed(const double gyro_corr[3], unsigned char estop,
-                      boolean_T ack, double F_des, boolean_T *kill,
-                      unsigned char *fault_src, double dbg[3])
+                      boolean_T ack, boolean_T *kill, unsigned char *fault_src,
+                      double dbg[3])
 {
   boolean_T ack_edge;
   boolean_T over_inst;
@@ -104,18 +98,13 @@ void safety_overspeed(const double gyro_corr[3], unsigned char estop,
     latched = true;
     src = 2U;
   }
-  /*  Re-Arm: steigende ack-Flanke + kein Overspeed + kein Hard-Kill + Schub im
-   * Idle. */
-  /*  Der Idle-Interlock (F_des <= F_rearm_idle) erzwingt "Schub runter zum
-   * Armen" und */
-  /*  verhindert damit einen Sprung-auf-Hover in dem Tick, in dem der Latch
-   * loest. */
+  /*  Re-Arm: steigende ack-Flanke + kein Overspeed + kein Hard-Kill. */
   if (ack && (!ack_prev)) {
     ack_edge = true;
   } else {
     ack_edge = false;
   }
-  if (latched && ack_edge && (!over_inst) && (estop != 2) && (F_des <= 1.0)) {
+  if (latched && ack_edge && (!over_inst) && (estop != 2)) {
     latched = false;
     cnt = 0U;
     src = 0U;

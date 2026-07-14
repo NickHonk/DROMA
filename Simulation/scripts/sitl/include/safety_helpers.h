@@ -21,11 +21,10 @@ struct OverspeedParams {
     double   omega_max;     // [rad/s]
     uint16_t debounce_N;    // >=1
     bool     use_norm;      // true: ||gyro|| ; false: per-Achse
-    double   F_rearm_idle;  // [N] Re-Arm nur wenn F_des <= dieser Schwelle
 };
 void overspeed_reset(void);
 void overspeed_step(const double gyro_corr[3], uint8_t estop, bool ack,
-                    double F_des, const OverspeedParams* p,
+                    const OverspeedParams* p,
                     bool* kill, uint8_t* fault_src, double dbg[3]);
 
 // ---- Battery (safety_battery.m) ----------------------------------------

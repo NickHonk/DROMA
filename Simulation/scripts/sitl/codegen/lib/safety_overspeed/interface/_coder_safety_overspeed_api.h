@@ -5,7 +5,7 @@
  * File: _coder_safety_overspeed_api.h
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 14-Jul-2026 09:29:01
+ * C/C++ source code generated on  : 14-Jul-2026 11:44:22
  */
 
 #ifndef _CODER_SAFETY_OVERSPEED_API_H
@@ -27,10 +27,9 @@ extern "C" {
 
 /* Function Declarations */
 void safety_overspeed(real_T gyro_corr[3], uint8_T estop, boolean_T ack,
-                      real_T F_des, boolean_T *kill, uint8_T *fault_src,
-                      real_T dbg[3]);
+                      boolean_T *kill, uint8_T *fault_src, real_T dbg[3]);
 
-void safety_overspeed_api(const mxArray *const prhs[5], int32_T nlhs,
+void safety_overspeed_api(const mxArray *const prhs[4], int32_T nlhs,
                           const mxArray *plhs[3]);
 
 void safety_overspeed_atexit(void);

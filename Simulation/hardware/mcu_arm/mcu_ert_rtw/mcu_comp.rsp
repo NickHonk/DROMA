@@ -1,7 +1,7 @@
--I"C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/hardware/mcu_arm"
--I"C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/hardware/mcu_arm/mcu_ert_rtw"
--I"C:/Program Files/Matlab/R2025b/extern/include"
--I"C:/Program Files/Matlab/R2025b/simulink/include"
--I"C:/Program Files/Matlab/R2025b/rtw/c/src"
--I"C:/Program Files/Matlab/R2025b/rtw/c/src/ext_mode/common"
--I"C:/Program Files/Matlab/R2025b/rtw/c/ert"
+﻿-IC:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\hardware\mcu_arm
+-IC:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\hardware\mcu_arm\mcu_ert_rtw
+-I"C:\Program Files\MATLAB\R2025b\extern\include"
+-I"C:\Program Files\MATLAB\R2025b\simulink\include"
+-I"C:\Program Files\MATLAB\R2025b\rtw\c\src"
+-I"C:\Program Files\MATLAB\R2025b\rtw\c\src\ext_mode\common"
+-I"C:\Program Files\MATLAB\R2025b\rtw\c\ert"
