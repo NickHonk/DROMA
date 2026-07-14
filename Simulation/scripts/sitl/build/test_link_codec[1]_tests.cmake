@@ -1,7 +1,0 @@
-add_test([=[LinkCodec.WireBitExact]=]  [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_link_codec.exe]==] [==[--gtest_filter=LinkCodec.WireBitExact]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[LinkCodec.WireBitExact]=]  PROPERTIES WORKING_DIRECTORY [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build]==] SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-add_test([=[LinkCodec.DecodeMatchesRx]=]  [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_link_codec.exe]==] [==[--gtest_filter=LinkCodec.DecodeMatchesRx]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[LinkCodec.DecodeMatchesRx]=]  PROPERTIES WORKING_DIRECTORY [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build]==] SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-add_test([=[LinkCodec.HeaderRoundTrip]=]  [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/Release/test_link_codec.exe]==] [==[--gtest_filter=LinkCodec.HeaderRoundTrip]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[LinkCodec.HeaderRoundTrip]=]  PROPERTIES WORKING_DIRECTORY [==[C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build]==] SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-set(  test_link_codec_TESTS LinkCodec.WireBitExact LinkCodec.DecodeMatchesRx LinkCodec.HeaderRoundTrip)

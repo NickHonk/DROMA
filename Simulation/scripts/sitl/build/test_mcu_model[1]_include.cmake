@@ -1,5 +1,0 @@
-if(EXISTS "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/test_mcu_model[1]_tests.cmake")
-  include("C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/test_mcu_model[1]_tests.cmake")
-else()
-  add_test(test_mcu_model_NOT_BUILT test_mcu_model_NOT_BUILT)
-endif()

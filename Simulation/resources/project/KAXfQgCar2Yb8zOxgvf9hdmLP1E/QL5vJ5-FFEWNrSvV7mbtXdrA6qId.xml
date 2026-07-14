@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Info File="scripts/motive/setup_motive_path.m" GroupUUID="default" Icon="" Name="setup_motive_path" Type="StartUp" Visible="0">
+    <Extension Name="StartUpPrev" Value="d3c77e5b-f7e3-4fab-8fb7-1f298fde2928"/>
+</Info>

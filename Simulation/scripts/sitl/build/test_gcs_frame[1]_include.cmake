@@ -1,5 +1,0 @@
-if(EXISTS "C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/test_gcs_frame[1]_tests.cmake")
-  include("C:/Users/Nick/thesis_doctoral/MAS Versuchsaufbau/Drohnen/DROMA/Simulation/scripts/sitl/build/test_gcs_frame[1]_tests.cmake")
-else()
-  add_test(test_gcs_frame_NOT_BUILT test_gcs_frame_NOT_BUILT)
-endif()
