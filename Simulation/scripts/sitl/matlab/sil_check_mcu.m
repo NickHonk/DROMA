@@ -1,7 +1,29 @@
-%% sil_check_mcu.m — (A) In-MATLAB-Gate: geschlossener Kreis Normal vs SIL.
+%% sil_check_mcu.m — DIAGNOSE-WERKZEUG, NICHT TEIL DER ZERTIFIZIERUNG.
+%
+%  ===================================================================
+%  Session 9: "Gate A" wurde als Zertifizierungsstufe ABGESCHAFFT.
+%  Alleinige Zertifizierung ist Gate B (ctest, scripts\sitl\test\) — der
+%  MATLAB-freie Host-Golden, tick-exakt <=1e-9 ueber alle 9 Kanaele, inkl.
+%  Determinismus- und Safety-Integrationstests im generierten Code.
+%  Begruendung:
+%    - Dieser Check ist laut eigenem Anspruch (s.u.) nur ein grober
+%      Aequivalenz-Check, KEIN Bit-Diff -> Gate B ist strikt schaerfer.
+%    - Der Golden stammt selbst aus dem geschlossenen Kreis (quadcop) ->
+%      dieselbe Trajektorie, die SIL hier faehrt. Kein Erkenntnisgewinn.
+%    - Er deckt nur Simulinks Modellreferenz-Integration ab. Die existiert
+%      auf der Drohne nicht: dort verdrahtet drone_hal.cpp ExtU/ExtY von
+%      Hand -> das faengt WEDER dieser Check NOCH Gate B, nur der HW-Test.
+%    - Headless (-batch) scheitert er an "rtwshared" — auch mit MSVC 2022,
+%      also am SIL-Setup, nicht an der Toolchain. Nur interaktiv fahrbar.
+%  Der Runner run_gate_a.m wurde geloescht (trug zusaetzlich die
+%  openProject-Falle, Handover §3h). Diese Datei bleibt nur als Werkzeug,
+%  falls je ein Verdacht auf ein Codegen-INTEGRATIONS-Problem aufkommt.
+%  Interaktiv in der MATLAB-IDE fahren, nicht headless.
+%  ===================================================================
+%
 %  Laesst den MCU-(Model-)Block einmal in Normal- und einmal in SIL-Mode laufen
 %  (also den ECHTEN generierten C++-Code im Loop) und vergleicht die rotor_cmd-
-%  Antwort. Grober, billiger Konfidenz-Check VOR dem strengen Host-Golden (B).
+%  Antwort.
 %
 %  Hinweis: Im geschlossenen Kreis darf eine winzige Codegen-Abweichung ueber
 %  die Rueckkopplung anwachsen -> dies ist ein VERHALTENS-/Aequivalenz-Check,

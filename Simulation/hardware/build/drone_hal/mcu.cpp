@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.274
+// Model version                  : 1.281
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Mon Jul 13 16:27:31 2026
+// C/C++ source code generated on : Tue Jul 14 12:05:39 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -138,7 +138,6 @@ void MCU::step()
   real_T S_tmp[9];
   real_T S_tmp_0[9];
   real_T rtb_F_cmd_0[4];
-  real_T rtb_Subtract[3];
   real_T rtb_tau_ref[3];
   real_T rtb_tau_ref_0[3];
   real_T theta[3];
@@ -177,17 +176,13 @@ void MCU::step()
   rtb_LogicalOperator = (mcu_U.Bus_Cmd_l.ack || mcu_U.btn_ack);
 
   // MATLAB Function: '<Root>/MATLAB Function' incorporates:
-  //   Constant: '<Root>/Constant1'
   //   Inport: '<Root>/Bus_Cmd'
   //   Inport: '<Root>/Bus_IMU'
-  //   Sum: '<Root>/Subtract'
 
-  over_inst = (std::sqrt(((mcu_U.Bus_IMU_k.imu_gyro[0] - 0.17453292519943295) *
-    (mcu_U.Bus_IMU_k.imu_gyro[0] - 0.17453292519943295) +
-    (mcu_U.Bus_IMU_k.imu_gyro[1] - -0.17453292519943295) *
-    (mcu_U.Bus_IMU_k.imu_gyro[1] - -0.17453292519943295)) +
-    (mcu_U.Bus_IMU_k.imu_gyro[2] - 0.17453292519943295) *
-    (mcu_U.Bus_IMU_k.imu_gyro[2] - 0.17453292519943295)) > 8.5);
+  over_inst = (std::sqrt((mcu_U.Bus_IMU_k.imu_gyro[0] *
+    mcu_U.Bus_IMU_k.imu_gyro[0] + mcu_U.Bus_IMU_k.imu_gyro[1] *
+    mcu_U.Bus_IMU_k.imu_gyro[1]) + mcu_U.Bus_IMU_k.imu_gyro[2] *
+    mcu_U.Bus_IMU_k.imu_gyro[2]) > 8.5);
   if (over_inst) {
     if (mcu_DW.cnt < 4) {
       mcu_DW.cnt = static_cast<uint16_T>(mcu_DW.cnt + 1);
@@ -208,7 +203,6 @@ void MCU::step()
   mcu_DW.ack_prev = rtb_LogicalOperator;
 
   // MATLAB Function: '<S3>/MATLAB Function' incorporates:
-  //   Constant: '<Root>/Constant1'
   //   Constant: '<S3>/Constant1'
   //   Constant: '<S3>/Constant3'
   //   Constant: '<S3>/Constant4'
@@ -226,10 +220,10 @@ void MCU::step()
   na = mcu_norm(mcu_U.Bus_IMU_k.imu_acc);
   if (na > 1.0E-6) {
     R_tmp_1 = mcu_DW.q[0] * mcu_DW.q[0];
-    q_err_idx_1 = mcu_DW.q[1] * mcu_DW.q[1];
+    q_err_idx_3 = mcu_DW.q[1] * mcu_DW.q[1];
     q_err_idx_2 = mcu_DW.q[2] * mcu_DW.q[2];
-    q_err_idx_3 = mcu_DW.q[3] * mcu_DW.q[3];
-    S_tmp[0] = ((R_tmp_1 + q_err_idx_1) - q_err_idx_2) - q_err_idx_3;
+    q_err_idx_1 = mcu_DW.q[3] * mcu_DW.q[3];
+    S_tmp[0] = ((R_tmp_1 + q_err_idx_3) - q_err_idx_2) - q_err_idx_1;
     rtb_q_ref_idx_3 = mcu_DW.q[1] * mcu_DW.q[2];
     R_tmp_2 = mcu_DW.q[0] * mcu_DW.q[3];
     S_tmp[3] = (rtb_q_ref_idx_3 + R_tmp_2) * 2.0;
@@ -237,33 +231,33 @@ void MCU::step()
     R_tmp_4 = mcu_DW.q[0] * mcu_DW.q[2];
     S_tmp[6] = (R_tmp_3 - R_tmp_4) * 2.0;
     S_tmp[1] = (rtb_q_ref_idx_3 - R_tmp_2) * 2.0;
-    R_tmp_1 -= q_err_idx_1;
-    S_tmp[4] = (R_tmp_1 + q_err_idx_2) - q_err_idx_3;
-    q_err_idx_1 = mcu_DW.q[2] * mcu_DW.q[3];
+    R_tmp_1 -= q_err_idx_3;
+    S_tmp[4] = (R_tmp_1 + q_err_idx_2) - q_err_idx_1;
+    q_err_idx_3 = mcu_DW.q[2] * mcu_DW.q[3];
     rtb_q_ref_idx_3 = mcu_DW.q[0] * mcu_DW.q[1];
-    S_tmp[7] = (q_err_idx_1 + rtb_q_ref_idx_3) * 2.0;
+    S_tmp[7] = (q_err_idx_3 + rtb_q_ref_idx_3) * 2.0;
     S_tmp[2] = (R_tmp_3 + R_tmp_4) * 2.0;
-    S_tmp[5] = (q_err_idx_1 - rtb_q_ref_idx_3) * 2.0;
-    S_tmp[8] = (R_tmp_1 - q_err_idx_2) + q_err_idx_3;
-    rtb_Subtract[0] = mcu_U.Bus_IMU_k.imu_acc[0] / na;
-    rtb_Subtract[1] = mcu_U.Bus_IMU_k.imu_acc[1] / na;
-    rtb_Subtract[2] = mcu_U.Bus_IMU_k.imu_acc[2] / na;
-    na = 0.0;
+    S_tmp[5] = (q_err_idx_3 - rtb_q_ref_idx_3) * 2.0;
+    S_tmp[8] = (R_tmp_1 - q_err_idx_2) + q_err_idx_1;
+    rtb_tau_ref[0] = mcu_U.Bus_IMU_k.imu_acc[0] / na;
     rtb_q_des_idx_1 = 0.0;
+    rtb_tau_ref[1] = mcu_U.Bus_IMU_k.imu_acc[1] / na;
     rtb_q_des_idx_2 = 0.0;
+    rtb_tau_ref[2] = mcu_U.Bus_IMU_k.imu_acc[2] / na;
+    na = 0.0;
     for (idx = 0; idx < 3; idx++) {
       rtb_q_des_idx_0_tmp = b_b[idx];
-      na += S_tmp[3 * idx] * static_cast<real_T>(rtb_q_des_idx_0_tmp);
-      rtb_q_des_idx_1 += S_tmp[3 * idx + 1] * static_cast<real_T>
+      rtb_q_des_idx_1 += S_tmp[3 * idx] * static_cast<real_T>
         (rtb_q_des_idx_0_tmp);
-      rtb_q_des_idx_2 += S_tmp[3 * idx + 2] * static_cast<real_T>
+      rtb_q_des_idx_2 += S_tmp[3 * idx + 1] * static_cast<real_T>
         (rtb_q_des_idx_0_tmp);
+      na += S_tmp[3 * idx + 2] * static_cast<real_T>(rtb_q_des_idx_0_tmp);
     }
 
-    theta[0] = rtb_Subtract[1] * rtb_q_des_idx_2 - rtb_q_des_idx_1 *
-      rtb_Subtract[2];
-    theta[1] = na * rtb_Subtract[2] - rtb_Subtract[0] * rtb_q_des_idx_2;
-    theta[2] = rtb_Subtract[0] * rtb_q_des_idx_1 - na * rtb_Subtract[1];
+    theta[0] = rtb_tau_ref[1] * na - rtb_q_des_idx_2 * rtb_tau_ref[2];
+    theta[1] = rtb_q_des_idx_1 * rtb_tau_ref[2] - rtb_tau_ref[0] * na;
+    theta[2] = rtb_tau_ref[0] * rtb_q_des_idx_2 - rtb_q_des_idx_1 * rtb_tau_ref
+      [1];
   } else {
     theta[0] = 0.0;
     theta[1] = 0.0;
@@ -289,32 +283,28 @@ void MCU::step()
       q_err_idx_3 = -q_err_idx_3;
     }
 
-    rtb_tau_ref[0] = 2.0 * q_err_idx_1;
-    rtb_tau_ref[1] = 2.0 * q_err_idx_2;
-    rtb_tau_ref[2] = 2.0 * q_err_idx_3;
+    rtb_q_des_idx_1 = 2.0 * q_err_idx_1;
+    rtb_q_des_idx_2 = 2.0 * q_err_idx_2;
+    na = 2.0 * q_err_idx_3;
   } else {
-    rtb_tau_ref[0] = 0.0;
-    rtb_tau_ref[1] = 0.0;
-    rtb_tau_ref[2] = 0.0;
+    rtb_q_des_idx_1 = 0.0;
+    rtb_q_des_idx_2 = 0.0;
+    na = 0.0;
   }
 
-  rtb_Subtract[0] = mcu_U.Bus_IMU_k.imu_gyro[0] - 0.17453292519943295;
-  theta[0] = ((25.0 * rtb_tau_ref[0] + theta[0]) + (mcu_U.Bus_IMU_k.imu_gyro[0]
-    - 0.17453292519943295)) * 0.001;
-  rtb_Subtract[1] = mcu_U.Bus_IMU_k.imu_gyro[1] - -0.17453292519943295;
-  theta[1] = ((25.0 * rtb_tau_ref[1] + theta[1]) + (mcu_U.Bus_IMU_k.imu_gyro[1]
-    - -0.17453292519943295)) * 0.001;
-  rtb_Subtract[2] = mcu_U.Bus_IMU_k.imu_gyro[2] - 0.17453292519943295;
-  theta[2] = ((25.0 * rtb_tau_ref[2] + theta[2]) + (mcu_U.Bus_IMU_k.imu_gyro[2]
-    - 0.17453292519943295)) * 0.001;
+  theta[0] = ((25.0 * rtb_q_des_idx_1 + theta[0]) + mcu_U.Bus_IMU_k.imu_gyro[0])
+    * 0.001;
+  theta[1] = ((25.0 * rtb_q_des_idx_2 + theta[1]) + mcu_U.Bus_IMU_k.imu_gyro[1])
+    * 0.001;
+  theta[2] = ((25.0 * na + theta[2]) + mcu_U.Bus_IMU_k.imu_gyro[2]) * 0.001;
   nE = mcu_norm(theta);
   if (nE > 1.0E-9) {
     na = nE / 2.0;
-    q_err_idx_1 = std::sin(na);
+    q_err_idx_3 = std::sin(na);
     na = std::cos(na);
-    rtb_q_des_idx_1 = theta[0] / nE * q_err_idx_1;
-    rtb_q_des_idx_2 = theta[1] / nE * q_err_idx_1;
-    nE = theta[2] / nE * q_err_idx_1;
+    rtb_q_des_idx_1 = theta[0] / nE * q_err_idx_3;
+    rtb_q_des_idx_2 = theta[1] / nE * q_err_idx_3;
+    nE = theta[2] / nE * q_err_idx_3;
   } else {
     na = 1.0;
     rtb_q_des_idx_1 = 0.5 * theta[0];
@@ -323,9 +313,9 @@ void MCU::step()
   }
 
   R_tmp_1 = mcu_DW.q[0];
-  q_err_idx_1 = mcu_DW.q[1];
+  q_err_idx_3 = mcu_DW.q[1];
   q_err_idx_2 = mcu_DW.q[2];
-  q_err_idx_3 = mcu_DW.q[3];
+  q_err_idx_1 = mcu_DW.q[3];
   rtb_q_ref_idx_3 = mcu_DW.q[0];
   R_tmp_2 = mcu_DW.q[1];
   R_tmp_3 = mcu_DW.q[2];
@@ -338,8 +328,8 @@ void MCU::step()
   tmp_0 = mcu_DW.q[1];
   tmp_1 = mcu_DW.q[2];
   tmp_2 = mcu_DW.q[3];
-  mcu_DW.q[0] = ((R_tmp_1 * na - q_err_idx_1 * rtb_q_des_idx_1) - q_err_idx_2 *
-                 rtb_q_des_idx_2) - q_err_idx_3 * nE;
+  mcu_DW.q[0] = ((R_tmp_1 * na - q_err_idx_3 * rtb_q_des_idx_1) - q_err_idx_2 *
+                 rtb_q_des_idx_2) - q_err_idx_1 * nE;
   mcu_DW.q[1] = ((rtb_q_ref_idx_3 * rtb_q_des_idx_1 + na * R_tmp_2) + R_tmp_3 *
                  nE) - rtb_q_des_idx_2 * R_tmp_4;
   mcu_DW.q[2] = ((R_tmp * rtb_q_des_idx_2 - R_tmp_0 * nE) + na * R_tmp_5) +
@@ -351,6 +341,8 @@ void MCU::step()
   mcu_DW.q[1] /= R_tmp_1;
   mcu_DW.q[2] /= R_tmp_1;
   mcu_DW.q[3] /= R_tmp_1;
+
+  // End of MATLAB Function: '<S3>/MATLAB Function'
 
   // RateTransition: '<Root>/Rate Transition'
   rtb_LogicalOperator = ((&mcu_M)->Timing.TaskCounters.TID[1] == 0);
@@ -368,11 +360,11 @@ void MCU::step()
     // SignalConversion generated from: '<Root>/Gain'
     rtb_F_cmd_0[0] = 9.3719834999999989;
     na = 1.0;
-    q_err_idx_1 = 1.0;
+    q_err_idx_3 = 1.0;
     rtb_q_des_idx_1 = 0.0;
     q_err_idx_2 = 0.0;
     rtb_q_des_idx_2 = 0.0;
-    q_err_idx_3 = 0.0;
+    q_err_idx_1 = 0.0;
     nE = 0.0;
     rtb_q_ref_idx_3 = 0.0;
     theta[0] = 0.0;
@@ -387,11 +379,11 @@ void MCU::step()
 
     rtb_F_cmd_0[0] = mcu_U.Bus_Cmd_l.F_des;
     na = mcu_U.Bus_Cmd_l.q_des[0];
-    q_err_idx_1 = mcu_U.Bus_Cmd_l.q_ref[0];
+    q_err_idx_3 = mcu_U.Bus_Cmd_l.q_ref[0];
     rtb_q_des_idx_1 = mcu_U.Bus_Cmd_l.q_des[1];
     q_err_idx_2 = mcu_U.Bus_Cmd_l.q_ref[1];
     rtb_q_des_idx_2 = mcu_U.Bus_Cmd_l.q_des[2];
-    q_err_idx_3 = mcu_U.Bus_Cmd_l.q_ref[2];
+    q_err_idx_1 = mcu_U.Bus_Cmd_l.q_ref[2];
     nE = mcu_U.Bus_Cmd_l.q_des[3];
     rtb_q_ref_idx_3 = mcu_U.Bus_Cmd_l.q_ref[3];
     theta[0] = mcu_U.Bus_Cmd_l.Omega_ref[0];
@@ -407,7 +399,7 @@ void MCU::step()
   // MATLAB Function: '<S4>/MATLAB Function' incorporates:
   //   Constant: '<S4>/Constant'
   //   Constant: '<S4>/Constant1'
-  //   MATLAB Function: '<S3>/MATLAB Function'
+  //   Inport: '<Root>/Bus_IMU'
 
   R_tmp_1 = mcu_DW.q[0] * mcu_DW.q[0];
   R_tmp_2 = mcu_DW.q[1] * mcu_DW.q[1];
@@ -487,22 +479,22 @@ void MCU::step()
   na = R[5];
   rtb_q_des_idx_1 = R[6];
   rtb_q_des_idx_2 = R[1];
-  nE = q_err_idx_1 * q_err_idx_1;
+  nE = q_err_idx_3 * q_err_idx_3;
   R_tmp_1 = q_err_idx_2 * q_err_idx_2;
-  R_tmp_2 = q_err_idx_3 * q_err_idx_3;
+  R_tmp_2 = q_err_idx_1 * q_err_idx_1;
   R_tmp_3 = rtb_q_ref_idx_3 * rtb_q_ref_idx_3;
   Rdes_0[0] = ((nE + R_tmp_1) - R_tmp_2) - R_tmp_3;
-  R_tmp_4 = q_err_idx_2 * q_err_idx_3;
-  R_tmp = q_err_idx_1 * rtb_q_ref_idx_3;
+  R_tmp_4 = q_err_idx_2 * q_err_idx_1;
+  R_tmp = q_err_idx_3 * rtb_q_ref_idx_3;
   Rdes_0[1] = (R_tmp_4 + R_tmp) * 2.0;
   R_tmp_0 = q_err_idx_2 * rtb_q_ref_idx_3;
-  R_tmp_5 = q_err_idx_1 * q_err_idx_3;
+  R_tmp_5 = q_err_idx_3 * q_err_idx_1;
   Rdes_0[2] = (R_tmp_0 - R_tmp_5) * 2.0;
   Rdes_0[3] = (R_tmp_4 - R_tmp) * 2.0;
   nE -= R_tmp_1;
   Rdes_0[4] = (nE + R_tmp_2) - R_tmp_3;
-  R_tmp_1 = q_err_idx_3 * rtb_q_ref_idx_3;
-  R_tmp_4 = q_err_idx_1 * q_err_idx_2;
+  R_tmp_1 = q_err_idx_1 * rtb_q_ref_idx_3;
+  R_tmp_4 = q_err_idx_3 * q_err_idx_2;
   Rdes_0[5] = (R_tmp_1 + R_tmp_4) * 2.0;
   Rdes_0[6] = (R_tmp_0 + R_tmp_5) * 2.0;
   Rdes_0[7] = (R_tmp_1 - R_tmp_4) * 2.0;
@@ -528,25 +520,25 @@ void MCU::step()
   rtb_q_ref_idx_3 = theta[0];
   R_tmp_2 = theta[2];
   R_tmp_1 = 0.0;
-  q_err_idx_1 = 0.0;
+  q_err_idx_3 = 0.0;
   q_err_idx_2 = 0.0;
   for (idx = 0; idx < 3; idx++) {
-    theta[idx] = rtb_Subtract[idx] - ((S_tmp_0[idx + 3] * nE + S_tmp_0[idx] *
-      rtb_q_ref_idx_3) + S_tmp_0[idx + 6] * R_tmp_2);
+    theta[idx] = mcu_U.Bus_IMU_k.imu_gyro[idx] - ((S_tmp_0[idx + 3] * nE +
+      S_tmp_0[idx] * rtb_q_ref_idx_3) + S_tmp_0[idx + 6] * R_tmp_2);
     rtb_tau_ref_0[idx] = rtb_tau_ref[idx] - ((mcu_ConstP.Constant_Value_m[idx +
       3] * rtb_q_des_idx_1 + mcu_ConstP.Constant_Value_m[idx] * na) +
       mcu_ConstP.Constant_Value_m[idx + 6] * rtb_q_des_idx_2);
-    q_err_idx_3 = theta[idx];
-    R_tmp_1 += mcu_ConstP.Constant1_Value_o[3 * idx] * q_err_idx_3;
-    q_err_idx_1 += mcu_ConstP.Constant1_Value_o[3 * idx + 1] * q_err_idx_3;
-    q_err_idx_2 += mcu_ConstP.Constant1_Value_o[3 * idx + 2] * q_err_idx_3;
+    q_err_idx_1 = theta[idx];
+    R_tmp_1 += mcu_ConstP.Constant1_Value_o[3 * idx] * q_err_idx_1;
+    q_err_idx_3 += mcu_ConstP.Constant1_Value_o[3 * idx + 1] * q_err_idx_1;
+    q_err_idx_2 += mcu_ConstP.Constant1_Value_o[3 * idx + 2] * q_err_idx_1;
   }
 
   // SignalConversion generated from: '<Root>/Gain' incorporates:
   //   MATLAB Function: '<S4>/MATLAB Function'
 
   rtb_F_cmd_0[1] = rtb_tau_ref_0[0] - R_tmp_1;
-  rtb_F_cmd_0[2] = rtb_tau_ref_0[1] - q_err_idx_1;
+  rtb_F_cmd_0[2] = rtb_tau_ref_0[1] - q_err_idx_3;
   rtb_F_cmd_0[3] = rtb_tau_ref_0[2] - q_err_idx_2;
 
   // Gain: '<Root>/Gain'
@@ -596,30 +588,30 @@ void MCU::step()
     mcu_Y.rotor_cmd[3] = std::sqrt(std::abs(nE));
 
     // Polyval: '<Root>/Polynomial'
-    q_err_idx_1 = -2.9813898214245487E-13;
-    q_err_idx_2 = -2.9813898214245487E-13;
-    q_err_idx_3 = -2.9813898214245487E-13;
-    rtb_q_ref_idx_3 = -2.9813898214245487E-13;
+    q_err_idx_3 = -2.9813898214245336E-13;
+    q_err_idx_2 = -2.9813898214245336E-13;
+    q_err_idx_1 = -2.9813898214245336E-13;
+    rtb_q_ref_idx_3 = -2.9813898214245336E-13;
     for (idx = 0; idx < 2; idx++) {
       R_tmp_1 = mcu_ConstP.Polynomial_Coefs[idx + 1];
-      q_err_idx_1 = q_err_idx_1 * na + R_tmp_1;
+      q_err_idx_3 = q_err_idx_3 * na + R_tmp_1;
       q_err_idx_2 = q_err_idx_2 * rtb_q_des_idx_1 + R_tmp_1;
-      q_err_idx_3 = q_err_idx_3 * rtb_q_des_idx_2 + R_tmp_1;
+      q_err_idx_1 = q_err_idx_1 * rtb_q_des_idx_2 + R_tmp_1;
       rtb_q_ref_idx_3 = rtb_q_ref_idx_3 * nE + R_tmp_1;
     }
 
     // End of Polyval: '<Root>/Polynomial'
 
     // Saturate: '<Root>/Saturation'
-    if (q_err_idx_1 > 100.0) {
+    if (q_err_idx_3 > 100.0) {
       // Outport: '<Root>/throttle'
       mcu_Y.throttle[0] = 100.0;
-    } else if (q_err_idx_1 < 0.0) {
+    } else if (q_err_idx_3 < 0.0) {
       // Outport: '<Root>/throttle'
       mcu_Y.throttle[0] = 0.0;
     } else {
       // Outport: '<Root>/throttle'
-      mcu_Y.throttle[0] = q_err_idx_1;
+      mcu_Y.throttle[0] = q_err_idx_3;
     }
 
     if (q_err_idx_2 > 100.0) {
@@ -633,15 +625,15 @@ void MCU::step()
       mcu_Y.throttle[1] = q_err_idx_2;
     }
 
-    if (q_err_idx_3 > 100.0) {
+    if (q_err_idx_1 > 100.0) {
       // Outport: '<Root>/throttle'
       mcu_Y.throttle[2] = 100.0;
-    } else if (q_err_idx_3 < 0.0) {
+    } else if (q_err_idx_1 < 0.0) {
       // Outport: '<Root>/throttle'
       mcu_Y.throttle[2] = 0.0;
     } else {
       // Outport: '<Root>/throttle'
-      mcu_Y.throttle[2] = q_err_idx_3;
+      mcu_Y.throttle[2] = q_err_idx_1;
     }
 
     if (rtb_q_ref_idx_3 > 100.0) {

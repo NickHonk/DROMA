@@ -29,11 +29,16 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
    raus, `mcu.slx` 756→312 KB).
 5. **🔴 Verbleibend: Drohne + Sende-Teensy neu flashen** — der ARM-Code trug beide
    Bugs. Gegentest: still am Boden muss `thr` **symmetrisch** sein (vorher
-   `[5 19 5 17]`). Dazu Batt-Pin/`k` an Pin 41 nachmessen (§1) und Gate A
-   interaktiv (§3h).
-6. **⚠️ Falle:** `openProject` (in `run_mcu_recert`/`run_mcu_arm_codegen`/`run_gate_a`)
-   hat `mcu.slx` mit einer alten Version überschrieben → headless ohne
-   `openProject` arbeiten (§3h).
+   `[5 19 5 17]`). Dazu Batt-`k` an Pin 41 nachmessen (§1). Arduino-Toolchain
+   ist auf dieser Maschine eingerichtet + verifiziert (§3h).
+6. **Gate A abgeschafft** (§3h): `run_gate_a.m` gelöscht, `sil_check_mcu.m` nur
+   noch Diagnose. **Gate B (30/30) ist die alleinige Zertifizierung.**
+7. **SSOT-PoC grün** (§3h): `mcu/MATLAB Function` ruft jetzt
+   `scripts\functions\safety_overspeed.m` auf — generierter Code **byte-identisch**,
+   `persistent` überlebt. Ausrollen auf die übrigen Blöcke steht aus.
+8. **⚠️ Falle:** `openProject` (in `run_mcu_recert`/`run_mcu_arm_codegen`) hat
+   `mcu.slx` mit einer alten Version überschrieben → headless ohne `openProject`
+   arbeiten (§3h).
 
 ---
 
@@ -165,7 +170,7 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
 | `test_link_codec.cpp` | CTest `test_link_codec` (L1/L2 + Header) | `scripts\sitl\test\` |
 | `configure_mcu_codegen.m` | **parametrisiert** (`target` host/arm) | `scripts\sitl\matlab\` |
 | `run_mcu_recert.m` | §3b: Host-Regen + Poly-Dump + Golden | `scripts\sitl\matlab\` |
-| `run_gate_a.m` | Gate A headless-Wrapper (SIL interaktiv fahren) | `scripts\sitl\matlab\` |
+| ~~`run_gate_a.m`~~ | ~~Gate A headless-Wrapper~~ — **in Session 9 gelöscht** (§3h) | — |
 | `run_mcu_arm_codegen.m` | §3f: ARM-Codegen → `hardware\mcu_arm\` | `scripts\sitl\matlab\` |
 | `throttle_poly.hpp` | generiert (`P` aus `quadcop.p_from_omega_sq`) | `scripts\sitl\include\` |
 | `mcu_io.hpp` | +`diff_throttle` | `scripts\sitl\include\` |
@@ -206,10 +211,11 @@ Codec isoliert).
 `throttle.1..4`). Diffs angewandt: `OUT_NAMES += throttle` (`log_mcu_golden.m`),
 `diff_throttle` (`mcu_io.hpp`), `test_mcu_model.cpp` (throttle-Golden-Diff ≤1e-9
 + Determinismus auf 9 Kanäle). Automations-Helfer: `run_mcu_recert.m` (Regen+
-Poly-Dump+Golden), `run_gate_a.m` (Gate A).
+Poly-Dump+Golden), ~~`run_gate_a.m`~~ (Session 9 gelöscht — Gate A abgeschafft, §3h).
 
-**Gate-Status:** *(Stand Session 9: **30/30** — siehe §3h; die Zahlen unten sind
-der historische Session-8-Stand.)*
+**Gate-Status:** *(Stand Session 9: **Gate B 30/30 = alleinige Zertifizierung;
+Gate A abgeschafft** — siehe §3h. Die Zahlen unten sind der historische
+Session-8-Stand.)*
 - **Gate B (Host-Golden, MATLAB-frei, tick-exakt): 25/25 GRÜN.** Das ist die
   maßgebliche Zertifizierung (throttle-Golden-Diff ≤1e-9, Invariante ≤1e-9,
   Determinismus 9 Kanäle, + Codec-Tests).
@@ -570,11 +576,61 @@ cmake --build C:\dsb --config Release && ctest -C Release
    Auflösung, verdoppelt den Headroom), oder belassen und per Sim-Kampagne
    belegen, dass die Entprellung (`debounce_N=4`) trägt. Vorher **keine**
    aggressiven Flüge nahe der Rate-Grenze.
-3. **Gate A (SIL) interaktiv.** Headless scheitert **weiterhin** an
-   `Errors occurred while building "rtwshared"` — **auch mit MSVC**. Damit ist
-   die Session-8-Vermutung bestätigt: es ist das **`-batch`-SIL-Setup**, nicht die
-   Toolchain. Gate B ist ohnehin die maßgebliche Zertifizierung (Gate A ist laut
-   `sil_check_mcu.m`-Header nur ein grober Konfidenz-Check).
+#### ❌ Gate A ABGESCHAFFT (Session 9) — Gate B ist die alleinige Zertifizierung
+`run_gate_a.m` **gelöscht**; `sil_check_mcu.m` bleibt nur als Diagnose-Werkzeug
+(Header sagt es jetzt explizit). Begründung:
+- Laut eigenem Header nur ein **grober Äquivalenz-Check, KEIN Bit-Diff** — Gate B
+  ist strikt schärfer (tick-exakt ≤1e-9, 9 Kanäle, Determinismus, Safety).
+- Der Golden stammt **selbst aus dem geschlossenen Kreis** (`quadcop`) → SIL fährt
+  dieselbe Trajektorie. Kein Erkenntnisgewinn.
+- Deckt nur Simulinks **Modellreferenz-Integration** ab — die es auf der Drohne
+  nicht gibt (dort verdrahtet `drone_hal.cpp` ExtU/ExtY von Hand). Das fängt weder
+  A noch B, nur der HW-Test.
+- Headless scheitert er an `rtwshared` — **auch mit MSVC 2022** ⇒ es ist das
+  `-batch`-SIL-Setup, nicht die Toolchain. Nur interaktiv, also teuer.
+
+#### 🔧 Arduino-Toolchain auf DIESER Maschine eingerichtet (Session 9)
+Es fehlte **alles** (nur `arduino:avr` + Pololu waren da):
+- Board-Manager-URL **PJRC**: `https://www.pjrc.com/teensy/package_teensy_index.json`
+- **`teensy:avr@1.60.0`** (bewusst NICHT 1.62.0 — 1.60.0 ist die in §3d verifizierte)
+- **`RF24@1.6.1`** (TMRh20). `Wire`/`SPI` kommen mit dem Teensy-Core.
+```
+CLI="C:\Program Files\Arduino IDE\resources\app\lib\backend\resources\arduino-cli.exe"
+& $CLI config add board_manager.additional_urls https://www.pjrc.com/teensy/package_teensy_index.json
+& $CLI core update-index ; & $CLI core install teensy:avr@1.60.0 ; & $CLI lib install "RF24@1.6.1"
+```
+**Verifiziert:** `./build_sketches.sh --compile` → alle 5 Sketches kompilieren mit
+dem NEUEN ARM-Code. `drone_hal` FLASH **54916**, RAM1 447 KB frei; `gcs_sender`
+15432; `i2c_scan` 36964; `esc_calibrate` 37204. Projektpfad hat **keine
+Leerzeichen** → die §3d-Falle entfällt hier.
+Flashen: `hardware\build\<name>\<name>.ino` in der IDE öffnen (Board „Teensy 4.1")
+oder `./build_sketches.sh --upload-drone COM<N>`.
+⚠️ **Auffällig:** `drone_hal` und `drone_hal -DHAL_SELFTEST` ergeben **exakt
+dieselbe** FLASH-Größe (54916) → das Define kommt vermutlich nicht an. Vor dem
+Bias-Gegentest prüfen, falls der `HAL_SELFTEST`-Report gebraucht wird.
+
+#### ✅ SSOT für MATLAB-Function-Blöcke — PoC erfolgreich (Session 9)
+**Befund (Audit über alle 6 Modelle, 11 Function-Blöcke):** 5 identisch,
+**2 driften** (`safety_battery` in `mcu`, `pack_gcs_frame` in `quadcop`),
+**4 haben gar keine `.m`** (`traj_gen`, `pos_ctrl`, 2× landcmd — nur inline).
+Der Drift ist **nur in Kommentaren** — aber `safety_battery` trug im Block noch
+`analogRead(A16/Pin40)`, während die Datei korrekt `A17/Pin41` sagt. Der
+Mechanismus ist also real, er hat nur noch keinen Code erwischt. Verschärfend:
+`.slx` ist **binär** → Code-Änderungen sind im git-Diff unsichtbar (in Session 9
+hat `openProject` genau so unbemerkt Blockcode zurückgerollt).
+
+**PoC an `mcu/MATLAB Function`:** Block hält jetzt nur noch einen Wrapper
+`safety_overspeed_sl(...)`, der `scripts\functions\safety_overspeed.m` aufruft.
+- Name MUSS abweichen (`…_sl`), sonst schattet er die externe Funktion → Rekursion.
+- **Generierter `mcu.cpp` ist BYTE-IDENTISCH** zur Inline-Variante (einziger Diff:
+  „Model version" + Zeitstempel im Header-Kommentar) ⇒ Wrapper ist transparent.
+- **`persistent`-State überlebt** (`mcu_DW.latched` 9×, `ack_prev` 2× im Code).
+- Coder findet die externe Funktion über den Projekt-/`addpath`-Pfad.
+- **Gate B 30/30** danach.
+→ Muster ist tragfähig. **Offen:** Ausrollen auf die übrigen 6 Blöcke mit `.m`
+(`safety_battery`, `mahony_filter`, `geo_attitude_ctrl`, `link_tx`, `link_rx`) und
+die 4 ohne `.m` extrahieren. Der Audit liegt als `audit_fcn_drift.m` (Scratchpad,
+noch nicht im Repo).
 
 #### ⚠️ FALLE: `openProject` überschreibt `mcu.slx`
 `run_mcu_recert.m` / `run_mcu_arm_codegen.m` rufen `openProject`. Dessen
