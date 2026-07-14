@@ -18,12 +18,12 @@ void overspeed_reset(void) {
 }
 
 void overspeed_step(const double gyro_corr[3], uint8_t estop, bool ack,
-                    const OverspeedParams* /*p (einkompiliert, ignoriert)*/,
+                    double F_des, const OverspeedParams* /*p (einkompiliert, ignoriert)*/,
                     bool* kill, uint8_t* fault_src, double dbg[3]) {
     boolean_T k;
     unsigned char fs;
     safety_overspeed(gyro_corr, static_cast<unsigned char>(estop),
-                     static_cast<boolean_T>(ack), &k, &fs, dbg);
+                     static_cast<boolean_T>(ack), F_des, &k, &fs, dbg);
     *kill      = (k != 0);
     *fault_src = fs;
 }

@@ -32,7 +32,7 @@ link_params = init_link(quadcop, Ts_inner);
 controller = init_controller(quadcop);
 
 %% ------------------------------------------------------------ Safety
-safety = init_safety();
+safety = init_safety(quadcop);
 
 %% ------------------------------------------------------------ Schaetzer
 [mahony,luen] = init_estimator(Ts_gcs);

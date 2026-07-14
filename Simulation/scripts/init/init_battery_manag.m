@@ -13,12 +13,12 @@ arguments (Output)
 end
 
 % --- ADC / HW (PM06 V2, Teensy) ---
-safety.batt_pin = 40; % Pin 40 = A16 Spannung (41/A17 = Strom).
+safety.batt_pin = 41; % Pin 41 = A17 Spannung (40/A16 = Strom).
                       % Nur Doku — im Codegen ungenutzt (Modell liest batt_count als Inport).
 safety.adc_bits = 12; % analogReadResolution(12)
 
-% V_batt = k*count + b.  k,b aus realer HW-Messung (Teensy Pin 40, 12 bit):
-%   Messpunkt: batt_count = 944 <-> V_akku = 15.74 V (Multimeter am XT60).
+% V_batt = k*count + b.  k,b aus realer HW-Messung (Teensy Pin 41, 12 bit):
+%   Messpunkt: batt_count = 944 <-> V_akku = 15.74 V.
 %   k = 15.74/944 = 0.0166737 V/count,  b = 0 (rein ohmscher Teiler).
 % Effektiver Teiler = k*4095/3.3 = 20.69:1 (Datenblatt-18.182 war zu optimistisch;
 % deckt sich mit der ~21:1-Messung: 0.75 V @ 15.75 V).

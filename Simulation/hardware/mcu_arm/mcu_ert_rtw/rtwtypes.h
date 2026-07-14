@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.274
+// Model version                  : 1.276
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Mon Jul 13 16:27:31 2026
+// C/C++ source code generated on : Tue Jul 14 09:46:27 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M

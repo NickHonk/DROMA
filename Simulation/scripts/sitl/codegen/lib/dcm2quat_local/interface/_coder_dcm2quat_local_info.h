@@ -5,7 +5,7 @@
  * File: _coder_dcm2quat_local_info.h
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 07-Jul-2026 13:49:50
+ * C/C++ source code generated on  : 14-Jul-2026 09:28:18
  */
 
 #ifndef _CODER_DCM2QUAT_LOCAL_INFO_H

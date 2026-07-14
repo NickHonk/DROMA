@@ -18,7 +18,7 @@ void overspeed_reset(void) {
 }
 
 void overspeed_step(const double gyro_corr[3], uint8_t estop, bool ack,
-                    const OverspeedParams* p,
+                    double F_des, const OverspeedParams* p,
                     bool* kill, uint8_t* fault_src, double dbg[3]) {
     if (!os_inited) {  // entspricht 'isempty(latched)' beim ersten Aufruf
         os_latched = false; os_cnt = 0; os_ack_prev = false; os_src = 0;
@@ -46,7 +46,8 @@ void overspeed_step(const double gyro_corr[3], uint8_t estop, bool ack,
     if (hard_kill && !os_latched){ os_latched = true; os_src = 2; }
 
     const bool ack_edge = ack && !os_ack_prev;
-    if (os_latched && ack_edge && !over_inst && (estop != 2)) {
+    if (os_latched && ack_edge && !over_inst && (estop != 2) &&
+        (F_des <= p->F_rearm_idle)) {                 // Arming-Idle-Interlock
         os_latched = false; os_cnt = 0; os_src = 0;
     }
     os_ack_prev = ack;

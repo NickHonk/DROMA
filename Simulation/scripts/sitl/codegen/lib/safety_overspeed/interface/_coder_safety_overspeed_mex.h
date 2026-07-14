@@ -5,7 +5,7 @@
  * File: _coder_safety_overspeed_mex.h
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 07-Jul-2026 13:50:20
+ * C/C++ source code generated on  : 14-Jul-2026 09:29:01
  */
 
 #ifndef _CODER_SAFETY_OVERSPEED_MEX_H
@@ -27,7 +27,7 @@ MEXFUNCTION_LINKAGE void mexFunction(int32_T nlhs, mxArray *plhs[],
 emlrtCTX mexFunctionCreateRootTLS(void);
 
 void unsafe_safety_overspeed_mexFunction(int32_T nlhs, mxArray *plhs[3],
-                                         int32_T nrhs, const mxArray *prhs[4]);
+                                         int32_T nrhs, const mxArray *prhs[5]);
 
 #ifdef __cplusplus
 }

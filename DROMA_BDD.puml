@@ -1,7 +1,7 @@
 @startuml DROMA_BDD
 ' =====================================================================
 '  DROMA — SysML Block Definition Diagram (Kompositions-Hierarchie)
-'  Quelle: main.slx + plant/sensors/mcu/link/gcu.slx  (XML-Parsing)
+'  Quelle: quadcop.slx + plant/sensors/mcu/link/gcu.slx  (XML-Parsing)
 '  Zeigt: welcher Block AUS WELCHEN Teilen besteht (schwarze Raute = Komposition)
 ' =====================================================================
 skinparam backgroundColor #FEFEFE
@@ -22,10 +22,10 @@ skinparam class {
   FontColor black
 }
 
-title <b>DROMA — SysML Block Definition Diagram (Kompositions-Hierarchie)</b>\n<size:10>Quelle: main.slx und referenzierte Modelle (XML-Parsing) — Raute = Komposition</size>
+title <b>DROMA — SysML Block Definition Diagram (Kompositions-Hierarchie)</b>\n<size:10>Quelle: quadcop.slx und referenzierte Modelle (XML-Parsing) — Raute = Komposition</size>
 
 ' =====================  EBENE 0: Prüfstand  ==========================
-class "DROMA SITL-Prüfstand\n(main.slx)" as SYS <<Testbench>>
+class "DROMA SITL-Prüfstand\n(quadcop.slx)" as SYS <<Testbench>>
 
 ' =====================  EBENE 1: Komponenten  ========================
 class "FlightController\n(mcu.slx -> C++)" as MCU <<Deployed Software>>
@@ -88,7 +88,7 @@ LINK *-- L_RX
 
 legend right
   |= Farbe |= Stereotyp / Allokation |
-  |<#FCF3CF>   | <<Testbench>>  – SITL-Gesamtmodell (main.slx) |
+  |<#FCF3CF>   | <<Testbench>>  – SITL-Gesamtmodell (quadcop.slx) |
   |<#D4E6F1>   | <<Deployed Software>>  – generierter/Ziel-Code |
   |<#D5F5E3>   | <<SITL Environment>>  – Host-PC-Simulation |
   |<#FBFCFC>   | <<part>>  – interner Teilblock |

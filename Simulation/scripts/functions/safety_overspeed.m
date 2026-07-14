@@ -1,10 +1,14 @@
-function [kill, fault_src, dbg] = safety_overspeed(gyro_corr, estop, ack, safety)
+function [kill, fault_src, dbg] = safety_overspeed(gyro_corr, estop, ack, F_des, safety)
 %#codegen
 % SAFETY_OVERSPEED  Onboard-KILL-Latch
 %
 % Overspeed-Entprell-Latch ∪ Hard-Kill (estop==2).
 % Aktion downstream: rotors_cmd = 0  (Override NACH Mixer / VOR Motor-PT1+ESC).
 % KILL dominiert LAND; KILL latcht; Re-Arm NIE in der Luft.
+%
+% ARMING-IDLE-INTERLOCK: Re-Arm wirkt zusaetzlich NUR, wenn der befohlene Schub
+% F_des <= safety.F_rearm_idle ("Schub runter zum Armen"). Verhindert einen
+% Sprung-auf-Hover beim Latch-Loesen (z.B. Re-Arm waehrend die GCS Hover sendet).
 %
 % Warum eine Funktion fuer beide KILL-Quellen: Overspeed und Hard-Kill teilen
 % denselben Latch, dieselbe Aktion (rotors_cmd=0) und dieselbe Re-Arm-Semantik
@@ -16,7 +20,9 @@ function [kill, fault_src, dbg] = safety_overspeed(gyro_corr, estop, ack, safety
 %   gyro_corr : 3x1  bias-korrigierte Drehrate [rad/s]  (MESSUNG, nicht Schaetzer!)
 %   estop : uint8  0 normal / 1 soft-land / 2 hard-kill (aus Bus_Cmd, Uplink)
 %   ack : bool   Quittung, bereits ge-OR-t (Teensy-Taster-Flanke | Bus_Cmd.ack)
-%   safety : struct  .omega_max [rad/s], .debounce_N (>=1), .use_norm (bool)
+%   F_des : double  befohlener Gesamtschub [N] (aus Bus_Cmd) fuer den Idle-Interlock
+%   safety : struct  .omega_max [rad/s], .debounce_N (>=1), .use_norm (bool),
+%                    .F_rearm_idle [N] (Idle-Schwelle fuer Re-Arm)
 %
 % Ausgaenge
 %   kill : bool   latched -> nachgelagerter Switch zwingt rotors_cmd=0
@@ -73,9 +79,11 @@ if hard_kill && ~latched
     src = uint8(2);
 end
 
-% Re-Arm: steigende ack-Flanke 
+% Re-Arm: steigende ack-Flanke + kein Overspeed + kein Hard-Kill + Schub im Idle.
+% Der Idle-Interlock (F_des <= F_rearm_idle) erzwingt "Schub runter zum Armen" und
+% verhindert damit einen Sprung-auf-Hover in dem Tick, in dem der Latch loest.
 ack_edge = ack && ~ack_prev;
-if latched && ack_edge && ~over_inst && (estop ~= uint8(2)) % momentan kein Overspeed & kein Hard-Kill
+if latched && ack_edge && ~over_inst && (estop ~= uint8(2)) && (F_des <= safety.F_rearm_idle)
     latched = false;
     cnt     = uint16(0);
     src     = uint8(0);
@@ -88,10 +96,8 @@ dbg       = [double(cnt); double(over_inst); double(ack_edge)];
 end
 
 % -------------------------------------------------------------------------
-% OPTIONALER IDLE-INTERLOCK (nicht aktiviert):
-% Will man re-arm zusaetzlich gegen "in der Luft" absichern OHNE Pos-Schaetzung,
-% kann onboard ein Throttle-Idle-Proxy gefordert werden, z.B. F_ref <= F_idle:
-%   ...&& (F_ref <= safety.F_rearm_idle) ...
-% F_ref liegt im empfangenen Bus_Cmd vor. Das ersetzt die Boden-Schaetzung durch
-% "Bediener hat heruntergeregelt", bleibt aber Heuristik (Hover braucht m*g>0).
-% Bewusst NICHT verdrahtet, bis §13 das fordert.
+% IDLE-INTERLOCK (AKTIV, s.o.): Re-Arm fordert F_des <= safety.F_rearm_idle.
+% Das ersetzt die (onboard fehlende) Boden-Pos-Schaetzung durch den Proxy
+% "Bediener hat den Schub heruntergeregelt". Bleibt eine Heuristik (Hover
+% braucht m*g>0), verhindert aber zuverlaessig ein Arming-in-Hover und den
+% throttle-Sprung beim Latch-Loesen. Schwelle in init_safety.m (Default 10% m*g).

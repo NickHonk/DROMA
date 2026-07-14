@@ -322,6 +322,40 @@ nicht `led`). Die „25/50/75 %-Pins"-Suche war gegenstandslos.
   **keine Disk-Kollision** mehr, wenn die interaktive MATLAB-Session gleichzeitig
   offen ist (sonst „file changed on disk"/Save-Dialog-Absturz). Nach Inport-
   Änderung: `IN_NAMES` in `log_mcu_golden.m` mitziehen, sonst Zähler-Assert.
+- **✅ GS-Kette end-to-end auf HW bewiesen (Session 8).** `gcs_sender.cpp` auf den
+  Sende-Teensy geflasht (nRF-Params IDENTISCH zum Drohnen-HAL: Adr `0xE7E7E7E7E7`,
+  Kanal 76, 1MBPS, Auto-Ack aus, 29-B; Bring-up-Heartbeat auf Pin 13 = LED blinkt
+  nur bei CRC-ok Frames). Kette `Simulink GCS → pack_gcs_frame → USB → gcs::parse
+  → pkt::pack → nRF → Drohne (id-Gate → unpack → Regler → throttle)` verifiziert:
+  `estop=0`, `link` 1–30 ms, `thr` folgt `F_des` (`0.2·m·g → [5 19 5 17]`; Asymmetrie
+  = Attitude-Korrektur der 6°-Schieflage). Simulink braucht **Simulation Pacing 1.0×**
+  (sonst Frame-Burst → Watchdog killt sofort) und `id` = BCD-ID der Drohne.
+- **⚠️ Operatives Boot-/Re-Arm-Verhalten (WICHTIG für jeden Test).** Die Drohne
+  bootet mit `estop=2` (kein Link) → `safety_overspeed`-Hard-Kill-**Latch gesetzt**.
+  Sobald der Link steht (`estop=0`), bleiben rotor/throttle **weiter 0**, bis eine
+  **steigende `ack`-Flanke** (Taster Pin 21 ODER GCS `ack=1`-Puls) den Latch löst
+  (nur bei `~overspeed & estop≠2`). Danach bleibt scharf, solange Link steht; jeder
+  Link-Verlust (`estop=2`) killt+latcht erneut → erneuter Re-Arm nötig.
+- **⚠️ `batt_land` ist PERMANENT (kein Re-Arm).** Fällt `Vf ≤ V_floor=12.0 V`, latcht
+  `safety_battery` → `safety_landcmd` überschreibt `F_des` auf `0.99·m·g` (Notabstieg,
+  throttle springt HOCH). Bleibt bis **Power-Cycle** aktiv, auch wenn Spannung sich
+  erholt (per Design gegen Sink↔Schweben-Grenzzyklus). Beim Testen mit Netzteil also
+  stets > 12 V halten, sonst latcht der Notabstieg und nur Neustart löst ihn.
+- **✅ Arming-Idle-Interlock (Session 8).** Re-Arm des Kill-Latch (ack-Flanke)
+  wirkt nur noch, wenn der befohlene Schub `F_des <= safety.F_rearm_idle` (=0.1·m·g
+  = 0.9467 N). Verhindert Sprung-auf-Hover im Löse-Tick ("Schub runter zum Armen",
+  Standard-Flightcontroller). Umsetzung: `safety_overspeed(gyro,estop,ack,F_des,safety)`
+  (F_des NEU, aus `Bus_Cmd.F_des` im Block verdrahtet → **kein** neuer ExtU-Eingang,
+  HAL unverändert). Param in `init_safety(quadcop)` (`rearm_idle_frac=0.1`, `F_rearm_idle`).
+  Generierter Code Z.203: `… && (Bus_Cmd_l.F_des <= 0.94666…)`. Tests: `Overspeed.S10`
+  (Standalone-Codegen via Shim) + `McuOverspeed.KillHoldsAndReArmsOnlyAtIdleThrust`
+  (volles Modell) → **Gate B 31/31**. **Bedienung:** nach jedem Kill zum Re-Armen
+  erst GCS-`F_des` auf ≤10% Hover runter, dann Taster/`ack`.
+- **Standalone-Safety-Leaves (`gen_lib_codegen.m`):** Build-Dir nutzt
+  `SAFETY_IMPL=codegen` → `test_safety` läuft gegen den generierten Standalone-
+  `safety_overspeed` (Shim), NICHT die Referenz. Nach Signatur-Änderung MUSS
+  `gen_lib_codegen.m` neu laufen (Args + `os_p.F_rearm_idle` mitziehen), sonst
+  Shim-Compile-Fehler. Referenz `safety_helpers_ref.cpp` parallel gepflegt.
 
 **Firmware-Build-Hinweis:** `drone_hal.cpp` braucht auf dem Include-Pfad die
 ARM-`mcu.h` (`hardware\mcu_arm\mcu_ert_rtw\`) **und** die SSOT `mcu_packet.hpp`

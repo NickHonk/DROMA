@@ -5,7 +5,7 @@
  * File: _coder_safety_overspeed_info.c
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 07-Jul-2026 13:50:20
+ * C/C++ source code generated on  : 14-Jul-2026 09:29:01
  */
 
 /* Include Files */
@@ -25,18 +25,18 @@ static const mxArray *c_emlrtMexFcnResolvedFunctionsI(void)
 {
   const mxArray *nameCaptureInfo;
   const char_T *data[4] = {
-      "789cc5944f4f833018c68b998b97e94e9efd04def5b67f464d9853d88cb1666229a10e5a"
-      "a4edb25dfd025efd685ebcf909fc048e011b6bd2b0b838dfcbc3c343"
-      "fbebfb0600c685690000f6415abd6aaab5ccd733dd01aba5e68646f3da0595957579fe96"
-      "296254e089480d7542bc58e9b29050870a7b1a611063ce823176e789",
-      "47026c93105b45d34d5c78568816268992eb968fd1c89221887dbe3c6150348b793c6afa"
-      "ad94cc432d751eea73392ffa25cfd07895972b773c2ca64336c6318f"
-      "307637ed37e755b5fc34e12296482cfbfdd890f7a2e5ade6f79d87d629ecf359bbb04bd0"
-      "080a1f73c2872e4382c54e00cd86753498a512f9dc91de9323613b66",
-      "3ec514b66faecc06b44828034710462147318904879ea428b9c1a13acee330e396cdf560"
-      "cd3e75df550deccdd5ac7d1adbe4bdbf7e7d6f9397d77ff1269afdd6"
-      "7d4f0f35bcba920f78ab7fde09eceb5bab29e565eff90e9dc866e1ff5cc2293b07d0f8bf"
-      "deff074b4e70aa",
+      "789cc5944f4fc23018c63b83840b4a62e2c1939fc083debc21b8c4c3f0cff05facd1d275"
+      "59c3da8eb623e097f0eb79f1bbc8d8066349332211dfcbb367cfda5f"
+      "df37db8075e55800803d90d64d3dd566e65b99ee80d52ae79641f3da05b5957579fe9929"
+      "165c93894e0d478c2c567a82518eb8ee4f23022451221c136f9ef834",
+      "247dca885b34bdc431bb102d4c1225d79d80e0a11b332003b53c6158348b79bc1bfaad55"
+      "cca35ce579949fcb79d12f7996c19779b92ae4133d7d136322554488"
+      "b769bf39af6ee4a789d232c67ad9efd786bc9191b79abf5cbe76cee1bd9ab50b7b140fa1"
+      "0e88a2eacd13580b8942e8b4dde387591ae340a1d81fa01876a50838",
+      "e1b07b77edb4a14b591c224d05870a4b1a6905fd98e3e48682e5719eb08c5b35d7fd35fb"
+      "347d574dd0982b3af8b6b6c9e3478da76df2f2fa2fdec4b0dfbaefe9"
+      "a181d72ae57a707a76614b31b28347c7bb95cf1f9d3eb50bffe70a4ed53980c1fff5fe3f"
+      "3c2c6ede",
       ""};
   nameCaptureInfo = NULL;
   emlrtNameCaptureMxArrayR2016a(&data[0], 1640U, &nameCaptureInfo);
@@ -79,11 +79,11 @@ mxArray *emlrtMexFcnProperties(void)
       110U, 100U, 108U, 101U, 0U,   0U,   0U,   0U,   0U,   0U,   0U,   0U};
   xEntryPoints =
       emlrtCreateStructMatrix(1, 1, 7, (const char_T **)&epFieldName[0]);
-  xInputs = emlrtCreateLogicalMatrix(1, 4);
+  xInputs = emlrtCreateLogicalMatrix(1, 5);
   emlrtSetField(xEntryPoints, 0, "QualifiedName",
                 emlrtMxCreateString("safety_overspeed"));
   emlrtSetField(xEntryPoints, 0, "NumberOfInputs",
-                emlrtMxCreateDoubleScalar(3.0));
+                emlrtMxCreateDoubleScalar(4.0));
   emlrtSetField(xEntryPoints, 0, "NumberOfOutputs",
                 emlrtMxCreateDoubleScalar(3.0));
   emlrtSetField(xEntryPoints, 0, "ConstantInputs", xInputs);
@@ -93,7 +93,7 @@ mxArray *emlrtMexFcnProperties(void)
                           "Versuchsaufbau\\Drohnen\\DROMA\\Simulation\\scripts"
                           "\\functions\\safety_overspeed.m"));
   emlrtSetField(xEntryPoints, 0, "TimeStamp",
-                emlrtMxCreateDoubleScalar(740169.65777777776));
+                emlrtMxCreateDoubleScalar(740177.38969907409));
   emlrtSetField(xEntryPoints, 0, "Visible", emlrtMxCreateLogicalScalar(true));
   xResult =
       emlrtCreateStructMatrix(1, 1, 7, (const char_T **)&propFieldName[0]);
@@ -102,7 +102,7 @@ mxArray *emlrtMexFcnProperties(void)
   emlrtSetField(xResult, 0, "ResolvedFunctions",
                 (mxArray *)c_emlrtMexFcnResolvedFunctionsI());
   emlrtSetField(xResult, 0, "Checksum",
-                emlrtMxCreateString("UgJMA7g9tYhgNRV9t8I8"));
+                emlrtMxCreateString("D7TfYjlvOS7bHgP6XhOOlE"));
   emlrtSetField(xResult, 0, "EntryPoints", xEntryPoints);
   emlrtSetField(xResult, 0, "AuxData",
                 emlrtMxCreateRowVectorUINT8((const uint8_T *)&v, 216U));

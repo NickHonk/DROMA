@@ -1,7 +1,7 @@
 @startuml DROMA_IBD
 ' =====================================================================
 '  DROMA — SysML Internal Block Diagram (Signalfluss / Regelkreis)
-'  Quelle: main.slx <Line>-Verschaltung der 5 ModelReference-Blöcke
+'  Quelle: quadcop.slx <Line>-Verschaltung der 5 ModelReference-Blöcke
 '  logische Schnittstelle = blau gestrichelt (Datenbus)
 '  physikalische Schnittstelle = rot fett (PWM, Kraft, Messung)
 ' =====================================================================

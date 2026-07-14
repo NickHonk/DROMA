@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'mcu'.
 //
-// Model version                  : 1.274
+// Model version                  : 1.276
 // Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
-// C/C++ source code generated on : Mon Jul 13 16:20:28 2026
+// C/C++ source code generated on : Tue Jul 14 09:45:28 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -200,7 +200,8 @@ void MCU::step()
   mcu_DW.latched = (((mcu_U.Bus_Cmd_l.estop == 2) && (!mcu_DW.latched)) ||
                     mcu_DW.latched);
   if (mcu_DW.latched && (rtb_LogicalOperator && (!mcu_DW.ack_prev)) &&
-      (!over_inst) && (mcu_U.Bus_Cmd_l.estop != 2)) {
+      (!over_inst) && (mcu_U.Bus_Cmd_l.estop != 2) && (mcu_U.Bus_Cmd_l.F_des <=
+       0.94666500000000009)) {
     mcu_DW.latched = false;
     mcu_DW.cnt = 0U;
   }

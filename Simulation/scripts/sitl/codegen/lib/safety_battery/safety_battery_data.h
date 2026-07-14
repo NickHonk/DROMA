@@ -5,7 +5,7 @@
  * File: safety_battery_data.h
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 07-Jul-2026 13:50:25
+ * C/C++ source code generated on  : 14-Jul-2026 09:29:05
  */
 
 #ifndef SAFETY_BATTERY_DATA_H

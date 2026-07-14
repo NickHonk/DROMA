@@ -5,7 +5,7 @@
  * File: quatRotate_initialize.h
  *
  * MATLAB Coder version            : 25.2
- * C/C++ source code generated on  : 07-Jul-2026 13:50:15
+ * C/C++ source code generated on  : 14-Jul-2026 09:28:55
  */
 
 #ifndef QUATROTATE_INITIALIZE_H
