@@ -64,6 +64,34 @@ classdef MotiveMocap < matlab.System
         end
     end
 
+    methods (Access = private)
+        function s = resolveIP(~, v)
+            %RESOLVEIP  IP-Literal oder base-Workspace-Variable aufloesen.
+            % Simulink wertet NUMERISCHE Dialogfelder eines MATLAB-System-Blocks
+            % aus (StreamingID='mocap.streaming_id' -> 1), CHAR-Felder aber NICHT:
+            % dort kam wortwoertlich 'mocap.host_ip' an. Damit params.m die
+            % einzige Konfigurationsstelle bleibt (statt IPs im binaeren .slx zu
+            % vergraben), loesen wir hier selbst auf:
+            %   '127.0.0.1'      -> direkt (enthaelt Ziffern/Punkte)
+            %   'mocap.host_ip'  -> evalin('base', ...)
+            s = char(v);
+            if isempty(regexp(s, '^[A-Za-z_]\w*(\.\w+)*$', 'once'))
+                return;   % IP-Literal oder Hostname mit Ziffern -> unveraendert
+            end
+            if ~isempty(regexp(s, '^\d', 'once'))
+                return;
+            end
+            try
+                val = evalin('base', s);
+                if ischar(val) || isstring(val)
+                    s = char(val);
+                end
+            catch
+                % nicht aufloesbar -> als Hostname durchreichen
+            end
+        end
+    end
+
     methods (Access = protected)
 
         function setupImpl(obj)
@@ -71,9 +99,11 @@ classdef MotiveMocap < matlab.System
             obj.lastPos   = [0;0;0];
             obj.lastQuat  = [1;0;0;0];
             obj.warnedNoRB = false;
+            host   = obj.resolveIP(obj.HostIP);
+            client = obj.resolveIP(obj.ClientIP);
             try
                 obj.client = natnet();
-                ok = obj.client.ConnectToNatNet(obj.ClientIP, obj.HostIP, 'Multicast');
+                ok = obj.client.ConnectToNatNet(client, host, 'Multicast');
                 obj.connected = (ok >= 1);
             catch ME
                 obj.connected = false;
@@ -83,7 +113,7 @@ classdef MotiveMocap < matlab.System
             if obj.Verbose
                 if obj.connected
                     fprintf('[MotiveMocap] verbunden (Host %s, ID %d)\n', ...
-                            obj.HostIP, obj.StreamingID);
+                            host, obj.StreamingID);
                 else
                     % KEIN Abbruch: die Sim laeuft weiter mit valid=false, damit
                     % der Pruefstand ohne Motive testbar bleibt.

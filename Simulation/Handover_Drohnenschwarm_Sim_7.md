@@ -667,16 +667,37 @@ Plugin (`natnet.m` + `NatNetML.dll`, .NET), **kein** Simulink-Blockset.
 - **Einheit:** NatNet liefert **Meter** (das OptiSample skaliert nur für die
   mm-Anzeige mit 1000). Kein Skalieren.
 
-**Fallstricke (gelöst):**
+**Fallstricke (alle gelöst — nicht erneut hineinlaufen):**
 - `natnet.setAssemblyPath` öffnet ein **`uigetfile`-Fenster** → hätte Simulink
   blockiert. `getLastAssemblyPath` liest `<plugin>\Matlab\assemblypath.txt`;
   die wird von `setup_motive_path` vorab geschrieben ⇒ kein Dialog.
   Verifiziert: `NatNetML 4.1.9210.17151` lädt.
 - `matlab.System` braucht einen **expliziten** Name-Value-Konstruktor
   (`setProperties`), sonst „No matching constructor found for superclass".
-- `.NET` ist nicht codegen-fähig ⇒ Block auf **Interpreted execution**.
+- **`.NET` ist nicht codegen-fähig** — schon `try/catch` bricht mit *„Try and
+  catch are not supported for code generation"*. Der Modus wird deshalb
+  **klassenseitig erzwungen** (`getSimulateUsingImpl` → `'Interpreted execution'`,
+  `showSimulateUsingImpl` → `false`); der Block-Parameter ist dadurch **read-only**
+  und kann nicht versehentlich auf Codegen zurückfallen.
+- **⚠️ Simulink wertet CHAR-Dialogfelder eines MATLAB-System-Blocks NICHT aus.**
+  `StreamingID='mocap.streaming_id'` (numerisch) → wird zu `1` ✔, aber
+  `HostIP='mocap.host_ip'` kam **wortwörtlich** als String an (Log zeigte
+  „Host mocap.host_ip"). Damit `params.m` die einzige Konfigurationsstelle bleibt
+  (statt IPs im binären `.slx` zu vergraben), löst `MotiveMocap.resolveIP` das
+  selbst auf: sieht der Wert wie eine IP aus → direkt, sieht er wie ein
+  Variablenname aus → `evalin('base',…)`. Verifiziert: „verbunden (Host 127.0.0.1)".
 - **Robust ohne Motive:** kein Absturz, `valid=false` + ZOH-Pose ⇒ der Prüfstand
-  bleibt ohne Motive testbar. Verifiziert (Smoke-Test 0.5 s: `ReachedStopTime`).
+  bleibt ohne Motive testbar. Verifiziert (Smoke-Test: `ReachedStopTime`).
+
+**⚠️ `.gitignore`-Falle (Session 9, zweimal zugeschlagen):**
+1. Patterns mit `/` sind relativ zur `.gitignore` (Repo-Wurzel `DROMA\`). Alle
+   Regeln standen ohne `Simulation/`-Präfix ⇒ **keine griff**; der komplette
+   Codegen-Output wurde jahrelang mitcommittet. Korrigiert; zusätzlich mit
+   `git rm -r --cached` aus dem Index genommen (1318 Einträge, **keine Quellen**).
+2. `Motive/` **ohne führenden Slash** matcht JEDEN `Motive`-Ordner im Baum — und
+   Git ist auf Windows **case-insensitive**, also auch `Simulation\scripts\motive\`
+   ⇒ `MotiveMocap.m` wäre nie ins Repo gekommen. Jetzt **`/Motive/`**.
+   Prüfen mit `git check-ignore -v <PFAD>` (der Befehl braucht einen Pfad).
 
 **⚠️ Regelkreis noch OFFEN (bewusst):** Der Uplink kommt weiterhin aus den
 **Test-Konstanten**; `gcu`-`Bus_Cmd` hängt noch am `gcu_cmd_unused`-Terminator.
