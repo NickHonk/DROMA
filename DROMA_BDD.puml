@@ -1,12 +1,16 @@
 @startuml DROMA_BDD
 ' =====================================================================
 '  DROMA — SysML Block Definition Diagram (Kompositions-Hierarchie)
-'  Quelle: quadcop.slx + plant/sensors/mcu/link/gcu.slx  (XML-Parsing)
-'  Zeigt: welcher Block AUS WELCHEN Teilen besteht (schwarze Raute = Komposition)
+'  Quelle: quadcop.slx / bench.slx + mcu/gcu/plant/sensors/link.slx
+'          (aus den .slx-Archiven geparst)
+'  Die schwarze Raute zeigt, woraus ein Block besteht.
 ' =====================================================================
+left to right direction
 skinparam backgroundColor #FEFEFE
 skinparam shadowing false
 skinparam linetype ortho
+skinparam nodesep 12
+skinparam ranksep 55
 skinparam defaultFontName "Segoe UI"
 hide empty members
 hide circle
@@ -17,22 +21,25 @@ skinparam class {
   BorderColor<<SITL Environment>>      #27AE60
   BackgroundColor<<Testbench>>         #FCF3CF
   BorderColor<<Testbench>>             #B7950B
+  BackgroundColor<<Hardware>>          #FADBD8
+  BorderColor<<Hardware>>              #C0392B
   BackgroundColor<<part>>              #FBFCFC
   BorderColor<<part>>                  #85929E
   FontColor black
 }
 
-title <b>DROMA — SysML Block Definition Diagram (Kompositions-Hierarchie)</b>\n<size:10>Quelle: quadcop.slx und referenzierte Modelle (XML-Parsing) — Raute = Komposition</size>
+title <b>DROMA — Blockstruktur der Simulink-Modelle</b>\n<size:10>Es gibt zwei Top-Level-Modelle: quadcop.slx simuliert alles, bench.slx fliegt die echte Drohne</size>
 
-' =====================  EBENE 0: Prüfstand  ==========================
-class "DROMA SITL-Prüfstand\n(quadcop.slx)" as SYS <<Testbench>>
+' =====================  EBENE 0: die zwei Harnesses  =================
+class "Volle Simulation\n(quadcop.slx)\n<size:9>Grundschritt 1 ms</size>" as SYS <<Testbench>>
+class "Hardware-Prüfstand\n(bench.slx)\n<size:9>Grundschritt 10 ms</size>" as BENCH <<Testbench>>
 
 ' =====================  EBENE 1: Komponenten  ========================
-class "FlightController\n(mcu.slx -> C++)" as MCU <<Deployed Software>>
-class "GroundControl\n(gcu.slx)"          as GCU <<Deployed Software>>
-class "Plant\n(plant.slx)"                as PLANT <<SITL Environment>>
-class "SensorSuite\n(sensors.slx)"        as SENS <<SITL Environment>>
-class "CommLink\n(link.slx)"              as LINK <<SITL Environment>>
+class "Flugregler\n(mcu.slx, wird zu C++)" as MCU <<Deployed Software>>
+class "Bodenstation\n(gcu.slx)"            as GCU <<Deployed Software>>
+class "Flugdynamik\n(plant.slx)"           as PLANT <<SITL Environment>>
+class "Sensorik\n(sensors.slx)"            as SENS <<SITL Environment>>
+class "Funkstrecke\n(link.slx)"            as LINK <<SITL Environment>>
 
 SYS *-- MCU
 SYS *-- GCU
@@ -40,57 +47,91 @@ SYS *-- PLANT
 SYS *-- SENS
 SYS *-- LINK
 
-' =====================  EBENE 2: FlightController  ===================
-class "Attitude-Estimator\n(Mahony-Filter)"            as F_EST  <<part>>
-class "Geometrischer\nAttitude-Controller"             as F_CTRL <<part>>
-class "Low-Battery-Failsafe\n(Hard-Descent, Stateflow)" as F_FS   <<part>>
-class "Batterie-Supervisor\n(V-Filter, LED, batt_land)" as F_BAT  <<part>>
-class "ADC\n(Volt -> 12-bit-Counts)"                   as F_ADC  <<part>>
-class "Arming / E-Stop-Gate"                           as F_ARM  <<part>>
-MCU *-- F_EST
-MCU *-- F_CTRL
-MCU *-- F_FS
-MCU *-- F_BAT
-MCU *-- F_ADC
-MCU *-- F_ARM
-note bottom of F_CTRL
-  Motor-Mapping omega^2 -> Throttle [%]
-  (Polynom + Saturation) => Ausgang "throttle"
+' --- bench.slx: gleiche Bodenstation, aber echte Sensorik und Funk ---
+class "Motive-Anbindung\n<size:9>OptiTrack über NatNet, liefert Bus_Mocap</size>" as B_MOT <<part>>
+class "Frame-Packer\n<size:9>pack_gcs_frame, 82 Byte mit CRC-8</size>"           as B_PKT <<part>>
+class "Serial Send\n<size:9>über USB an den Sende-Teensy</size>"                 as B_SER <<part>>
+class "Bedienelemente\n<size:9>Drehschalter für estop, Kippschalter für ack</size>" as B_UI <<part>>
+
+BENCH *-- GCU
+BENCH *-- B_MOT
+BENCH *-- B_PKT
+BENCH *-- B_SER
+BENCH *-- B_UI
+
+class "Echte Drohne\n<size:9>Teensy 4.1, Cortex-M7</size>" as HW <<Hardware>>
+MCU ..> HW : läuft auf
+note right of HW
+  In bench.slx wird die Drohne nicht simuliert.
+  Der generierte Reglercode läuft auf der echten
+  Drohne, angebunden über den Sende-Teensy und
+  die nRF24-Funkstrecke.
 end note
 
-' =====================  EBENE 2: GroundControl  =====================
-class "Positionsregler"                as G_POS  <<part>>
-class "Landing-Supervisor\n(soft/hard, estop)" as G_LAND <<part>>
-class "Command-Generator\n(-> Bus_Cmd)" as G_CMD  <<part>>
-GCU *-- G_POS
-GCU *-- G_LAND
-GCU *-- G_CMD
+' =====================  EBENE 2: Flugregler  =========================
+class "Lageschätzer\n<size:9>mahony_filter</size>"                        as F_EST  <<part>>
+class "Geometrischer\nLageregler\n<size:9>geo_attitude_ctrl</size>"       as F_CTRL <<part>>
+class "Kill-Latch\n<size:9>safety_overspeed</size>\n<size:8>rastet bei Overspeed, estop=2,</size>\n<size:8>zu großem Kippwinkel oder Taster</size>" as F_KILL <<part>>
+class "Batterieüberwachung\n<size:9>safety_battery, liefert led, batt_land und V_filt</size>" as F_BAT <<part>>
+class "Notabstieg\n<size:9>safety_landcmd, überschreibt die Sollwerte</size>" as F_LAND <<part>>
+MCU *-- F_EST
+MCU *-- F_CTRL
+MCU *-- F_KILL
+MCU *-- F_BAT
+MCU *-- F_LAND
+note bottom of F_CTRL
+  Aus omega² macht ein Polynom den Throttle in Prozent,
+  anschließend auf 0 bis 100 begrenzt. Das ist der Ausgang
+  "throttle". Der frühere ADC-Quantisierer sitzt nicht mehr
+  hier, die HAL schickt bereits rohe Counts.
+end note
 
-' =====================  EBENE 2: Plant  =============================
-class "Starrkörper-Dynamik\n(6-DOF)"        as P_RB   <<part>>
-class "Propeller-/Rotor-Modell\n(c_T, c_tau)" as P_PROP <<part>>
+' =====================  EBENE 2: Bodenstation  ======================
+class "Bahnplanung\n<size:9>traj_gen</size>"                                  as G_TRAJ <<part>>
+class "Positionsregler (PD)\n<size:9>pos_ctrl</size>"                         as G_POS  <<part>>
+class "Supervisor\n<size:9>gcs_supervisor, steuert Soft-Landing und estop</size>" as G_SUP <<part>>
+GCU *-- G_TRAJ
+GCU *-- G_POS
+GCU *-- G_SUP
+
+' =====================  EBENE 2: Flugdynamik  =======================
+class "Starrkörperdynamik\n<size:9>6 Freiheitsgrade</size>"                 as P_RB   <<part>>
+class "Propellermodell\n<size:9>Schub- und Momentbeiwerte</size>"            as P_PROP <<part>>
 PLANT *-- P_RB
 PLANT *-- P_PROP
 
-' =====================  EBENE 2: SensorSuite  =======================
-class "Accelerometer-Modell\n(3-axis)"   as S_ACC <<part>>
-class "Gyroskop-Modell\n(3-axis)"        as S_GYR <<part>>
-class "Mocap-Modell\n(Quaternion-Pose)"  as S_MOC <<part>>
+' =====================  EBENE 2: Sensorik  ==========================
+class "Beschleunigungssensor\n<size:9>Aerospace Blockset, 3 Achsen</size>" as S_ACC <<part>>
+class "Drehratensensor\n<size:9>Aerospace Blockset, 3 Achsen</size>"       as S_GYR <<part>>
+class "Mocap-Modell\n<size:9>Lage als Quaternion</size>"                   as S_MOC <<part>>
 SENS *-- S_ACC
 SENS *-- S_GYR
 SENS *-- S_MOC
 
-' =====================  EBENE 2: CommLink  ==========================
-class "TX-Encoder\n(Packing, Quaternion 4B)" as L_TX <<part>>
-class "RX-Decoder\n(Unpacking)"              as L_RX <<part>>
+' =====================  EBENE 2: Funkstrecke  =======================
+class "Sender\n<size:9>link_tx, packt in int16 und smallest-three</size>" as L_TX <<part>>
+class "Kanalmodell\n<size:9>drei Signale über Ratenwechsel und Totzeit,</size>\n<size:9>dazu Paketverlust</size>" as L_CH <<part>>
+class "Empfänger\n<size:9>link_rx</size>"                                 as L_RX <<part>>
 LINK *-- L_TX
+LINK *-- L_CH
 LINK *-- L_RX
 
+note as N_WRAP
+  <b>Beim Bearbeiten beachten</b>
+  In den MATLAB-Function-Blöcken steht kein Algorithmus.
+  Jeder Block ruft nur die passende .m-Datei aus
+  scripts/functions auf, erkennbar am Suffix _sl.
+  Wer etwas ändern will, ändert die .m-Datei.
+end note
+N_WRAP .. MCU
+N_WRAP .. GCU
+
 legend right
-  |= Farbe |= Stereotyp / Allokation |
-  |<#FCF3CF>   | <<Testbench>>  – SITL-Gesamtmodell (quadcop.slx) |
-  |<#D4E6F1>   | <<Deployed Software>>  – generierter/Ziel-Code |
-  |<#D5F5E3>   | <<SITL Environment>>  – Host-PC-Simulation |
-  |<#FBFCFC>   | <<part>>  – interner Teilblock |
+  |= Farbe |= Was der Block ist |
+  |<#FCF3CF>   | Top-Level-Modell, das man startet |
+  |<#D4E6F1>   | Code, der später auf einem Rechner läuft |
+  |<#D5F5E3>   | nur simuliert, auf dem Host-PC |
+  |<#FADBD8>   | echte Hardware |
+  |<#FBFCFC>   | Teilblock innerhalb eines Modells |
 endlegend
 @enduml

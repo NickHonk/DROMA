@@ -1,0 +1,36 @@
+# ============================================================================
+# Generierte / maschinenspezifische Artefakte — regenerierbar, NICHT committen.
+# Wiederherstellung auf einem neuen Rechner (Reihenfolge egal):
+#   MATLAB:  run_mcu_recert(root); run_mcu_arm_codegen(root); run gen_lib_codegen.m
+#   CMake :  cmake -S scripts/sitl -B scripts/sitl/build \
+#                  -DSAFETY_IMPL=codegen -DQUAT_IMPL=codegen
+#   Arduino: bash hardware/build_sketches.sh --compile
+# ============================================================================
+
+# --- CMake-Build (Exes + CMakeCache mit Absolutpfaden -> immer maschinenspezifisch)
+scripts/sitl/build/
+
+# --- Arduino-Sketch-Assembly (build_sketches.sh)
+hardware/build/
+
+# --- Simulink-Codegen-Cache (Absolutpfad-Referenzen, autogeneriert)
+slprj/
+**/slprj/
+*.slxc
+scripts/sitl/mcu.zip
+
+# --- Generierter Modell-Code (run_mcu_recert / run_mcu_arm_codegen)
+scripts/sitl/mcu_ert_rtw/
+hardware/mcu_arm/
+
+# --- Standalone-Leaf-Codegen (gen_lib_codegen.m)
+scripts/sitl/codegen/
+
+# --- MATLAB-Nebenprodukte
+*.asv
+*.m~
+*.autosave
+
+# HINWEIS: Test-Fixtures BLEIBEN getrackt (bewusst, kein MATLAB noetig zum Testen):
+#   scripts/sitl/data/*.csv        (Golden-Vektoren)
+#   scripts/sitl/include/throttle_poly.hpp  (generiert, aber klein + Test-Input)
