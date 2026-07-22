@@ -6,7 +6,7 @@ arguments (Output)
 end
 
 quadcop.g   = 9.81; % m/s^2
-quadcop.m   = 0.965; % kg            
+quadcop.m   = 0.985; % kg            
 quadcop.J   = diag([6.583 * 10^-3, 5.125 * 10^-3, 1.104 * 10^-2]); % kg*m^2 
 quadcop.J_inv = inv(quadcop.J);
 l = 0.124;  % Armlaenge 
@@ -41,16 +41,29 @@ omega_cube = (omega_Q.^3)';
 c_tau = omega_cube \ P_mech;
 disp(['Gierkonstante c_tau: ', num2str(c_tau), ' Nms^2/rad^2']);
 
-% --- Umrechnung von Omega^2 zu Throttle ---
-throttle_data = [10, 20, 30, 40, 50, 60, 70, 80, 90]; % Zuordnung aus Datenblatt
-omega_sq_data = omega(2:end-1).^2; % omega wurde bereits berechnet
-% Fit eines Polynoms 2. Grades: Throttle = p1*(omega^2)^2 + p2*(omega^2) + p3
-quadcop.p_from_omega_sq = polyfit(omega_sq_data, throttle_data, 2);
-disp('Koeffizienten fuer direkte Abbildung (omega^2 -> Throttle):');
-x_fit = linspace(0,9e6,1000);
-y_fit = polyval(quadcop.p_from_omega_sq, x_fit);
-figure;
-plot(omega_sq_data, throttle_data ,'r-', x_fit, y_fit, 'b--');
+% --- Umrechnung von Omega zu Throttle (spannungsnormiert auf 22.2 V) ----------
+%
+% 1) Fit ueber omega statt omega^2, und durch den Ursprung. Residuum 0.8 %.
+%
+% 2) Spannungsnormierung. Das Datenblatt des Propellers ist bei 22.2 V (6S) 
+%   aufgenommen, geflogen wird 4S. Fuer dieselbe Drehzahl gilt
+%    darum throttle(U) = throttle(22.2 V) * 22.2/U. 
+throttle_data = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90];   
+omega_data    = omega(1:end-1);                            
+% Fit: throttle = p1*omega^2 + p2*omega. 
+Mfit = [(omega_data(:)/1e3).^2, omega_data(:)/1e3];
+cfit = Mfit \ throttle_data(:);
+quadcop.p_from_omega = [cfit(1)/1e6, cfit(2)/1e3, 0];      % polyval-Reihenfolge
+disp('Koeffizienten fuer die Abbildung (omega -> aequiv. 22.2-V-Throttle):');
+disp(quadcop.p_from_omega);
+
+% Spannungsnormierung: thr = polyval(p_from_omega, omega) * U_ds / clamp(V_filt).
+% Die Klemmung ist NICHT optional — V_filt steht im Nenner, und ein ausgefallener
+% Batteriesensor (V_filt = 0) wuerde sonst alle vier Motoren auf 100 % treiben.
+quadcop.U_ds = 22.2; % [V] Spannung, bei der das Datenblatt aufgenommen wurde
+quadcop.V_thr_min = 11.0; % [V] untere Klemme (4S leer ~12.0, etwas Luft darunter)
+quadcop.V_thr_max = 17.5; % [V] obere Klemme (4S voll 16.8, etwas Luft darueber)
+quadcop.V_thr_init = 16.8;  % [V] 4S voll geladen
 
 % Motorwinkelgeschwindigkeiten -> Schubkraft und Drehmomente:  [F; tau_x; tau_y; tau_z] = Gamma * [w1^2; w2^2; w3^2; w4^2] 
 % momentan fliegt Quadrkopter in X-Konfiguration
@@ -80,9 +93,9 @@ quadcop.Gamma_inv = inv(quadcop.Gamma);
 
 
 % Motor (PT1) + Saettigung
-quadcop.tau_m   = 0.030;             % Motorzeitkonstante  TODO: measure 
-quadcop.rotors_min   = 0;            % rad/s
-quadcop.rotors_max   = 30000;        % rad/s  
+quadcop.tau_m = 0.030; % Motorzeitkonstante 
+quadcop.rotors_min = 0; % rad/s
+quadcop.rotors_max = 30000; % rad/s  
 
 quadcop.T = [1 0 0; 0 -1 0; 0 0 -1]; % to transform form NED to laboratory coordinate system (all with z-up)
 

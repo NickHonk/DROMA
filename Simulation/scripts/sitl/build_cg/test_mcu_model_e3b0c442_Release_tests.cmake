@@ -2,7 +2,7 @@ add_test([=[McuGolden.RotorCmdMatchesGolden]=]  C:/Users/Rakete/Documents/Drohne
 set_tests_properties([=[McuGolden.RotorCmdMatchesGolden]=]
   PROPERTIES
     
-    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:44]==]
+    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:42]==]
     WORKING_DIRECTORY [==[C:/Users/Rakete/Documents/Drohnenversuchsstand/DROMA/Simulation/scripts/sitl/build_cg]==]
     SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==]
     
@@ -11,7 +11,7 @@ add_test([=[McuGolden.DeterministicAcrossFreshInstances]=]  C:/Users/Rakete/Docu
 set_tests_properties([=[McuGolden.DeterministicAcrossFreshInstances]=]
   PROPERTIES
     
-    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:82]==]
+    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:103]==]
     WORKING_DIRECTORY [==[C:/Users/Rakete/Documents/Drohnenversuchsstand/DROMA/Simulation/scripts/sitl/build_cg]==]
     SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==]
     
@@ -20,7 +20,7 @@ add_test([=[McuFailsafe.Estop2KillsThrottleAndRotor]=]  C:/Users/Rakete/Document
 set_tests_properties([=[McuFailsafe.Estop2KillsThrottleAndRotor]=]
   PROPERTIES
     
-    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:108]==]
+    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:129]==]
     WORKING_DIRECTORY [==[C:/Users/Rakete/Documents/Drohnenversuchsstand/DROMA/Simulation/scripts/sitl/build_cg]==]
     SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==]
     
@@ -29,7 +29,7 @@ add_test([=[McuOverspeed.KillHoldsAndReArmsOnBusAckEdge]=]  C:/Users/Rakete/Docu
 set_tests_properties([=[McuOverspeed.KillHoldsAndReArmsOnBusAckEdge]=]
   PROPERTIES
     
-    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:131]==]
+    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:152]==]
     WORKING_DIRECTORY [==[C:/Users/Rakete/Documents/Drohnenversuchsstand/DROMA/Simulation/scripts/sitl/build_cg]==]
     SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==]
     
@@ -38,7 +38,7 @@ add_test([=[McuButton.EdgeKillsHeldBlocksRearmBusAckClears]=]  C:/Users/Rakete/D
 set_tests_properties([=[McuButton.EdgeKillsHeldBlocksRearmBusAckClears]=]
   PROPERTIES
     
-    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:190]==]
+    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:211]==]
     WORKING_DIRECTORY [==[C:/Users/Rakete/Documents/Drohnenversuchsstand/DROMA/Simulation/scripts/sitl/build_cg]==]
     SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==]
     
@@ -47,7 +47,7 @@ add_test([=[McuTilt.SustainedTiltKills]=]  C:/Users/Rakete/Documents/Drohnenvers
 set_tests_properties([=[McuTilt.SustainedTiltKills]=]
   PROPERTIES
     
-    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:238]==]
+    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:259]==]
     WORKING_DIRECTORY [==[C:/Users/Rakete/Documents/Drohnenversuchsstand/DROMA/Simulation/scripts/sitl/build_cg]==]
     SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==]
     
@@ -56,7 +56,7 @@ add_test([=[McuBattery.RampEscalatesLed]=]  C:/Users/Rakete/Documents/Drohnenver
 set_tests_properties([=[McuBattery.RampEscalatesLed]=]
   PROPERTIES
     
-    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:270]==]
+    DEF_SOURCE_LINE [==[C:\Users\Rakete\Documents\Drohnenversuchsstand\DROMA\Simulation\scripts\sitl\test\test_mcu_model.cpp:291]==]
     WORKING_DIRECTORY [==[C:/Users/Rakete/Documents/Drohnenversuchsstand/DROMA/Simulation/scripts/sitl/build_cg]==]
     SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==]
     

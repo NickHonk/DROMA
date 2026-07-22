@@ -19,15 +19,13 @@
 
 using namespace sitl;
 
-// throttle-Invariante: clamp(polyval(P, x), 0, 100), Horner wie MATLAB polyval.
-// Gegen den generierten Code nicht bit-exakt (der Polyval-Eingang im Modell ist
-// das vorzeichenbehaftete omega_sq vor abs; rotor_cmd=sqrt(abs(omega_sq)), und
-// sqrt(x)^2 weicht ~1 ULP von x ab). Beobachtet |d|<=7.1e-15, Schranke 1e-9.
-static double throttle_ref(double x) {
+// polyval(P, omega) — Horner wie MATLAB. Eingang ist rotor_cmd (= omega), das ist
+// exakt der Blockeingang, daher hier keine sqrt(x)^2-ULP-Frage mehr.
+// Der aequivalente 22.2-V-Throttle; die Saettigung sitzt erst hinter der
+// Spannungskorrektur und wird deshalb NICHT hier angewendet.
+static double throttle_eq(double omega) {
     double y = mcuref::P_THROTTLE[0];
-    for (int k = 1; k < mcuref::P_THROTTLE_N; ++k) y = y * x + mcuref::P_THROTTLE[k];
-    if (y > mcuref::THROTTLE_MAX) y = mcuref::THROTTLE_MAX;
-    if (y < mcuref::THROTTLE_MIN) y = mcuref::THROTTLE_MIN;
+    for (int k = 1; k < mcuref::P_THROTTLE_N; ++k) y = y * omega + mcuref::P_THROTTLE[k];
     return y;
 }
 
@@ -63,12 +61,35 @@ TEST(McuGolden, RotorCmdMatchesGolden) {
         // throttle: (a) generierter Code vs Simulink-Golden (<=GOLDEN_TOL).
         ASSERT_LE(diff_throttle(y, *g, r), (double)GOLDEN_TOL)
             << "throttle-Golden-Divergenz in Zeile " << r;
-        // (b) Struktur-Invariante: throttle == clamp(polyval(P, rotor_cmd^2)).
-        for (int i = 0; i < 4; ++i) {
-            double di = std::abs(y.throttle[i] - throttle_ref(y.rotor_cmd[i] * y.rotor_cmd[i]));
-            if (di > worst_inv) { worst_inv = di; }
-            ASSERT_LE(di, 1e-9)
-                << "throttle-Invariante verletzt in Zeile " << r << " Kanal " << i;
+        // (b) Struktur-Invariante. throttle = clamp(polyval(P,omega)*U_DS/Vc), und
+        //     Vc (= geklemmtes V_filt) ist an der Blockgrenze nicht sichtbar. Statt
+        //     Vc zu raten, wird der gemeinsame Faktor geprueft: fuer alle vier
+        //     Kanaele muss throttle_i/polyval(P,omega_i) denselben Wert haben, und
+        //     die daraus implizierte Spannung muss in den Klemmgrenzen liegen. Das
+        //     faengt ein falsches Polynom UND eine fehlende/kaputte Klemmung.
+        //     Gesaettigte und stillstehende Kanaele tragen keine Information -> raus.
+        {
+            double ratio = 0.0; bool have = false;
+            for (int i = 0; i < 4; ++i) {
+                double eq = throttle_eq(y.rotor_cmd[i]);
+                if (eq <= 1e-9) continue;                              // Motor steht
+                if (y.throttle[i] >= mcuref::THROTTLE_MAX - 1e-9) continue;  // oben geklemmt
+                if (y.throttle[i] <= mcuref::THROTTLE_MIN + 1e-9) continue;  // unten geklemmt
+                double ri = y.throttle[i] / eq;                        // = U_DS/Vc
+                if (!have) { ratio = ri; have = true; }
+                double di = std::abs(ri - ratio);
+                if (di > worst_inv) { worst_inv = di; }
+                ASSERT_LE(di, 1e-9)
+                    << "throttle-Invariante: Kanal " << i << " hat einen anderen "
+                    << "Spannungsfaktor als Kanal 0, Zeile " << r;
+            }
+            if (have) {
+                double V_impl = mcuref::U_DS / ratio;                  // implizierte Spannung
+                ASSERT_GE(V_impl, mcuref::V_THR_MIN - 1e-6)
+                    << "implizierte Spannung " << V_impl << " V unter der Klemme, Zeile " << r;
+                ASSERT_LE(V_impl, mcuref::V_THR_MAX + 1e-6)
+                    << "implizierte Spannung " << V_impl << " V ueber der Klemme, Zeile " << r;
+            }
         }
     }
     RecordProperty("worst_abs_diff", worst);
