@@ -4,10 +4,15 @@
 # Ergebnis: hardware/build/{gcs_sender,drone_hal}/  -> in Arduino IDE oeffnen & flashen,
 # oder mit --compile / --upload direkt via arduino-cli.
 #
-#   ./build_sketches.sh                      # nur assemblieren
-#   ./build_sketches.sh --compile            # + fuer Teensy 4.1 kompilieren (Verifikation)
-#   ./build_sketches.sh --upload-sender COM7 # + Sende-Teensy flashen
-#   ./build_sketches.sh --upload-drone  COM8 # + eine Drohne flashen
+#   ./build_sketches.sh                            # nur assemblieren
+#   ./build_sketches.sh --compile                  # + fuer Teensy 4.1 kompilieren (alle 3 Modi)
+#   ./build_sketches.sh --upload-sender       COM7 # + Sende-Teensy flashen
+#   ./build_sketches.sh --upload-drone-bench  COM8 # Motoren tot, volle Telemetrie (Props ab)
+#   ./build_sketches.sh --upload-drone-thrust COM8 # Motoren scharf + Telemetrie (Waagentest S-1)
+#   ./build_sketches.sh --upload-drone-flight COM8 # Motoren scharf, kein Report
+#
+# Die Betriebsart wird bewusst nie implizit gewaehlt: --upload-drone gibt es nicht
+# mehr, weil aus dem Namen nicht hervorging, ob die ESCs scharf werden.
 set -euo pipefail
 
 HW="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"      # .../hardware
@@ -41,12 +46,28 @@ mkdir -p "$OUT/i2c_scan" "$OUT/esc_calibrate"
 cp "$HW/i2c_scan.cpp"      "$OUT/i2c_scan/i2c_scan.ino"
 cp "$HW/esc_calibrate.cpp" "$OUT/esc_calibrate/esc_calibrate.ino"
 
+# set_mode [BENCH|THRUST|FLIGHT] — Betriebsart in den Sketch schreiben.
+# Ueber Header statt -D, weil die Teensy-Recipe compiler.cpp.extra_flags ignoriert
+# (dort verpuffte das Define stillschweigend und es lief immer der Datei-Default).
+set_mode() {
+    cat > "$OUT/drone_hal/hal_mode.h" <<EOF
+// Automatisch erzeugt von build_sketches.sh — nicht von Hand aendern.
+#define HAL_MODE_$1
+EOF
+    echo "   Betriebsart: HAL_MODE_$1"
+}
+
+# Assemblieren setzt immer auf BENCH zurueck. Sonst erbt ein spaeterer Flash aus
+# der IDE stillschweigend die Betriebsart des letzten Laufs — und das ist der
+# Unterschied zwischen "Motoren tot" und "Propeller drehen an".
+set_mode BENCH
+
 for s in gcs_sender drone_hal i2c_scan esc_calibrate; do echo "  $s/: $(ls "$OUT/$s" | tr '\n' ' ')"; done
 
-# compile [sketch] [extra_flags]
-compile() { echo "== compile $1 ${2:+($2)} =="; "$CLI" compile -b "$FQBN" "$OUT/$1" --config-file "$CFG" \
-    ${2:+--build-property "compiler.cpp.extra_flags=$2"} \
-    2>&1 | grep -iE "error|Memory Usage|FLASH|RAM|Build.*status" | grep -viE "Fehler beim Initialisieren|Download failed"; }
+# compile [sketch] — grep darf leer ausgehen, sonst killt pipefail den Lauf.
+compile() { echo "== compile $1 =="; "$CLI" compile -b "$FQBN" "$OUT/$1" --config-file "$CFG" \
+    2>&1 | { grep -iE "error|Memory Usage|FLASH|RAM|Build.*status" || true; } \
+         | { grep -viE "Fehler beim Initialisieren|Download failed" || true; }; }
 # Teensy-Uploads brauchen den "teensy port" (usb:...), NICHT COMx. Auto-erkennen.
 teensy_port() { "$CLI" board list --config-file "$CFG" 2>/dev/null \
     | grep "$FQBN" | awk '{print $1}' | head -1; }
@@ -55,20 +76,35 @@ teensy_port() { "$CLI" board list --config-file "$CFG" 2>/dev/null \
 upload()  {
     local tp; tp="$(teensy_port)"; tp="${tp:-$2}"
     if [ -z "$tp" ]; then echo "FEHLER: kein Teensy gefunden (USB angesteckt? Nur 1 Teensy?)." >&2; return 1; fi
-    echo "== compile+upload $1 -> $tp ${3:+($3)} =="
+    echo "== compile+upload $1 -> $tp =="
     echo "   (Serial-Monitor auf dem Ziel-Teensy vorher SCHLIESSEN, sonst haengt der Loader.)"
     "$CLI" compile --upload -b "$FQBN" -p "$tp" "$OUT/$1" --config-file "$CFG" \
-        ${3:+--build-property "compiler.cpp.extra_flags=$3"} \
-    2>&1 | grep -iE "error|Memory Usage|upload|verif|bytes|programming|Build.*status" \
-         | grep -viE "Fehler beim Initialisieren|Download failed"; }
+    2>&1 | { grep -iE "error|Memory Usage|upload|verif|bytes|programming|Build.*status" || true; } \
+         | { grep -viE "Fehler beim Initialisieren|Download failed" || true; }; }
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --compile)                compile gcs_sender; compile drone_hal; compile drone_hal "-DHAL_SELFTEST";
+    --compile)                compile gcs_sender;
+                              set_mode BENCH;  compile drone_hal;
+                              set_mode THRUST; compile drone_hal;
+                              set_mode FLIGHT; compile drone_hal;
+                              set_mode BENCH;                       # sicherer Endzustand
                               compile i2c_scan;   compile esc_calibrate; shift;;
     --upload-sender)          upload gcs_sender    "$2"; shift 2;;
-    --upload-drone)           upload drone_hal     "$2"; shift 2;;
-    --upload-drone-selftest)  upload drone_hal     "$2" "-DHAL_SELFTEST"; shift 2;;
+    # Betriebsart immer explizit: bench = Motoren tot, thrust = Motoren + Telemetrie
+    # (Waagentest S-1), flight = Motoren, kein Report.
+    # Nur die Betriebsart setzen (zum Flashen aus der Arduino-IDE).
+    --mode)                   case "$2" in BENCH|THRUST|FLIGHT) set_mode "$2";;
+                                *) echo "FEHLER: --mode braucht BENCH|THRUST|FLIGHT" >&2; exit 2;; esac; shift 2;;
+    --upload-drone-bench)     set_mode BENCH;  upload drone_hal "$2"; shift 2;;
+    --upload-drone-thrust)    set_mode THRUST; upload drone_hal "$2"; shift 2;;
+    --upload-drone-flight)    set_mode FLIGHT; upload drone_hal "$2"; shift 2;;
+    --upload-drone|--upload-drone-selftest)
+                              echo "FEHLER: '$1' ist mehrdeutig geworden. Betriebsart explizit waehlen:" >&2
+                              echo "  --upload-drone-bench   Motoren tot, volle Telemetrie (Props ab)" >&2
+                              echo "  --upload-drone-thrust  Motoren scharf + Telemetrie (Waagentest S-1)" >&2
+                              echo "  --upload-drone-flight  Motoren scharf, kein Report" >&2
+                              exit 2;;
     --upload-scan)            upload i2c_scan      "$2"; shift 2;;
     --upload-esccal)          upload esc_calibrate "$2"; shift 2;;
     *) echo "unbekannt: $1" >&2; exit 2;;

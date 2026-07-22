@@ -5,19 +5,29 @@
 // Motorphasen spielt beim Einlernen keine Rolle (es werden nur die Endpunkte
 // gelernt); die Drehrichtung stellt man danach ueber die Phasenreihenfolge.
 //
-// !!! PROPELLER AB !!!  Beim MAX-Schritt und beim Test drehen die Motoren.
+// Zwei Betriebsarten mit GEGENSAETZLICHER Propeller-Anforderung:
+//
+//   1) Einlernen (C/m):  !!! PROPELLER AB !!!
+//      Beim C-Schritt liegt Vollgas an, bevor der Akku kommt. Erkennt der ESC den
+//      Kalibriermodus nicht, laeuft er stattdessen auf 100 %.
+//   2) Schubmessung (1..4 + '+'):  Propeller DRAUF, Drohne verschraubt/gefesselt.
+//      Liefert die Kennlinie Throttle -> Schub fuer p_from_omega_sq.
 //
 // Ablauf (Zeichen im Serial-Monitor senden, 115200):
 //   C = Kalibrieren: MAX setzen -> dann Akku anstecken, ESC-Beeps (max) abwarten
 //   m = MIN setzen -> ESC-Beeps (fertig), ESC ist scharf/kalibriert
 //   0 = alle Motoren waehlen | 1..4 = einzelnen Motor waehlen
-//   + / - = Test-Gas +/-5% auf Auswahl (gedeckelt auf 40 %)
+//   + / - = Test-Gas +/-5% auf Auswahl (gedeckelt, siehe TEST_CAP)
 //   x = alle stop (min)   |   h = Hilfe
 #include <Arduino.h>
 
 static const uint8_t PIN_PWM[4] = {33, 2, 4, 3};   // M1 CCW, M2 CW, M3 CCW, M4 CW
 static constexpr int ESC_MIN = 512, ESC_MAX = 1024;
-static constexpr int TEST_CAP = 40;                // Test-Gas-Deckel [%]
+static constexpr int TEST_CAP = 50;                // Test-Gas-Deckel [%]
+// 50 statt 40, damit die Schubkennlinie einen Punkt OBERHALB des Hovers bekommt
+// (4S: Hover ~41 % je Motor). Ein Fit, der am Hover endet, extrapoliert genau
+// dort, wo es drauf ankommt. Einzelmotor bei 50 % sind ~330 g -> Drohne muss
+// verschraubt sein.
 
 static int g_sel = 0;                              // 0=alle, 1..4=einzeln
 static int g_thr = 0;                              // Test-Gas [%]
@@ -36,7 +46,7 @@ static void help() {
     Serial.println(F("\n=== ESC-Einlernen (PROPS AB!) ==="));
     Serial.println(F(" C = MAX setzen -> dann Akku anstecken (max-Beeps abwarten)"));
     Serial.println(F(" m = MIN setzen -> fertig-Beeps, ESC scharf"));
-    Serial.println(F(" 0=alle 1..4=Motor waehlen | +/- = Test-Gas +/-5% (max 40%)"));
+    Serial.printf( " 0=alle 1..4=Motor waehlen | +/- = Test-Gas +/-5%% (max %d%%)\n", TEST_CAP);
     Serial.println(F(" x = ALLE STOP (min) | h = Hilfe"));
     Serial.printf( " Auswahl=%s  Test-Gas=%d%%\n", g_sel ? "" : "alle", g_thr);
     if (g_sel) Serial.printf(" (Motor M%d)\n", g_sel);

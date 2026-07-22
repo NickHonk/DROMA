@@ -37,11 +37,63 @@
 #include "mcu.h"           // generierte Klasse MCU (ExtU/ExtY)
 #include "mcu_packet.hpp"  // pkt::unpack / id_matches (single source of truth)
 
-// ---- Bench-Selbsttest -------------------------------------------------------
-// Aktiviert die Pruefstand-Firmware: die Motoren bleiben sicher auf min, und die
-// Drohne printet stattdessen alle I/O-Pfade (Gyro/Acc/Batt/Link/estop/throttle/
-// Timing) ~10x/s ueber Serial. Fuer den Flug auskommentiert lassen.
-#define HAL_SELFTEST
+// ---- Betriebsart ------------------------------------------------------------
+// Zwei unabhaengige Schalter, damit sich "Motoren aus" und "ich sehe was" nicht
+// gegenseitig bedingen — beim Schubtest auf der Waage braucht man beides zugleich.
+//
+//   HAL_REPORT      Serial-Report ~10 Hz (Gyro/Acc/Batt/Link/estop/btn/throttle)
+//                   plus die [boot]-Meldungen. Kostet ~0.1 ms im 1-kHz-Tick,
+//                   gemessenes tickmax 464 us gegen 1000 us Budget.
+//   HAL_MOTORS_MIN  Motoren hart auf ESC_MIN, esc_arm() wird uebersprungen.
+//                   Die ESCs werden damit nie scharf.
+//
+//   HAL_MODE_BENCH  (Props ab)      : beide  -> Motoren tot, volle Telemetrie
+//   HAL_MODE_THRUST (Props! S-1)    : Report -> Motoren laufen, Telemetrie bleibt
+//   HAL_MODE_FLIGHT                 : keins  -> Motoren scharf, kein Report
+//
+// Achtung im scharfen Zustand: das Throttle-Polynom hat die Konstante 8.404, bei
+// F_des = 0 und aufgehobenem Kill stehen alle vier Motoren also auf ~8.4 %, nicht
+// auf 0. Die Propeller laufen an, sobald quittiert wird.
+// Gewaehlt wird genau eine Betriebsart. Der Normalweg ist hal_mode.h, das
+// build_sketches.sh je nach --upload-drone-* in den Sketch-Ordner schreibt.
+// Bewusst KEIN -DHAL_MODE_* : die Teensy-Recipe (platform.txt) kennt
+// compiler.cpp.extra_flags nicht, ein -D dort verpufft wirkungslos — und
+// "Flag verpufft" heisst hier "ESCs anders scharf als gedacht".
+#if defined(__has_include)
+  #if __has_include("hal_mode.h")
+    #include "hal_mode.h"
+  #endif
+#endif
+
+// Ohne hal_mode.h gilt die sicherste Variante (Motoren tot).
+#if !defined(HAL_MODE_BENCH) && !defined(HAL_MODE_THRUST) && !defined(HAL_MODE_FLIGHT)
+  #define HAL_MODE_BENCH
+#endif
+
+#if defined(HAL_MODE_BENCH)
+  #define HAL_REPORT
+  #define HAL_MOTORS_MIN
+#elif defined(HAL_MODE_THRUST)
+  #define HAL_REPORT
+#endif
+// HAL_MODE_FLIGHT: keins von beiden -> Motoren scharf, kein Report.
+
+// Betriebsart im Klartext ausgeben. BENCH und THRUST sehen im Serial-Monitor
+// sonst identisch aus (beide mit Report) — und der Unterschied ist genau
+// "Propeller drehen" vs. "drehen nicht". Deshalb steht die Art im Boot-Log UND
+// in jeder Report-Zeile (mot=on/off).
+#if defined(HAL_MODE_BENCH)
+  #define HAL_MODE_NAME "BENCH"
+#elif defined(HAL_MODE_THRUST)
+  #define HAL_MODE_NAME "THRUST"
+#else
+  #define HAL_MODE_NAME "FLIGHT"
+#endif
+#ifdef HAL_MOTORS_MIN
+  #define HAL_MOT_STATE "off"
+#else
+  #define HAL_MOT_STATE "on"
+#endif
 
 // ------------------------------ Pinbelegung (PCB Drohne_Teensy) --------------
 static constexpr uint8_t PIN_PWM[4] = {33, 2, 4, 3};   // M1 CCW, M2 CW, M3 CCW, M4 CW
@@ -171,15 +223,15 @@ static void estimate_gyro_bias() {
 // ------------------------------ 1-kHz-Tick -----------------------------------
 static void on_tick() { g_tick = true; }  // ISR: nur Flag; I2C/SPI im loop()
 
-#ifdef HAL_SELFTEST
-// Bench-Report ~10 Hz: jeden I/O-Pfad einmal sichtbar machen (Motoren bleiben min).
+#ifdef HAL_REPORT
+// Report ~10 Hz: jeden I/O-Pfad einmal sichtbar machen.
 static void selftest_report(const MCU::ExtY_mcu_T& y) {
     static uint32_t n = 0;
     if (++n < 100) return; n = 0;
     double V = g_U.batt_count * 0.016673728813559323;        // Volt wie Modell (k HW-kal. 15.74/944)
     Serial.printf("id=%u gyro[% .3f % .3f % .3f] acc[% .2f % .2f % .2f] "
                   "batt=%.0f(%.2fV) bias[% .3f % .3f % .3f] link=%lums estop=%u btn=%u "
-                  "thr[%.0f %.0f %.0f %.0f] tickmax=%luus\n",
+                  "thr[%.0f %.0f %.0f %.0f] mot=" HAL_MOT_STATE " tickmax=%luus\n",
         g_own_id,
         g_U.Bus_IMU_k.imu_gyro[0], g_U.Bus_IMU_k.imu_gyro[1], g_U.Bus_IMU_k.imu_gyro[2],
         g_U.Bus_IMU_k.imu_acc[0],  g_U.Bus_IMU_k.imu_acc[1],  g_U.Bus_IMU_k.imu_acc[2],
@@ -194,8 +246,9 @@ static void selftest_report(const MCU::ExtY_mcu_T& y) {
 // ------------------------------ setup ----------------------------------------
 void setup() {
     Serial.begin(115200);                                    // Timing-Budget-Report (non-blocking)
-#ifdef HAL_SELFTEST
+#ifdef HAL_REPORT
     { uint32_t ts=millis(); while(!Serial && millis()-ts<2000){} }   // USB-CDC kurz abwarten
+    Serial.println("[boot] 0 MODE=" HAL_MODE_NAME "  Motoren=" HAL_MOT_STATE);
     Serial.println("[boot] 1 setup start");
 #endif
     for (int i=0;i<4;++i) pinMode(PIN_PWM[i], OUTPUT);
@@ -216,7 +269,7 @@ void setup() {
     mpu_write(MPU_PWR_MGMT_1, 0x00);                         // wake
     mpu_write(MPU_GYRO_CONFIG, 0x08);                        // FS_SEL=1 (+-500 dps)
     mpu_write(MPU_ACCEL_CONFIG, 0x08);                       // AFS_SEL=1 (+-4 g)
-#ifdef HAL_SELFTEST
+#ifdef HAL_REPORT
     Serial.println("[boot] 2 MPU konfiguriert");
 #endif
 
@@ -226,10 +279,14 @@ void setup() {
     // Auf dem Teensy die SPI1-Pins explizit setzen und SPI1.begin() vor
     // RF24::begin(&SPI1) aufrufen, sonst haengt der erste SPI-Transfer in
     // RF24::begin (Peripherie noch nicht enabled).
-#if defined(HAL_SELFTEST) && defined(SELFTEST_SKIP_NRF)
+// SELFTEST_SKIP_NRF ist reine Debug-Hilfe (nie per Default gesetzt). Ohne Funk
+// bleibt estop = 2, der Kill haelt also — auch mit scharfen ESCs unkritisch.
+#if defined(SELFTEST_SKIP_NRF)
+  #ifdef HAL_REPORT
     Serial.println("[boot] 3 nRF UEBERSPRUNGEN (SELFTEST_SKIP_NRF)");
+  #endif
 #else
-  #ifdef HAL_SELFTEST
+  #ifdef HAL_REPORT
     Serial.println("[boot] 3 nRF begin (SPI1 explizit)...");
   #endif
     SPI1.setMOSI(26); SPI1.setMISO(1); SPI1.setSCK(27);
@@ -241,7 +298,7 @@ void setup() {
     g_radio.setChannel(76);                                  // == gcs_sender.cpp (GS + 3 Drohnen teilen)
     g_radio.openReadingPipe(1, NRF_BCAST_ADDR);
     g_radio.startListening();
-  #ifdef HAL_SELFTEST
+  #ifdef HAL_REPORT
     Serial.printf("[boot] 4 nRF ok=%d chip=%d\n", (int)nrf_ok, (int)g_radio.isChipConnected());
   #else
     (void)nrf_ok;
@@ -249,23 +306,29 @@ void setup() {
 #endif
 
     // Startup-Sequenz (Drohne am Boden, still): ESC armen, Gyro-Bias
-#ifndef HAL_SELFTEST
-    esc_arm();                                               // Flug: scharfschalten (min-Halten)
-#endif                                                       // Selbsttest: ESCs bleiben min (aus setup)
-#ifdef HAL_SELFTEST
+#ifndef HAL_MOTORS_MIN
+    esc_arm();                                               // scharfschalten (min-Halten)
+#endif                                                       // sonst: ESCs bleiben min (aus setup)
+#ifdef HAL_REPORT
     Serial.println("[boot] 5 gyro bias (3 s, still halten)...");
 #endif
     estimate_gyro_bias();
 
     // Init-Kommando = sicher (kein Schub), bis das erste Paket kommt
     g_cmd = pkt::Cmd{};                                   // alles 0
-    g_cmd.q_des[0]=1; g_cmd.q_ref[0]=1; g_cmd.q_ext[0]=1;   // Identitaets-Quats
+    g_cmd.q_des[0]=1; g_cmd.q_ref[0]=1;                   // Sollwerte: Identitaet
+    // q_ext bleibt bewusst das NULL-Quaternion: vor dem ersten Paket gibt es
+    // keine gueltige Mocap-Referenz. Der Mahony faellt damit auf Accel-only
+    // zurueck, statt sich auf eine vorgetaeuschte waagerechte Lage einzurasten.
+    // (Identitaet hier waere ein "gueltiger" Bezug mit kE=25 — genau der Fehler,
+    // den das reservierte Codewort 0 auf der Funkstrecke beseitigt.)
     g_cmd.estop = 2;                                         // bis Link steht: gekillt
     g_t_last_rx = 0;
 
-    MCU::initialize();
+    g_mcu.initialize();   // seit der Spannungskorrektur nicht mehr statisch:
+                          // initialize() setzt den RT_Vfilt-Startwert im Objekt
     g_timer.begin(on_tick, TICK_US);                         // 1 kHz
-#ifdef HAL_SELFTEST
+#ifdef HAL_REPORT
     Serial.printf("[boot] 6 bias done [% .3f % .3f % .3f]; loop laeuft ab jetzt.\n",
                   g_gyro_bias[0], g_gyro_bias[1], g_gyro_bias[2]);
 #endif
@@ -311,13 +374,14 @@ void loop() {
     const MCU::ExtY_mcu_T& y = g_mcu.getExternalOutputs();
 
     // 5) Aktorik: throttle -> OneShot125, led-state -> LEDs
-#ifdef HAL_SELFTEST
-    for (int i=0;i<4;++i) analogWrite(PIN_PWM[i], ESC_MIN);  // Selbsttest: Motoren sicher auf min
-    drive_leds(y.led);
-    selftest_report(y);
+#ifdef HAL_MOTORS_MIN
+    for (int i=0;i<4;++i) analogWrite(PIN_PWM[i], ESC_MIN);  // Motoren sicher auf min
 #else
     esc_write_all(y.throttle);
+#endif
     drive_leds(y.led);
+#ifdef HAL_REPORT
+    selftest_report(y);
 #endif
 
     // 6) Timing-Budget: max. Tick-Dauer + Overruns (>1 ms) messen, ~1x/s melden.

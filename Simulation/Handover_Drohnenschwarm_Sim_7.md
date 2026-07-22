@@ -36,8 +36,10 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
    modellweit **`McuOverspeed`** (Bus-ack-Re-Arm), **`McuButton`**, **`McuTilt`**
    (letzterer beweist die `q_hat`-Verdrahtung: Estimator via `q_ext` in 85° gezogen,
    Kill greift). `verify_overspeed.m`-Scaffold grün.
-6. ⚠️ **Flug-Erinnerung (unverändert):** `drone_hal.cpp` `#define HAL_SELFTEST`
-   auskommentieren + neu flashen. Der neue ARM-Code liegt in `hardware/mcu_arm/`.
+6. ⚠️ **Flug-Erinnerung (Session 11 aktualisiert):** Betriebsart beim Flashen
+   explizit wählen — `./build_sketches.sh --upload-drone-flight`. Kein
+   Auskommentieren mehr nötig (`HAL_SELFTEST` gibt es nicht mehr, siehe
+   §Betriebsarten). Der neue ARM-Code liegt in `hardware/mcu_arm/`.
    HAL-Code selbst unverändert (`btn_ack` + `Bus_Cmd.ack` gingen schon getrennt in
    die MCU); nur der Kommentar bei Pkt. „3b) btn_ack" ist nachgezogen.
 
@@ -66,9 +68,9 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
    mit dem Sim-Sweep ⇒ **Sim == HW**. Failsafe/Re-Arm/Batt/Timing ebenfalls grün.
    Realer Gyro-Bias ist **6× kleiner** als die Sim-Annahme ⇒ Overspeed-Marge real
    entspannt (13 % statt 77 %).
-   ⚠️ Firmware ist **Prüfstand-Modus** (`drone_hal.cpp` Z.43 `#define HAL_SELFTEST`
-   hart aktiv) ⇒ Motoren drehen nie. **Für den Flug Z.43 auskommentieren + neu
-   flashen.**
+   ⚠️ Default-Betriebsart ist **`HAL_MODE_BENCH`** ⇒ Motoren drehen nie.
+   **Für Schubtest bzw. Flug explizit flashen:** `--upload-drone-thrust` bzw.
+   `--upload-drone-flight` (siehe §Betriebsarten).
 6. **✅ `models\bench.slx`** (§3h): Prüfstand-Harness = `quadcop` ohne
    Drohnen-Simulation, `FixedStep=Ts_gcs` (100 Hz statt 1 kHz), Accelerator.
    **Auf HW verifiziert: `missed ticks = 0`** (vorher 3700/6.76 s), **`link=8 ms`**
@@ -242,7 +244,7 @@ Nächster Block: Codec-Cross-Check, SITL-Re-Zert für `throttle`, ARM-Codegen.*
 | `prune_mcu_configs.m` | Modell-Hygiene: nummerierte Config-Set-Dups entfernen | `scripts\sitl\matlab\` |
 | `i2c_scan.cpp` | Bench: MPU-Adresse 0x68/0x69 prüfen (ADO-Bodge) | `hardware\` |
 | `esc_calibrate.cpp` | Bench: ESC-Einlernen + Motor-Test (Serial-geführt) | `hardware\` |
-| `drone_hal.cpp` `HAL_SELFTEST` | Bench-Selbsttest: Motoren min, I/O-Report ~10 Hz | `hardware\` |
+| `drone_hal.cpp` `HAL_MODE_*` | Betriebsart über `hal_mode.h`: BENCH (Motoren min + Report) / THRUST (Motoren + Report) / FLIGHT (Motoren, kein Report) | `hardware\` |
 
 ---
 
@@ -374,7 +376,7 @@ nicht `led`). Die „25/50/75 %-Pins"-Suche war gegenstandslos.
   blockiert der erste SPI-Transfer. In `drone_hal.cpp` **und** `gcs_sender.cpp`
   gefixt. Bench: `nRF ok=1 chip=1`.
 - **Timing-Budget (bestätigt):** `tickmax ≈ 464 µs`, `overruns = 0/1000` →
-  1-kHz-Tick mit >50 % Reserve. Der `HAL_SELFTEST`-Report druckt es live.
+  1-kHz-Tick mit >50 % Reserve. Der Report (`HAL_REPORT`) druckt es live.
 - **Gyro (ok):** Bias 3 s abgezogen, ~0 still, reagiert auf Bewegung.
 - **Acc (kleiner Offset):** z ≈ +9.2 (z-up korrekt), aber |a| ≈ 9.27 (~5 % niedrig)
   + y-Offset ~−1.0 → leichte Schräglage/Accel-Offset. Für Bench ok; Accel-Kalib
@@ -631,10 +633,18 @@ cmake --build C:\dsb --config Release && ctest -C Release
   bias[3], link(ms), estop, btn, thr[4], tickmax`.
 ⇒ **Für alle Tests unten ideal und sicher** (`thr` ist ablesbar, ohne dass sich
 etwas dreht). **Für den Flug MUSS Z.43 auskommentiert und neu geflasht werden.**
-*(Nebenbefund: `build_sketches.sh --compile` baut `drone_hal` und
-`drone_hal -DHAL_SELFTEST` zu byte-identischen `.hex` — kein Bug, das Define
-steht schon im Code. Das `-D` dort ist redundant. Teensy kennt übrigens kein
-`compiler.cpp.extra_flags`; die Defines hängen an `build.flags.defs`.)*
+> **NACHTRAG Session 11 — der obige Nebenbefund war eine Fehldiagnose.**
+> Die byte-identischen `.hex` waren **doch** ein Bug: die Teensy-Recipe in
+> `platform.txt` referenziert `compiler.cpp.extra_flags` überhaupt nicht, das
+> `-D` verpuffte also **immer** wirkungslos. Dass es trotzdem passte, lag allein
+> am fest eingebauten `#define` — die beiden Fehler haben sich gegenseitig
+> verdeckt. Praktische Folge: **`--upload-drone` hat nie Flug-Firmware geflasht**,
+> sondern immer die Bench-Variante mit toten Motoren.
+> Behoben durch drei benannte Betriebsarten über einen generierten Header
+> (`hal_mode.h`), siehe §Betriebsarten. Nachgewiesen an drei unterschiedlichen
+> FLASH-Größen (BENCH 55236 / THRUST 55492 / FLIGHT 55044).
+> **Lehre:** „gleiche Binärgröße trotz unterschiedlichem Flag" nie als harmlos
+> abtun — das ist der Standardbefund für ein wirkungsloses Flag.
 
 **Flashen:** `hardware\build\drone_hal\drone_hal.ino` in der IDE (Board Teensy 4.1),
 oder `./build_sketches.sh --upload-drone COM<N>`. Sende-Teensy: `--upload-sender`.
@@ -813,8 +823,10 @@ Leerzeichen** → die §3d-Falle entfällt hier.
 Flashen: `hardware\build\<name>\<name>.ino` in der IDE öffnen (Board „Teensy 4.1")
 oder `./build_sketches.sh --upload-drone COM<N>`.
 ⚠️ **Auffällig:** `drone_hal` und `drone_hal -DHAL_SELFTEST` ergeben **exakt
-dieselbe** FLASH-Größe (54916) → das Define kommt vermutlich nicht an. Vor dem
-Bias-Gegentest prüfen, falls der `HAL_SELFTEST`-Report gebraucht wird.
+dieselbe** FLASH-Größe (54916) → das Define kommt vermutlich nicht an.
+✅ **Session 11: bestätigt und behoben.** Der Verdacht stimmte — die Teensy-Recipe
+kennt `compiler.cpp.extra_flags` nicht. Betriebsart läuft jetzt über den
+generierten Header `hal_mode.h` statt über `-D`.
 
 #### ✅ SSOT für MATLAB-Function-Blöcke — PoC erfolgreich (Session 9)
 **Befund (Audit über alle 6 Modelle, 11 Function-Blöcke):** 5 identisch,

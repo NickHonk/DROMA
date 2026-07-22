@@ -14,7 +14,7 @@ end
 
 imu.gyro_FSR = deg2rad(500); % rad/s  (FS_SEL=1: +-500 deg/s, 65.5 LSB/(deg/s))
 imu.Ts = Ts_inner; % Update-Periode des IMU-Blocks (Sekunden)
-imu.location = [-0.014; -0.015; 0.045];
+imu.location = [-0.014; -0.015; 0.065];
  
 % --- Gyroskop ---
 % Roher Sensor-Bias, wie er im MPU-Register steht (vor Kalibrierung). Die

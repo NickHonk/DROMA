@@ -22,9 +22,9 @@ safety.use_norm = true;
 % und haelt das ueber tilt_debounce_N Basistakte (@1 kHz also ms) an, latcht der
 % Kill ebenfalls. Der Vergleich laeuft ueber cos(Kippwinkel), daher hier der
 % vorberechnete Cosinus (groesserer Winkel = kleinerer Cosinus).
-safety.tilt_max_deg     = 80;                      % [deg] gegen die Vertikale
-safety.tilt_cos_min     = cosd(safety.tilt_max_deg);
-safety.tilt_debounce_N  = uint16(80);              % 80 Basistakte = 80 ms @1 kHz
+safety.tilt_max_deg = 80; % [deg] gegen die Vertikale
+safety.tilt_cos_min = cosd(safety.tilt_max_deg);
+safety.tilt_debounce_N = uint16(80); % 80 Basistakte = 80 ms @1 kHz
 
 % rearm_idle_frac/F_rearm_idle (Arming-Idle-Interlock) sind entfallen; die
 % Begruendung steht im Schlusskommentar von safety_overspeed.m.

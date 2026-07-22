@@ -10,17 +10,14 @@ arguments (Output)
     supervisor struct 
 end
 
-% geregeltes Soft-Land mit ~0.3..0.5 m/s 
-supervisor.v_sink = 0.15; % [m/s]  Soll-Sinkrate
+% geregeltes Soft-Land
+supervisor.v_sink = 0.15; % [m/s] Soll-Sinkrate
 
 % Falls Mocap-z-Null nicht am Boden liegt, hier den realen Bodenwert setzen.
 supervisor.z_ground = 0.0; % [m]  z-Koordinate des Bodens 
 
 % Disarm-Marge ueber Grund: Cutoff (estop=2) bei z_est <= z_ground + margin.
-% Aufschlaggeschwindigkeit:  v_imp = sqrt(v_sink^2 + 2*g*margin)
-%   margin=0.08, v_sink=0.35 -> v_imp ~ 1.29 m/s
-% Kleiner margin => sanfter, aber mehr Bodeneffekte. 
-supervisor.disarm_margin = 0.2;       % [m]
+supervisor.disarm_margin = 0.3; % [m]
 
 supervisor.Ts = Ts_gcs; % [s]
 
